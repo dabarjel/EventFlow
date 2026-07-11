@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"luxury florist event rental proposal builder elegant sophisticated\" --design-system --persist -p \"EventFlow\")",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"luxury florist event rental proposal builder elegant sophisticated\" --design-system --persist -p \"EventFlow\")"
+    ]
+  }
+}
