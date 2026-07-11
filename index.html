@@ -86,9 +86,34 @@
     padding: 14px 20px; border-top: 1px solid var(--border);
     display: flex; align-items: center; gap: 10px;
   }
-  .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
-  .user-name { font-size: 12.5px; color: var(--charcoal); font-weight: 500; }
-  .user-role { font-size: 10px; color: var(--stone); }
+  .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .user-name { font-size: 12.5px; color: var(--charcoal); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .user-role { font-size: 10px; color: var(--stone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .auth-signout-btn {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: var(--radius-sm); border: 1px solid var(--border-mid);
+    background: var(--warm-white); color: var(--stone); cursor: pointer; font-size: 13px; line-height: 1;
+    display: flex; align-items: center; justify-content: center; transition: background 0.14s, color 0.14s;
+  }
+  .auth-signout-btn:hover { background: var(--sage-light); color: var(--sage-dark); }
+
+  .auth-overlay {
+    position: fixed; inset: 0; z-index: 999; background: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .auth-box {
+    width: 320px; max-width: 90vw; padding: 32px 28px; background: var(--warm-white);
+    border: 1px solid var(--border-mid); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .auth-logo { font-family: var(--font-serif); font-weight: 600; font-size: 24px; color: var(--sage); }
+  .auth-sub { font-size: 12px; color: var(--stone); margin-bottom: 22px; }
+  .auth-status { font-size: 12.5px; color: var(--stone); margin-bottom: 14px; }
+  #auth-form input {
+    display: block; width: 100%; box-sizing: border-box; padding: 9px 12px; margin-bottom: 10px;
+    border: 1px solid var(--border-mid); border-radius: var(--radius-sm); font-size: 13px;
+    font-family: var(--font-sans); color: var(--charcoal); background: var(--cream); outline: none;
+  }
+  .auth-error { font-size: 12px; color: #B3261E; margin-top: 10px; min-height: 14px; }
 
   /* MAIN */
   .main { margin-left: 220px; flex: 1; min-height: 100vh; }
@@ -531,6 +556,27 @@
 </head>
 <body>
 
+<!-- AUTH GATE — visible by default; hidden by _authInit() once a session is confirmed -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">EventFlow</div>
+    <div class="auth-sub">Event & Wedding Studio</div>
+    <div class="auth-status" id="auth-status">Checking session…</div>
+    <div id="auth-form" style="display:none;">
+      <input type="email" id="auth-email" placeholder="Email" autocomplete="username">
+      <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')_authSignIn()">
+      <button class="btn btn-primary" style="width:100%;box-sizing:border-box;" onclick="_authSignIn()">Sign In</button>
+      <div class="auth-error" id="auth-error"></div>
+    </div>
+    <div id="auth-setpass-form" style="display:none;">
+      <input type="password" id="auth-newpass"  placeholder="New password" autocomplete="new-password" onkeydown="if(event.key==='Enter')_authSetPassword()">
+      <input type="password" id="auth-newpass2" placeholder="Confirm password" autocomplete="new-password" onkeydown="if(event.key==='Enter')_authSetPassword()">
+      <button class="btn btn-primary" style="width:100%;box-sizing:border-box;" onclick="_authSetPassword()">Set Password & Sign In</button>
+      <div class="auth-error" id="auth-setpass-error"></div>
+    </div>
+  </div>
+</div>
+
 <!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sidebar-logo">
@@ -575,11 +621,12 @@
     </div>
   </div>
   <div class="sidebar-user">
-    <div class="user-avatar">SA</div>
-    <div>
-      <div class="user-name">Sharone Abarjel</div>
-      <div class="user-role">Studio Owner</div>
+    <div class="user-avatar" id="auth-user-avatar">–</div>
+    <div style="flex:1;min-width:0;">
+      <div class="user-name" id="auth-user-name">—</div>
+      <div class="user-role" id="auth-user-email">—</div>
     </div>
+    <button class="auth-signout-btn" onclick="_authSignOut()" title="Sign out">⏻</button>
   </div>
 </nav>
 
@@ -2033,7 +2080,20 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+// ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
+// Project URL + anon public key — NOT secrets, safe to commit. They're meant
+// to be embedded client-side; every table they can reach is gated by Postgres
+// row-level security policies, not by hiding this key. Get both from the
+// Supabase Dashboard → Project Settings → API, after creating the project and
+// running supabase/migrations/0001_init_auth.sql in the SQL Editor.
+const SUPABASE_URL = 'https://abelnnebtlgiyzobmhtr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiZWxubmVidGxnaXl6b2JtaHRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MzQ0NTQsImV4cCI6MjA5OTMxMDQ1NH0.N_qgDODwkcmLeWnKjR8eLin-av0pza5da4yanJbnR08';
+const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
 const pages = {
   dashboard: 'Dashboard',
   pipeline: 'Event Pipeline',
@@ -2047,6 +2107,120 @@ const pages = {
   invoices: 'Invoices & Payments',
   visualizer: 'Venue Visualizer'
 };
+
+// ── AUTH GATE ─────────────────────────────────────────────────────────────────
+// Phase 0 of the Supabase migration: this only gates *visual/functional access*
+// to the app behind a login screen. No feature's data reads/writes are backed
+// by Supabase yet (that starts in phase 1, inventory overrides) — everything
+// below the overlay still runs on localStorage exactly as before. The overlay
+// is visible by default in the HTML so there's never a flash of real app
+// content before a session is confirmed.
+async function _authInit() {
+  const statusEl = document.getElementById('auth-status');
+  const formEl   = document.getElementById('auth-form');
+  if (!sb) {
+    if (statusEl) statusEl.textContent = 'Supabase isn\'t configured yet — set SUPABASE_URL / SUPABASE_ANON_KEY near the top of index.html.';
+    return;
+  }
+
+  // Invite and "reset password" emails redirect back here as
+  // #access_token=...&refresh_token=...&type=invite (or type=recovery).
+  // supabase-js's detectSessionInUrl (on by default) turns that into a real
+  // session by the time getSession() below resolves — but an invited user
+  // has no password yet, so a session existing is NOT enough to treat them
+  // as signed in. Capture the link's type from the hash before it's gone
+  // (Supabase doesn't reliably strip it itself) so we can route to a
+  // "set your password" prompt instead of dropping them straight into the app.
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const linkType = hashParams.get('type'); // 'invite' | 'recovery' | null
+
+  const { data: { session } } = await sb.auth.getSession();
+
+  if (session && (linkType === 'invite' || linkType === 'recovery')) {
+    history.replaceState(null, '', window.location.pathname + window.location.search); // drop the token out of the URL bar/history
+    _authShowSetPassword(linkType);
+  } else if (session) {
+    _authOnSignedIn(session);
+  } else {
+    if (statusEl) statusEl.textContent = 'Sign in to continue';
+    if (formEl) formEl.style.display = '';
+    const emailEl = document.getElementById('auth-email');
+    if (emailEl) emailEl.focus();
+  }
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') { _authShowSetPassword(linkType || 'recovery'); return; }
+    if (event === 'SIGNED_IN' && session) _authOnSignedIn(session);
+    if (event === 'SIGNED_OUT') location.reload();
+  });
+}
+
+async function _authSignIn() {
+  const email    = (document.getElementById('auth-email')    || {value:''}).value.trim();
+  const password = (document.getElementById('auth-password') || {value:''}).value;
+  const errEl = document.getElementById('auth-error');
+  if (errEl) errEl.textContent = '';
+  if (!email || !password) { if (errEl) errEl.textContent = 'Enter your email and password.'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { if (errEl) errEl.textContent = error.message; return; }
+  // onAuthStateChange fires SIGNED_IN and takes it from here.
+}
+
+// Shown for both a fresh invite (no password set yet) and a password-reset
+// link — same UI, same call (auth.updateUser), only the status copy differs.
+function _authShowSetPassword(kind) {
+  const statusEl  = document.getElementById('auth-status');
+  const formEl    = document.getElementById('auth-form');
+  const setPassEl = document.getElementById('auth-setpass-form');
+  if (statusEl) statusEl.textContent = kind === 'invite'
+    ? 'Welcome to EventFlow — set a password to finish setting up your account.'
+    : 'Set a new password to continue.';
+  if (formEl) formEl.style.display = 'none';
+  if (setPassEl) setPassEl.style.display = '';
+  const pwEl = document.getElementById('auth-newpass');
+  if (pwEl) pwEl.focus();
+}
+
+async function _authSetPassword() {
+  const pw1 = (document.getElementById('auth-newpass')  || {value:''}).value;
+  const pw2 = (document.getElementById('auth-newpass2') || {value:''}).value;
+  const errEl = document.getElementById('auth-setpass-error');
+  if (errEl) errEl.textContent = '';
+  if (!pw1 || pw1.length < 6) { if (errEl) errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (pw1 !== pw2) { if (errEl) errEl.textContent = 'Passwords don\'t match.'; return; }
+  const { error } = await sb.auth.updateUser({ password: pw1 });
+  if (error) { if (errEl) errEl.textContent = error.message; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  _authOnSignedIn(session);
+}
+
+function _authOnSignedIn(session) {
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'none';
+  _authRenderUser(session);
+}
+
+async function _authRenderUser(session) {
+  const email = session.user.email || '';
+  let displayName = email;
+  try {
+    const { data } = await sb.from('profiles').select('display_name').eq('id', session.user.id).single();
+    if (data && data.display_name) displayName = data.display_name;
+  } catch (e) {}
+  const nameEl   = document.getElementById('auth-user-name');
+  const emailEl  = document.getElementById('auth-user-email');
+  const avatarEl = document.getElementById('auth-user-avatar');
+  if (nameEl)   nameEl.textContent   = displayName;
+  if (emailEl)  emailEl.textContent  = email;
+  if (avatarEl) avatarEl.textContent = displayName.slice(0, 2).toUpperCase();
+}
+
+async function _authSignOut() {
+  if (!sb || !confirm('Sign out of EventFlow?')) return;
+  await sb.auth.signOut();
+}
+
+_authInit();
 
 // ── HTML ESCAPING ─────────────────────────────────────────────────────────────
 // Single shared escaper for every place user-typed data (client names, notes,
