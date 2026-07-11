@@ -2120,6 +2120,7 @@ async function _authInit() {
   const formEl   = document.getElementById('auth-form');
   if (!sb) {
     if (statusEl) statusEl.textContent = 'Supabase isn\'t configured yet — set SUPABASE_URL / SUPABASE_ANON_KEY near the top of index.html.';
+    _authResolveReady(); // unblock any awaiters — getInvEdits() etc. already degrade to empty when sb is null
     return;
   }
 
@@ -2194,10 +2195,22 @@ async function _authSetPassword() {
   _authOnSignedIn(session);
 }
 
+// Resolved once the auth state is known (signed in, or unconfigured — see
+// both call sites below). Any Supabase-backed read/write that fires at
+// page-init time (e.g. applyInvEdits, called synchronously from the bottom
+// of inventory.js's IIFE) must await this first: _authInit() is async and
+// does NOT block the rest of the top-level script, so without this a
+// data-load could race ahead of sign-in and see zero rows purely because
+// the RLS-gated query ran before a session existed — not because the data
+// itself was ever missing.
+let _authResolveReady;
+const _authReady = new Promise(resolve => { _authResolveReady = resolve; });
+
 function _authOnSignedIn(session) {
   const overlay = document.getElementById('auth-overlay');
   if (overlay) overlay.style.display = 'none';
   _authRenderUser(session);
+  _authResolveReady();
 }
 
 async function _authRenderUser(session) {
@@ -2327,14 +2340,12 @@ function resizeImageFile(file, maxDim, quality) {
   });
 }
 
-// ── SHARED PHOTO STORE BUDGET (invImgs_v1 / vzaCropLib_v1) ──────────────────
-// invImgs_v1 holds Inventory's catalog photo overrides, custom-item photos,
-// AND a duplicate of every Venue Visualizer crop-library save (vzaLibSave
-// writes both keys) — three features, no single owner, no cap. Policy:
-// cap-and-reject. Once a key would exceed its budget the write is refused
-// and the user is told, rather than silently evicting a photo someone
-// deliberately chose (which is what a blind LRU-evict would risk doing to a
-// catalog photo because of unrelated crop-library activity elsewhere).
+// ── SHARED PHOTO STORE BUDGET (vzaCropLib_v1 only, as of Phase 1) ───────────
+// Used to guard vzaCropLib_v1, still a localStorage JSON map until Phase 3
+// migrates Venue Visualizer. Inventory's own images (invImgs_v1, previously
+// sharing this same budget-capped map) moved to Supabase Storage below —
+// each item's row now carries its own image_url, so there's no shared
+// per-key size budget to exhaust for photos anymore.
 const IMAGE_STORE_BUDGET_BYTES = 3 * 1024 * 1024; // ~3MB per key
 
 // Sets map[entryKey] = entryValue in the given localStorage JSON map key,
@@ -2347,28 +2358,43 @@ function _imageMapSetEntry(storageKey, entryKey, entryValue) {
   map[entryKey] = entryValue;
   const serialized = JSON.stringify(map);
   if (serialized.length > IMAGE_STORE_BUDGET_BYTES) {
-    if (typeof showToast === 'function') showToast('Photo library full — delete some inventory or crop-library photos to add more.', 'toast-error');
+    if (typeof showToast === 'function') showToast('Photo library full — delete some crop-library photos to add more.', 'toast-error');
     return false;
   }
   try {
     localStorage.setItem(storageKey, serialized);
     return true;
   } catch (e) {
-    if (typeof showToast === 'function') showToast('Photo library full — delete some inventory or crop-library photos to add more.', 'toast-error');
+    if (typeof showToast === 'function') showToast('Photo library full — delete some crop-library photos to add more.', 'toast-error');
     return false;
   }
 }
 
-// Convenience wrapper for the common case (Inventory photo overrides / custom
-// item photos) — the invImgs_v1 key specifically.
-function setInventoryImage(sku, dataUrl) {
-  return _imageMapSetEntry('invImgs_v1', sku, dataUrl);
-}
-
-// Guarded read — a corrupted invImgs_v1 used to throw straight out of
-// Inventory card rendering, which would break the whole grid.
-function getInventoryImages() {
-  try { return JSON.parse(localStorage.getItem('invImgs_v1') || '{}'); } catch (e) { return {}; }
+// ── INVENTORY IMAGES (Supabase Storage) ──────────────────────────────────────
+// Uploads to the public 'inventory-images' bucket (one object per upload,
+// timestamped so a photo replace can't collide with a stale CDN-cached URL
+// for the old one) and links the resulting public URL onto the item's own
+// row — inventory_custom_items for 'CUST-' skus, inventory_overrides for
+// everything else. Returns the public URL on success, null on failure (a
+// toast is already shown before returning null, matching every other saveX
+// in this file — callers just check truthiness).
+async function setInventoryImage(sku, dataUrl) {
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return null; }
+  try {
+    const blob = await (await fetch(dataUrl)).blob();
+    const ext = blob.type === 'image/png' ? 'png' : (blob.type === 'image/webp' ? 'webp' : 'jpg');
+    const path = sku + '-' + Date.now() + '.' + ext;
+    const { error: upErr } = await sb.storage.from('inventory-images').upload(path, blob, { contentType: blob.type });
+    if (upErr) { showToast('Could not upload photo: ' + upErr.message, 'toast-error'); return null; }
+    const { data: { publicUrl } } = sb.storage.from('inventory-images').getPublicUrl(path);
+    const table = sku.startsWith('CUST-') ? 'inventory_custom_items' : 'inventory_overrides';
+    const { error: dbErr } = await sb.from(table).upsert({ sku, image_url: publicUrl }, { onConflict: 'sku' });
+    if (dbErr) { showToast('Photo uploaded but could not link it to the item: ' + dbErr.message, 'toast-error'); return null; }
+    return publicUrl;
+  } catch (e) {
+    showToast('Could not process/upload that image', 'toast-error');
+    return null;
+  }
 }
 
 // ── PROPOSAL STATE ───────────────────────────────────────────────────────────
@@ -4639,24 +4665,38 @@ function addInvItemToProposal() {
 // Edits are stored in localStorage as { sku: {name, price} }
 // On page load we apply overrides to the DOM so everything stays in sync.
 
-const INV_EDITS_KEY = 'invEdits_v1';
-
-function getInvEdits() {
-  try { return JSON.parse(localStorage.getItem(INV_EDITS_KEY) || '{}'); } catch(e) { return {}; }
+// Reads every row of inventory_overrides as a {sku: {sku,name,price,cat,image_url}}
+// map (renaming the table's `category` column to `cat` here, once, so every
+// other place in this file that already deals in item.cat — proposal line
+// items, the proposal-builder catalog grid, etc. — doesn't need to know the
+// column is named differently in Postgres).
+async function getInvEdits() {
+  if (!sb) return {};
+  const { data, error } = await sb.from('inventory_overrides').select('*');
+  if (error) { showToast('Could not load inventory edits: ' + error.message, 'toast-error'); return {}; }
+  const map = {};
+  (data || []).forEach(row => { map[row.sku] = { sku: row.sku, name: row.name, price: row.price, cat: row.category, image_url: row.image_url }; });
+  return map;
 }
-function saveInvEdits(edits) {
-  try {
-    localStorage.setItem(INV_EDITS_KEY, JSON.stringify(edits));
-    return true;
-  } catch (e) {
-    showToast('Could not save this edit — ' + (e.name === 'QuotaExceededError' ? 'storage is full.' : (e.message || e)), 'toast-error');
-    return false;
-  }
+
+// Upserts one sku's override fields. Replaces the old getInvEdits-mutate-
+// saveInvEdits(wholeMap) round trip — with a real table each sku is its own
+// row, so there's no whole-map rewrite to do; only saveInvCardEdit calls this.
+async function saveInvOverride(sku, fields) {
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return false; }
+  const row = { sku };
+  if (fields.name !== undefined)  row.name = fields.name;
+  if (fields.price !== undefined) row.price = fields.price;
+  if (fields.cat !== undefined)   row.category = fields.cat;
+  const { error } = await sb.from('inventory_overrides').upsert(row, { onConflict: 'sku' });
+  if (error) { showToast('Could not save this edit: ' + error.message, 'toast-error'); return false; }
+  return true;
 }
 
 // Apply saved edits to all inv-card elements in the DOM
-function applyInvEdits() {
-  const edits = getInvEdits();
+async function applyInvEdits() {
+  await _authReady; // don't query before we know whether/who is signed in — see _authReady's comment
+  const edits = await getInvEdits();
   document.querySelectorAll('#inv-grid .inv-card').forEach(card => {
     const sku = card.dataset.sku;
     if (!sku || !edits[sku]) return;
@@ -4666,7 +4706,7 @@ function applyInvEdits() {
       const nameEl = card.querySelector('.inv-name');
       if (nameEl) nameEl.textContent = e.name;
     }
-    if (e.price !== undefined) {
+    if (e.price !== undefined && e.price !== null) {
       card.dataset.price = e.price;
       const priceEl = card.querySelector('.inv-price');
       if (priceEl) priceEl.textContent = e.price === 'MP' ? 'MP' : e.price + '/ea';
@@ -4676,10 +4716,20 @@ function applyInvEdits() {
       const metaEl = card.querySelector('.inv-meta');
       if (metaEl) metaEl.textContent = e.cat;
     }
+    if (e.image_url) {
+      const imgDiv = card.querySelector('.inv-img');
+      if (imgDiv) {
+        imgDiv.innerHTML = '';
+        const img = document.createElement('img');
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        img.src = e.image_url;
+        imgDiv.appendChild(img);
+      }
+    }
     card.dataset.edited = '1';
   });
   // Load user-added custom items, then update dashboard count
-  if (typeof applyCustomInvItems === 'function') applyCustomInvItems();
+  if (typeof applyCustomInvItems === 'function') await applyCustomInvItems();
   const total = document.querySelectorAll('#inv-grid .inv-card').length;
   const statEl = document.getElementById('stat-inventory');
   const subEl  = document.getElementById('stat-inventory-sub');
@@ -4761,7 +4811,17 @@ function injectInvOverlays() {
   invOverlaysInjected = true;
 }
 
-function saveInvCardEdit(btn) {
+// Persists first, updates the DOM and advances to the next card only once
+// that's confirmed — the old localStorage version updated the DOM first
+// (a write to localStorage essentially never fails). A network write fails
+// far more often, so doing it in that order here risked exactly the "UI
+// claims success, nothing was actually saved" class of bug this codebase's
+// getX/saveX hardening pass elsewhere was built to prevent. Same sku is
+// shared between custom items and base-catalog overrides, just in different
+// tables — a custom item's row already exists (addInvItemFromModal's
+// insert), a base item's override row may not exist yet, hence upsert for
+// both rather than update.
+async function saveInvCardEdit(btn) {
   const overlay = btn.closest('.inv-edit-overlay');
   const card    = overlay.closest('.inv-card');
   const sku     = card.dataset.sku;
@@ -4772,7 +4832,14 @@ function saveInvCardEdit(btn) {
 
   if (!newName) { overlay.querySelector('.inv-edit-name').focus(); return; }
 
-  // Update DOM
+  if (sku) {
+    if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
+    const table = sku.startsWith('CUST-') ? 'inventory_custom_items' : 'inventory_overrides';
+    const { error } = await sb.from(table).upsert({ sku, name: newName, price: newPrice, category: newCat }, { onConflict: 'sku' });
+    if (error) { showToast('Could not save this edit: ' + error.message, 'toast-error'); return; } // overlay stays open, nothing in the DOM changes
+  }
+
+  // Update DOM now that the write is confirmed
   card.dataset.name  = newName;
   card.dataset.price = newPrice;
   card.dataset.cat   = newCat;
@@ -4783,13 +4850,6 @@ function saveInvCardEdit(btn) {
   if (nameEl)  nameEl.textContent  = newName;
   if (priceEl) priceEl.textContent = newPrice === 'MP' ? 'MP' : newPrice + '/ea';
   if (metaEl)  metaEl.textContent  = newCat;
-
-  // Persist
-  if (sku) {
-    const edits = getInvEdits();
-    edits[sku] = { name: newName, price: newPrice, cat: newCat };
-    saveInvEdits(edits);
-  }
 
   // Live-update proposal grid if already built
   propInvBuilt = false;
@@ -4805,7 +4865,7 @@ function saveInvCardEdit(btn) {
     });
   }
 
-  // Close and immediately advance to the next visible card
+  // Close and advance to the next visible card
   overlay.classList.remove('open');
   const allVisible = [...document.querySelectorAll('#inv-grid .inv-card')]
     .filter(c => c.style.display !== 'none');
@@ -4867,7 +4927,7 @@ function skipInvCard(btn, dir) {
   else btn.closest('.inv-edit-overlay').classList.remove('open');
 }
 
-// Let staff reassign a card's image from a local file; persists to localStorage
+// Let staff reassign a card's image from a local file; uploads to Supabase Storage
 function changeInvPhoto(btn) {
   const card = btn.closest('.inv-card');
   const sku  = card.dataset.sku;
@@ -4877,14 +4937,16 @@ function changeInvPhoto(btn) {
   fi.addEventListener('change', function () {
     const file = fi.files[0];
     if (!file) return;
-    resizeImageFile(file, 800, 0.8).then(url => {
-      if (!setInventoryImage(sku, url)) return; // budget/quota toast already shown
-      const imgDiv = card.querySelector('.inv-img');
-      imgDiv.textContent = '';
-      const img = document.createElement('img');
-      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-      img.src = url;
-      imgDiv.appendChild(img);
+    resizeImageFile(file, 800, 0.8).then(dataUrl => {
+      return setInventoryImage(sku, dataUrl).then(publicUrl => {
+        if (!publicUrl) return; // upload/link error toast already shown
+        const imgDiv = card.querySelector('.inv-img');
+        imgDiv.textContent = '';
+        const img = document.createElement('img');
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        img.src = publicUrl;
+        imgDiv.appendChild(img);
+      });
     }).catch(() => {
       if (typeof showToast === 'function') showToast('Could not process that image — try a different file', 'toast-error');
     });
@@ -4910,9 +4972,12 @@ function toggleInvEditMode(btn) {
   }
 }
 
-function resetAllInvEdits() {
+async function resetAllInvEdits() {
   if (!confirm('Reset ALL inventory edits back to original names and prices?')) return;
-  localStorage.removeItem(INV_EDITS_KEY);
+  if (sb) {
+    const { error } = await sb.from('inventory_overrides').delete().neq('sku', ''); // PostgREST requires an explicit filter; sku is never '' so this matches every row
+    if (error) { showToast('Could not reset edits: ' + error.message, 'toast-error'); return; }
+  }
   // Restore DOM from original data attributes — reload is simplest
   location.reload();
 }
@@ -5374,19 +5439,15 @@ function _crmRestoreFilter() {
 }
 
 // ── ADD INVENTORY ITEM (from modal) ──────────────────────────────────────────
-const CUSTOM_INV_KEY = 'invCustomItems_v1';
-function getCustomInvItems() { try { return JSON.parse(localStorage.getItem(CUSTOM_INV_KEY) || '[]'); } catch(e) { return []; } }
-function saveCustomInvItems(customs) {
-  try {
-    localStorage.setItem(CUSTOM_INV_KEY, JSON.stringify(customs));
-    return true;
-  } catch (e) {
-    showToast('Could not add item — ' + (e.name === 'QuotaExceededError' ? 'storage is full.' : (e.message || e)), 'toast-error');
-    return false;
-  }
+// category → cat rename here too, same reasoning as getInvEdits.
+async function getCustomInvItems() {
+  if (!sb) return [];
+  const { data, error } = await sb.from('inventory_custom_items').select('*').order('created_at', { ascending: false });
+  if (error) { showToast('Could not load custom items: ' + error.message, 'toast-error'); return []; }
+  return (data || []).map(row => ({ sku: row.sku, name: row.name, price: row.price, cat: row.category, notes: row.notes, image_url: row.image_url }));
 }
 
-function addInvItemFromModal() {
+async function addInvItemFromModal() {
   const nameEl  = document.getElementById('new-item-name');
   const catEl   = document.getElementById('new-item-cat');
   const priceEl = document.getElementById('new-item-price');
@@ -5405,13 +5466,13 @@ function addInvItemFromModal() {
     notes: notesEl ? notesEl.value.trim() : '',
     sku:   'CUST-' + Date.now()
   };
-  const customs = getCustomInvItems();
-  customs.push(item);
-  if (!saveCustomInvItems(customs)) return; // error toast already shown — don't fake success below
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
+  const { error } = await sb.from('inventory_custom_items').insert({ sku: item.sku, name: item.name, category: item.cat, price: item.price, notes: item.notes });
+  if (error) { showToast('Could not add item: ' + error.message, 'toast-error'); return; } // was a single push+full-array-save before — now a single-row insert, no whole-table rewrite
 
   if (_newItemImgBase64) {
-    const imgSaved = setInventoryImage(item.sku, _newItemImgBase64);
-    _renderCustomInvCard(item, imgSaved ? {[item.sku]: _newItemImgBase64} : {});
+    const publicUrl = await setInventoryImage(item.sku, _newItemImgBase64);
+    _renderCustomInvCard(Object.assign({}, item, { image_url: publicUrl || null }));
     _newItemImgBase64 = null;
   } else {
     _renderCustomInvCard(item);
@@ -5425,7 +5486,7 @@ function addInvItemFromModal() {
   }
 }
 
-function _renderCustomInvCard(item, _imgs) {
+function _renderCustomInvCard(item) {
   const grid = document.getElementById('inv-grid');
   if (!grid) return;
   const div = document.createElement('div');
@@ -5438,11 +5499,10 @@ function _renderCustomInvCard(item, _imgs) {
   div.setAttribute('onclick',    'openItemDetail(this)');
   const imgDiv = document.createElement('div');
   imgDiv.className = 'inv-img';
-  const savedImgs = _imgs || getInventoryImages();
-  if (savedImgs[item.sku]) {
+  if (item.image_url) {
     const imgEl = document.createElement('img');
     imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-    imgEl.src = savedImgs[item.sku];
+    imgEl.src = item.image_url;
     imgDiv.appendChild(imgEl);
   } else {
     imgDiv.textContent = '📦';
@@ -5462,9 +5522,9 @@ function _renderCustomInvCard(item, _imgs) {
   propInvBuilt = false; // force proposal browser refresh
 }
 
-function applyCustomInvItems() {
-  const imgs = getInventoryImages();
-  getCustomInvItems().forEach(item => _renderCustomInvCard(item, imgs));
+async function applyCustomInvItems() {
+  const items = await getCustomInvItems();
+  items.forEach(item => _renderCustomInvCard(item));
 }
 
 // ── TOAST ────────────────────────────────────────────────────────────────────
@@ -7694,24 +7754,23 @@ function vzaLibSave(itemId) {
   const cat  = (catEl  ? catEl.value         : item.category) || 'Other';
   const key  = item.invSku || ('VZA-' + name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,30) + '-' + Date.now());
 
-  // Two keys need to agree: vzaCropLib_v1 (the library entry) and invImgs_v1
-  // (the duplicate the inventory grid actually renders). If the library
-  // write fits under budget but the invImgs_v1 mirror doesn't, roll the
-  // library write back rather than leaving the two keys inconsistent — an
-  // entry showing "in the library" whose photo doesn't appear anywhere.
   const libEntry = { key, name, category: cat, imgSrc: thumbSrc, savedAt: Date.now() };
-  if (!_imageMapSetEntry(VZA_LIB_KEY, key, libEntry)) return; // budget/quota toast already shown
+  if (!_imageMapSetEntry(VZA_LIB_KEY, key, libEntry)) return; // budget/quota toast already shown — vzaCropLib_v1 stays in localStorage until Phase 3
 
-  if (!_imageMapSetEntry('invImgs_v1', key, thumbSrc)) {
-    try {
-      const lib = vzaLibGet();
-      delete lib[key];
-      localStorage.setItem(VZA_LIB_KEY, JSON.stringify(lib));
-    } catch (e) {}
-    return; // budget/quota toast already shown
+  // Mirror into the Inventory grid only when this crop is actually tied to a
+  // real catalog/custom item (item.invSku). An unmatched crop has no
+  // inventory row to attach a photo to — a real table can't upsert
+  // image_url onto a sku that was never a real item, unlike the old flat
+  // invImgs_v1 map, which tolerated an arbitrary VZA-... key that only ever
+  // showed up via a live DOM patch and was never reload-persistent anyway.
+  // The crop library save above is already complete and successful either
+  // way — this mirror is a best-effort secondary side-effect, so it doesn't
+  // block "✓ Saved to Crop Library" on its own network round trip.
+  if (item.invSku) {
+    setInventoryImage(item.invSku, thumbSrc).then(publicUrl => {
+      if (publicUrl) _vzaUpdateInvCardImg(item.invSku, publicUrl, name);
+    });
   }
-
-  _vzaUpdateInvCardImg(key, thumbSrc, name);
 
   // Update button
   const btn = document.getElementById('vza-lib-btn-' + itemId);
@@ -7783,12 +7842,16 @@ function vzaLibDelete(key) {
     return;
   }
   // Best-effort mirror cleanup — its failure shouldn't hide the fact that the
-  // library entry itself (the source of truth for this UI) was removed.
-  try {
-    const imgs = JSON.parse(localStorage.getItem('invImgs_v1') || '{}');
-    delete imgs[key];
-    localStorage.setItem('invImgs_v1', JSON.stringify(imgs));
-  } catch (e) {}
+  // library entry itself (the source of truth for this UI) was removed. Only
+  // clear the Inventory-side image when this crop was actually mirrored
+  // there in the first place, i.e. key is a real invSku, not a generated
+  // 'VZA-...' slug — same real-sku check as vzaLibSave's fix.
+  if (sb && !key.startsWith('VZA-')) {
+    const table = key.startsWith('CUST-') ? 'inventory_custom_items' : 'inventory_overrides';
+    sb.from(table).update({ image_url: null }).eq('sku', key).then(({ error }) => {
+      if (error) showToast('Removed from library, but could not clear the Inventory photo: ' + error.message, 'toast-error');
+    });
+  }
   vzaLibRender();
   showToast('Removed from library', 'toast-info');
 }

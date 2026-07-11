@@ -11,11 +11,6 @@ _s.textContent =
   '.inv-edit-mode .inv-photo-btn{display:block;}';
 document.head.appendChild(_s);
 
-// ── Custom-image localStorage store ──────────────────────────────────────────
-var IMG_KEY = 'invImgs_v1';
-function getImgEdits(){ try{ return JSON.parse(localStorage.getItem(IMG_KEY)||'{}'); }catch(e){ return {}; } }
-function saveImgEdits(e){ try{ localStorage.setItem(IMG_KEY,JSON.stringify(e)); }catch(e){} }
-
 // ── Item data ─────────────────────────────────────────────────────────────────
 var ITEMS = [
   {n:"Silver Mercury Glass Votive Holder",c:"Décor & Props",p:"MP",d:"Silver mercury glass votive candle holder with a dotted/speckled pattern, featuring a reflective metallic finish that gradients from clear to silver. Cylindrical shape suitable for tea lights or small candles.",s:"image273.png",sku:"EF-0001"},
@@ -820,7 +815,7 @@ function setCardImg(imgDiv, srcFile, emoji) {
   imgDiv.appendChild(img);
 }
 
-// Replace card image with a user-chosen file and persist to localStorage
+// Replace card image with a user-chosen file, uploaded to Supabase Storage
 function attachPhotoBtn(div, imgDiv, sku) {
   var btn = document.createElement('button');
   btn.className = 'inv-photo-btn';
@@ -836,18 +831,22 @@ function attachPhotoBtn(div, imgDiv, sku) {
       if (!file) return;
       // resizeImageFile / setInventoryImage are defined in the main inline
       // script, loaded before this file — both are function declarations so
-      // they're guaranteed to exist by the time this runs.
+      // they're guaranteed to exist by the time this runs. setInventoryImage
+      // is async now (uploads to Storage, then links the row) — resolves to
+      // the public URL on success, null on failure (its own toast already shown).
       if (typeof resizeImageFile !== 'function' || typeof setInventoryImage !== 'function') return;
-      resizeImageFile(file, 800, 0.8).then(function(url) {
-        if (!setInventoryImage(sku, url)) return; // budget/quota toast already shown
-        // swap image
-        var old = imgDiv.querySelector('img');
-        if (old) imgDiv.removeChild(old);
-        imgDiv.textContent = '';
-        var img = document.createElement('img');
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-        img.src = url;
-        imgDiv.appendChild(img);
+      resizeImageFile(file, 800, 0.8).then(function(dataUrl) {
+        return setInventoryImage(sku, dataUrl).then(function(publicUrl) {
+          if (!publicUrl) return;
+          // swap image
+          var old = imgDiv.querySelector('img');
+          if (old) imgDiv.removeChild(old);
+          imgDiv.textContent = '';
+          var img = document.createElement('img');
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+          img.src = publicUrl;
+          imgDiv.appendChild(img);
+        });
       }).catch(function() {
         if (typeof showToast === 'function') showToast('Could not process that image — try a different file', 'toast-error');
       });
@@ -862,8 +861,12 @@ var grid = document.getElementById('inv-grid');
 if (!grid) return;
 
 var seenNames = Object.create(null);
-var savedImgs = getImgEdits();
-
+// Image/name/price/category overrides (including custom-photo uploads) are
+// no longer read synchronously here — they arrive async from Supabase via
+// applyInvEdits(), called at the bottom of this file, same as it already
+// patches in name/price/category overrides. Expect a brief flash of the
+// default catalog image before an override lands, same latency trade-off
+// every other Supabase-backed read in this app now has.
 ITEMS.forEach(function(item) {
   var key = (item.n || '').toLowerCase().trim();
   if (!key || seenNames[key]) return;
@@ -890,15 +893,7 @@ ITEMS.forEach(function(item) {
   var imgDiv = document.createElement('div');
   imgDiv.className = 'inv-img';
 
-  if (savedImgs[sku]) {
-    // custom user-chosen photo takes priority
-    var img = document.createElement('img');
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-    img.src = savedImgs[sku];
-    imgDiv.appendChild(img);
-  } else {
-    setCardImg(imgDiv, item.s, emoji);
-  }
+  setCardImg(imgDiv, item.s, emoji);
 
   // card body
   var body = document.createElement('div');
