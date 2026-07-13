@@ -1608,10 +1608,6 @@
         .viz-callout-label { font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .viz-callout-price { font-size:12px; color:var(--sage-dark); font-weight:700; white-space:nowrap; }
         .viz-empty-canvas { text-align:center; color:var(--stone); font-size:13px; padding:48px 20px; display:flex; flex-direction:column; align-items:center; gap:12px; }
-        .viz-settings-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-        .viz-settings-row label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--stone); min-width:100px; }
-        .viz-settings-row input { flex:1; padding:6px 10px; border:1px solid var(--border-mid); border-radius:6px; font-size:12px; font-family:var(--font-sans); outline:none; }
-        .viz-settings-row input:focus { border-color:var(--sage); }
         .viz-stage { display:none; }
         .viz-stage.active { display:flex; flex-direction:column; gap:16px; }
         .viz-action-row { display:flex; gap:10px; flex-wrap:wrap; }
@@ -1774,27 +1770,7 @@
         <button class="btn" onclick="vzaSessionSavePrompt()" title="Save this visualizer session with a name">💾 Save Session</button>
         <button class="btn" onclick="vzaSessionOpenPanel()" title="Browse and restore saved sessions">📋 Sessions</button>
         <button class="btn" onclick="vzaLibOpen()" title="Crop Library: saved crop photos">🗂 Library</button>
-        <button class="btn" id="viz-settings-btn" onclick="vizToggleSettings()" title="API key settings">⚙ Settings</button>
         <button class="btn btn-danger" onclick="vizReset()" title="Start over with a new venue photo">↺ Reset</button>
-      </div>
-
-      <!-- Settings panel -->
-      <div id="viz-settings-panel" style="display:none;margin-bottom:16px;">
-        <div class="viz-card" style="max-width:560px;">
-          <div class="viz-section-label">API Keys — stored locally in your browser only</div>
-          <div class="viz-settings-row">
-            <label>Anthropic Key</label>
-            <input type="password" id="viz-anthropic-key" placeholder="sk-ant-…" oninput="try{localStorage.setItem('anthropicApiKey',this.value)}catch(e){}">
-          </div>
-          <div class="viz-settings-row">
-            <label>OpenAI Key</label>
-            <input type="password" id="viz-openai-key" placeholder="sk-…" oninput="try{localStorage.setItem('openaiApiKey',this.value)}catch(e){}">
-          </div>
-          <div style="font-size:11px;color:var(--stone);margin-top:8px;">
-            Anthropic key: required for venue analysis (claude-opus-4-6 vision).<br>
-            OpenAI key: required for DALL-E 3 image generation. Without it, Claude returns a detailed text description instead.
-          </div>
-        </div>
       </div>
 
       <!-- STAGE: ENTRY (choose mode) -->
@@ -1862,9 +1838,8 @@
             <!-- Generate button -->
             <button class="viz-btn-generate" id="viz-generate-btn" onclick="vizGenerate()" disabled>
               <span id="viz-btn-icon">✦</span>
-              <span id="viz-btn-label">Generate Mockup</span>
+              <span id="viz-btn-label">Generate Mockup Image</span>
             </button>
-            <div style="text-align:center;font-size:10.5px;color:var(--stone-light);" id="viz-api-hint"></div>
           </div>
 
           <!-- Right: empty state / venue preview -->
@@ -6041,23 +6016,10 @@ function vizRestoreState() {
 // ── Init & navigation ─────────────────────────────────────────────────────────
 
 function vizInit() {
-  // Pre-fill API key inputs
-  const ak = localStorage.getItem('anthropicApiKey') || '';
-  const ok = localStorage.getItem('openaiApiKey')    || '';
-  const akEl = document.getElementById('viz-anthropic-key');
-  const okEl = document.getElementById('viz-openai-key');
-  if (akEl) akEl.value = ak;
-  if (okEl) okEl.value = ok;
-  vizUpdateApiHint();
   // Restore persisted state; only show entry if nothing was saved
   if (!vizRestoreState()) vizShowStage('entry');
   vizUpdateGenerateBtn();
   vizUpdateProposalChips();
-}
-
-function vizToggleSettings() {
-  const panel = document.getElementById('viz-settings-panel');
-  if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
 }
 
 function vizShowStage(stage) {
@@ -6152,9 +6114,6 @@ desc.value = desc.value.replace(new RegExp('(?:,\s*)?' + label.replace(/[.*+?^${
 
 function vizUpdateGenerateBtn() {
   const btn  = document.getElementById('viz-generate-btn');
-  const hint = document.getElementById('viz-api-hint');
-  const ak   = localStorage.getItem('anthropicApiKey') || '';
-  const ok   = localStorage.getItem('openaiApiKey')    || '';
   const hasDesc  = !!(document.getElementById('viz-design-input') || {value:''}).value.trim()
                 || !!(document.getElementById('viz-venue-desc')   || {value:''}).value.trim();
   const hasVenue = !!(vizState.venueBase64) || !!(document.getElementById('viz-venue-desc')||{value:''}).value.trim();
@@ -6162,21 +6121,7 @@ function vizUpdateGenerateBtn() {
   if (!btn) return;
   const canGen = hasDesc && (hasVenue || hasDesc);
   btn.disabled = !canGen;
-
-  const lbl = document.getElementById('viz-btn-label');
-  if (ok && ak) {
-    if (lbl) lbl.textContent = 'Generate Mockup Image';
-    if (hint) hint.textContent = 'Uses Claude vision + DALL-E 3';
-  } else if (ak) {
-    if (lbl) lbl.textContent = 'Generate Design Description';
-    if (hint) hint.textContent = 'Add an OpenAI key for DALL-E image generation';
-  } else {
-    if (lbl) lbl.textContent = 'Generate Mockup';
-    if (hint) hint.textContent = 'Add an Anthropic API key in ⚙ Settings to get started';
-  }
 }
-
-function vizUpdateApiHint() { vizUpdateGenerateBtn(); }
 
 // ── Venue upload ──────────────────────────────────────────────────────────────
 
@@ -6205,16 +6150,6 @@ function vizHandleDrop(e) {
 // ── Generate ──────────────────────────────────────────────────────────────────
 
 async function vizGenerate() {
-  const ak = localStorage.getItem('anthropicApiKey') || '';
-  const ok = localStorage.getItem('openaiApiKey')    || '';
-  if (!ak) {
-    const k = prompt('Enter your Anthropic API key (stored locally):');
-    if (!k) return;
-    try { localStorage.setItem('anthropicApiKey', k.trim()); } catch (e) {}
-    const el = document.getElementById('viz-anthropic-key');
-    if (el) el.value = k.trim();
-  }
-
   const designDesc  = (document.getElementById('viz-design-input')  || {value:''}).value.trim();
   const venueDesc   = (document.getElementById('viz-venue-desc')    || {value:''}).value.trim();
   const fullContext = (venueDesc ? 'Venue: ' + venueDesc + '. ' : '') + 'Setup: ' + designDesc;
@@ -6224,29 +6159,22 @@ async function vizGenerate() {
   const titleEl = document.getElementById('viz-progress-title');
 
   try {
-    let dallePrompt = null;
-    let claudeDesc  = null;
+    let claudeDesc = null;
 
     if (vizState.venueBase64) {
       if (titleEl) titleEl.textContent = 'Analyzing your venue…';
       if (subEl)   subEl.textContent   = 'Claude is studying the space and composing the design description…';
-      claudeDesc = await vizCallClaude(vizState.venueBase64, vizState.venueMime, fullContext, localStorage.getItem('anthropicApiKey'));
+      claudeDesc = await vizCallClaude(vizState.venueBase64, vizState.venueMime, fullContext);
     } else {
       claudeDesc = 'Professional event photography of ' + fullContext + '. Photorealistic, elegant interior event design, high-end lighting.';
     }
 
     vizState.currentClaudeDesc = claudeDesc;
 
-    if (ok || localStorage.getItem('openaiApiKey')) {
-      const openaiKey = localStorage.getItem('openaiApiKey') || '';
-      if (titleEl) titleEl.textContent = 'Generating image with DALL-E 3…';
-      if (subEl)   subEl.textContent   = 'This takes 15–30 seconds. Almost there…';
-      const imageUrl = await vizCallDALLE3(claudeDesc, openaiKey);
-      await vizDisplayResult(imageUrl, claudeDesc);
-    } else {
-      // No DALL-E key — show Claude's description as the "result"
-      vizShowDescriptionResult(claudeDesc);
-    }
+    if (titleEl) titleEl.textContent = 'Generating image with DALL-E 3…';
+    if (subEl)   subEl.textContent   = 'This takes 15–30 seconds. Almost there…';
+    const imageUrl = await vizCallDALLE3(claudeDesc);
+    await vizDisplayResult(imageUrl, claudeDesc);
   } catch(err) {
     vizShowStage('input');
     showToast('Error: ' + (err.message || err), 'toast-error');
@@ -6267,75 +6195,57 @@ async function vizRefine() {
 }
 
 // ── API Calls ─────────────────────────────────────────────────────────────────
+// All Anthropic/OpenAI calls go through the ai-proxy Edge Function, which holds
+// the real API keys server-side and only forwards requests for a signed-in staff
+// session — no key ever reaches the browser.
 
-async function vizCallClaude(imgB64, mime, description, apiKey) {
-  if (!apiKey) apiKey = localStorage.getItem('anthropicApiKey') || '';
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-opus-4-6',
-      max_tokens: 800,
-      messages: [{
-        role: 'user',
-        content: [
-          { type:'image', source:{ type:'base64', media_type:mime, data:imgB64 } },
-          { type:'text', text:
-            'You are an expert event designer and photographer. Study this venue photo carefully.\n\n'
-          + 'The client wants this setup: "' + description + '"\n\n'
-          + 'Write a photorealistic DALL-E 3 image generation prompt that shows this exact venue with the requested event setup. '
-          + 'Your prompt must:\n'
-          + '1. Describe the venue\'s architecture precisely (ceiling height, windows, floor, walls, lighting fixtures)\n'
-          + '2. Place the requested furniture and décor in realistic positions that match the room layout\n'
-          + '3. Describe lighting, atmosphere, and perspective as if this is professional event photography\n'
-          + '4. Be vivid and specific — mention colors, materials, quantities\n\n'
-          + 'Return ONLY the DALL-E prompt. Start with: "Professional event photography of"'
-          }
-        ]
-      }]
-    })
-  });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    if (resp.status === 401) { localStorage.removeItem('anthropicApiKey'); throw new Error('Invalid Anthropic API key — check Settings.'); }
-    throw new Error('Claude API error (' + resp.status + '): ' + (err.error && err.error.message || resp.statusText));
+async function _vizAiProxy(provider, payload) {
+  const { data, error } = await sb.functions.invoke('ai-proxy', { body: { provider, payload } });
+  if (error) {
+    let msg = error.message || 'AI request failed';
+    if (error.context && typeof error.context.json === 'function') {
+      try {
+        const errBody = await error.context.json();
+        if (errBody && errBody.error) msg = errBody.error.message || errBody.error;
+      } catch (e) {}
+    }
+    throw new Error(msg);
   }
-  const data = await resp.json();
+  return data;
+}
+
+async function vizCallClaude(imgB64, mime, description) {
+  const data = await _vizAiProxy('anthropic', {
+    model: 'claude-opus-4-6',
+    max_tokens: 800,
+    messages: [{
+      role: 'user',
+      content: [
+        { type:'image', source:{ type:'base64', media_type:mime, data:imgB64 } },
+        { type:'text', text:
+          'You are an expert event designer and photographer. Study this venue photo carefully.\n\n'
+        + 'The client wants this setup: "' + description + '"\n\n'
+        + 'Write a photorealistic DALL-E 3 image generation prompt that shows this exact venue with the requested event setup. '
+        + 'Your prompt must:\n'
+        + '1. Describe the venue\'s architecture precisely (ceiling height, windows, floor, walls, lighting fixtures)\n'
+        + '2. Place the requested furniture and décor in realistic positions that match the room layout\n'
+        + '3. Describe lighting, atmosphere, and perspective as if this is professional event photography\n'
+        + '4. Be vivid and specific — mention colors, materials, quantities\n\n'
+        + 'Return ONLY the DALL-E prompt. Start with: "Professional event photography of"'
+        }
+      ]
+    }]
+  });
   return data.content && data.content[0] ? data.content[0].text.trim() : '';
 }
 
-async function vizCallDALLE3(imgPrompt, apiKey) {
-  if (!apiKey) apiKey = localStorage.getItem('openaiApiKey') || '';
-  if (!apiKey) {
-    const k = window.prompt('Enter your OpenAI API key for DALL-E 3:');
-    if (!k) throw new Error('OpenAI API key required for image generation.');
-    try { localStorage.setItem('openaiApiKey', k.trim()); } catch (e) {}
-    apiKey = k.trim();
-  }
-  const resp = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + apiKey
-    },
-    body: JSON.stringify({
-      model: "gpt-image-1",
-      prompt: imgPrompt,
-      n: 1,
-      size: "1024x1024"
-    })
+async function vizCallDALLE3(imgPrompt) {
+  const data = await _vizAiProxy('openai', {
+    model: "gpt-image-1",
+    prompt: imgPrompt,
+    n: 1,
+    size: "1024x1024"
   });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    if (resp.status === 401) { localStorage.removeItem('openaiApiKey'); throw new Error('Invalid OpenAI API key — check Settings.'); }
-    throw new Error('DALL-E error (' + resp.status + '): ' + (err.error && err.error.message || resp.statusText));
-  }
-  const data = await resp.json();
   return "data:image/png;base64," + data.data[0].b64_json;
 }
 
@@ -6385,20 +6295,6 @@ async function vizDisplayResult(imageUrlOrDataUrl, claudeDesc) {
 
   vizShowStage('review');
   showToast('✓ Mockup generated!', 'toast-success');
-}
-
-function vizShowDescriptionResult(claudeDesc) {
-  // No DALL-E key — show Claude's text description in the review panel
-  vizState.currentImageSrc = null;
-  vizState.currentClaudeDesc = claudeDesc;
-
-  const revImg = document.getElementById('viz-review-img');
-  if (revImg) { revImg.src = ''; revImg.style.display = 'none'; }
-  const reviewWrap = document.getElementById('viz-review-wrap');
-  if (reviewWrap) reviewWrap.innerHTML = '<div style="padding:24px;font-size:13px;color:var(--charcoal);line-height:1.8;"><div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--champagne-dark);font-weight:700;margin-bottom:12px;">Design Description (Claude)</div>' + claudeDesc.replace(/\n/g,'<br>') + '<div style="margin-top:16px;font-size:11.5px;color:var(--stone);">Add an OpenAI API key in ⚙ Settings to generate a DALL-E image from this description.</div></div>';
-
-  vizShowStage('review');
-  showToast('✓ Design description generated', 'toast-success');
 }
 
 function vizRenderVersionStrip() {
@@ -6687,8 +6583,6 @@ async function vizAddToProposal() {
 
 async function vizIdentifyItems(btn) {
   if (!vizState.currentImageSrc) { showToast('Generate a mockup first', 'toast-info'); return; }
-  const ak = localStorage.getItem('anthropicApiKey') || '';
-  if (!ak) { showToast('Add an Anthropic API key in ⚙ Settings', 'toast-info'); return; }
 
   const origText = btn ? btn.textContent : '';
   if (btn) { btn.textContent = 'Identifying…'; btn.disabled = true; }
@@ -6698,38 +6592,23 @@ async function vizIdentifyItems(btn) {
     if (!match) throw new Error('Invalid image source');
     const [, mime, b64] = match;
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ak,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-6',
-        max_tokens: 1024,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
-            { type: 'text', text:
-              'You are an expert event rental consultant. Identify all visible items in this venue mockup that an event company could rent (chairs, tables, linens, draping, lighting, centerpieces, floral, décor, etc.).\n\n'
-            + 'For each item, estimate its center position as normalized coordinates where 0,0 = top-left and 1,1 = bottom-right.\n\n'
-            + 'Reply ONLY with a raw JSON array — no markdown fences, no explanation:\n'
-            + '[{"label":"item name","category":"Furniture|Lighting|Décor|Linen|Floral|Other","nx":0.0,"ny":0.0,"price":""}]\n\n'
-            + 'Identify up to 8 distinct rentable items clearly visible in the image. Set price to a realistic rental estimate like "$120" or leave empty.'
-            }
-          ]
-        }]
-      })
+    const data = await _vizAiProxy('anthropic', {
+      model: 'claude-opus-4-6',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
+          { type: 'text', text:
+            'You are an expert event rental consultant. Identify all visible items in this venue mockup that an event company could rent (chairs, tables, linens, draping, lighting, centerpieces, floral, décor, etc.).\n\n'
+          + 'For each item, estimate its center position as normalized coordinates where 0,0 = top-left and 1,1 = bottom-right.\n\n'
+          + 'Reply ONLY with a raw JSON array — no markdown fences, no explanation:\n'
+          + '[{"label":"item name","category":"Furniture|Lighting|Décor|Linen|Floral|Other","nx":0.0,"ny":0.0,"price":""}]\n\n'
+          + 'Identify up to 8 distinct rentable items clearly visible in the image. Set price to a realistic rental estimate like "$120" or leave empty.'
+          }
+        ]
+      }]
     });
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      if (resp.status === 401) { localStorage.removeItem('anthropicApiKey'); throw new Error('Invalid Anthropic API key — check Settings.'); }
-      throw new Error('Claude error (' + resp.status + '): ' + (err.error && err.error.message || resp.statusText));
-    }
-    const data = await resp.json();
     let raw = (data.content && data.content[0] ? data.content[0].text : '').trim();
     raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
     let items;
@@ -6808,8 +6687,6 @@ function vzaHandleFile(file) {
 
 async function vzaAnalyzePhoto() {
   if (!vzaState.imgSrc) return;
-  const ak = localStorage.getItem('anthropicApiKey') || '';
-  if (!ak) { showToast('Add an Anthropic API key in ⚙ Settings', 'toast-info'); return; }
 
   const btn      = document.getElementById('vza-analyze-btn');
   const status   = document.getElementById('vza-status');
@@ -6829,43 +6706,24 @@ async function vzaAnalyzePhoto() {
 
   try {
     // ── Step 1: ping test — confirm API connectivity with a trivial text-only call ──
-    console.log('[VZA] Starting analysis. MIME:', mime, '| b64 length:', b64.length, '| API key present:', !!ak);
+    console.log('[VZA] Starting analysis. MIME:', mime, '| b64 length:', b64.length);
     if (status) status.textContent = 'Verifying API connection…';
 
-    const pingResp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'x-api-key':ak, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-opus-4-6', max_tokens:20, messages:[{ role:'user', content:'Reply with the single word: ok' }] })
+    const pingData = await _vizAiProxy('anthropic', {
+      model:'claude-opus-4-6', max_tokens:20, messages:[{ role:'user', content:'Reply with the single word: ok' }]
     });
-    const pingData = await pingResp.json();
-    console.log('[VZA] Ping response (status ' + pingResp.status + '):', JSON.stringify(pingData).slice(0, 200));
-    if (!pingResp.ok) {
-      if (pingResp.status === 401) { localStorage.removeItem('anthropicApiKey'); throw new Error('Invalid API key (401). Re-enter it in ⚙ Settings.'); }
-      throw new Error('API error on ping (' + pingResp.status + '): ' + (pingData.error && pingData.error.message || pingResp.statusText));
-    }
+    console.log('[VZA] Ping response:', JSON.stringify(pingData).slice(0, 200));
 
     // ── Step 2: full image analysis ───────────────────────────────────────────
     if (status) status.textContent = 'Sending image to Claude for analysis…';
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'x-api-key':ak, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({
-        model: 'claude-opus-4-6',
-        max_tokens: 8000,
-        messages: [{ role: 'user', content: [
-          { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
-          { type: 'text', text: 'You are an event rental specialist writing for a luxury event company\'s proposal system. Identify the 10 most prominent rentable items in this photo (furniture, lighting, draping, centerpieces, décor, staging, bars, chairs, tables, etc.).\n\nFor each item return: name (specific, include color and material if visible), category, quantity (integer), description (2–3 elegant sentences: first sentence names the item with its color and material; second sentence describes how it contributes to the event aesthetic; optional third sentence notes quantity or arrangement if relevant — do NOT truncate), and region (x, y, w, h as percentage of image dimensions).\n\nExample description: "Six plush navy velvet Chesterfield sofas arranged in an intimate lounge configuration. Their tufted design and rich upholstery anchor the sophisticated aesthetic with a touch of classic elegance. Grouped in pairs to encourage conversation around the dance floor."\n\nReturn ONLY a raw JSON array — no markdown, no explanation, no extra text.\nExample format: [{"name":"Gold Chiavari Chair","category":"Seating","quantity":8,"description":"…","region":{"x":10,"y":40,"w":20,"h":35}}]' }
-        ]}]
-      })
+    const data = await _vizAiProxy('anthropic', {
+      model: 'claude-opus-4-6',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: [
+        { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
+        { type: 'text', text: 'You are an event rental specialist writing for a luxury event company\'s proposal system. Identify the 10 most prominent rentable items in this photo (furniture, lighting, draping, centerpieces, décor, staging, bars, chairs, tables, etc.).\n\nFor each item return: name (specific, include color and material if visible), category, quantity (integer), description (2–3 elegant sentences: first sentence names the item with its color and material; second sentence describes how it contributes to the event aesthetic; optional third sentence notes quantity or arrangement if relevant — do NOT truncate), and region (x, y, w, h as percentage of image dimensions).\n\nExample description: "Six plush navy velvet Chesterfield sofas arranged in an intimate lounge configuration. Their tufted design and rich upholstery anchor the sophisticated aesthetic with a touch of classic elegance. Grouped in pairs to encourage conversation around the dance floor."\n\nReturn ONLY a raw JSON array — no markdown, no explanation, no extra text.\nExample format: [{"name":"Gold Chiavari Chair","category":"Seating","quantity":8,"description":"…","region":{"x":10,"y":40,"w":20,"h":35}}]' }
+      ]}]
     });
-    console.log('[VZA] Vision response HTTP status:', resp.status);
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      console.error('[VZA] Vision request failed:', JSON.stringify(err));
-      if (resp.status === 401) { localStorage.removeItem('anthropicApiKey'); throw new Error('Invalid Anthropic API key.'); }
-      throw new Error('Claude error (' + resp.status + '): ' + (err.error && err.error.message || resp.statusText));
-    }
-    const data = await resp.json();
     console.log('[VZA] Full API response object:', data);
 
     const rawText = data.content && data.content[0] ? data.content[0].text : '';
