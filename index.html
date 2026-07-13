@@ -2339,36 +2339,6 @@ function resizeImageFile(file, maxDim, quality) {
   });
 }
 
-// ── SHARED PHOTO STORE BUDGET (vzaCropLib_v1 only, as of Phase 1) ───────────
-// Used to guard vzaCropLib_v1, still a localStorage JSON map until Phase 3
-// migrates Venue Visualizer. Inventory's own images (invImgs_v1, previously
-// sharing this same budget-capped map) moved to Supabase Storage below —
-// each item's row now carries its own image_url, so there's no shared
-// per-key size budget to exhaust for photos anymore.
-const IMAGE_STORE_BUDGET_BYTES = 3 * 1024 * 1024; // ~3MB per key
-
-// Sets map[entryKey] = entryValue in the given localStorage JSON map key,
-// refusing the write (and toasting once) if the result would exceed the
-// per-key budget, or if setItem itself throws (e.g. the browser's overall
-// quota is already exhausted by other keys). Returns true on success.
-function _imageMapSetEntry(storageKey, entryKey, entryValue) {
-  let map;
-  try { map = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (e) { map = {}; }
-  map[entryKey] = entryValue;
-  const serialized = JSON.stringify(map);
-  if (serialized.length > IMAGE_STORE_BUDGET_BYTES) {
-    if (typeof showToast === 'function') showToast('Photo library full — delete some crop-library photos to add more.', 'toast-error');
-    return false;
-  }
-  try {
-    localStorage.setItem(storageKey, serialized);
-    return true;
-  } catch (e) {
-    if (typeof showToast === 'function') showToast('Photo library full — delete some crop-library photos to add more.', 'toast-error');
-    return false;
-  }
-}
-
 // ── INVENTORY IMAGES (Supabase Storage) ──────────────────────────────────────
 // Uploads to the public 'inventory-images' bucket (one object per upload,
 // timestamped so a photo replace can't collide with a stale CDN-cached URL
@@ -5148,6 +5118,7 @@ async function propLoadProposal(key) {
   if (!p) return;
   window._propEditingKey = p.key; // track which proposal we're editing
   _propCurrentPayments = p.payments || []; // repopulate the builder's payment-ledger cache for this proposal
+  await _propRefreshHasLinkedSession(p.key); // ditto for the session-link cache, before propRender() reads it
   const setVal = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
   const f = p.fields || {};
   setVal('prop-client',    f.client   || p.clientName || '');
@@ -5348,6 +5319,7 @@ function propNewBlank() {
   proposalItems = [];
   propItemIdCounter = 0;
   _propCurrentPayments = []; // no proposal loaded — nothing for the builder's payment ledger to show
+  _propHasLinkedSession = false; // ditto for the session-link cache
   propRender();
   ['prop-client','prop-child','prop-phone','prop-email','prop-date','prop-venue','prop-colors','prop-planner','prop-adults','prop-kids','prop-pickup','prop-notes'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -5606,18 +5578,15 @@ function filterInvoices(el, status, searchOverride) {
 }
 
 // ── CONTRACT TEMPLATE EDIT ───────────────────────────────────────────────────
-const CONTRACT_TEMPLATE_KEY = 'contractTemplate_v1';
-
-function _contractsRestoreTemplate() {
+async function _contractsRestoreTemplate() {
   const tmpl = document.getElementById('contract-template-text');
-  if (!tmpl) return;
-  try {
-    const saved = localStorage.getItem(CONTRACT_TEMPLATE_KEY);
-    if (saved) tmpl.innerHTML = saved;
-  } catch(e) {}
+  if (!tmpl || !sb) return;
+  const { data, error } = await sb.from('settings').select('value').eq('key', 'contract_template').maybeSingle();
+  if (error) { showToast('Could not load contract template: ' + error.message, 'toast-error'); return; }
+  if (data && data.value && data.value.html) tmpl.innerHTML = data.value.html;
 }
 
-function editContractTemplate() {
+async function editContractTemplate() {
   const tmpl = document.getElementById('contract-template-text');
   const btn  = document.getElementById('contract-edit-btn');
   if (!tmpl || !btn) return;
@@ -5629,12 +5598,10 @@ function editContractTemplate() {
     tmpl.focus();
     showToast('Template is editable — click Done when finished');
   } else {
-    try {
-      localStorage.setItem(CONTRACT_TEMPLATE_KEY, tmpl.innerHTML);
-      showToast('Template saved');
-    } catch(e) {
-      showToast('Could not save template', 'toast-error');
-    }
+    if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
+    const { error } = await sb.from('settings').upsert({ key: 'contract_template', value: { html: tmpl.innerHTML } }, { onConflict: 'key' });
+    if (error) showToast('Could not save template: ' + error.message, 'toast-error');
+    else showToast('Template saved');
   }
 }
 
@@ -6681,7 +6648,16 @@ async function vizAddToProposal() {
 
   try {
     const png = await vizExportPNG();
-    window._vizProposalMockup = png || vizState.currentImageSrc;
+    // Uploaded to Storage rather than kept as base64 — resolves the Phase 2
+    // TODO on proposals.mockup_image_url (propSave's own fallback logic
+    // needs no changes for this: it already just treats _vizProposalMockup
+    // as an opaque string, whether that string used to be base64 or is now
+    // a URL). If the upload fails, leave _vizProposalMockup unset rather
+    // than falling back to attaching a giant base64 blob — that would
+    // undo the exact thing Storage exists to fix.
+    const mockupUrl = await _vizUploadImage(png || vizState.currentImageSrc, 'mockup');
+    if (mockupUrl) window._vizProposalMockup = mockupUrl;
+    else showToast('Mockup could not be uploaded — proposal will keep its previous mockup, if any', 'toast-error');
 
     let added = 0;
     for (const c of vizState.callouts) {
@@ -6779,7 +6755,9 @@ async function vizIdentifyItems(btn) {
 
 async function vizAddToProposalDirect() {
   if (!vizState.currentImageSrc) { showToast('No mockup to add', 'toast-info'); return; }
-  window._vizProposalMockup = vizState.currentImageSrc;
+  const mockupUrl = await _vizUploadImage(vizState.currentImageSrc, 'mockup');
+  if (!mockupUrl) { showToast('Mockup could not be uploaded — try again', 'toast-error'); return; }
+  window._vizProposalMockup = mockupUrl;
   navigate('proposals');
   propRender();
   showToast('✓ Mockup attached to proposal', 'toast-success');
@@ -7449,14 +7427,27 @@ function vzaConfirmCrops() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-function vzaRenderResults() {
+// Fetches the crop library once per render pass rather than once per card —
+// vzaBuildCard() runs in a tight forEach over potentially many detected
+// items, and a network fetch per item would turn one render into N.
+async function vzaRenderResults() {
   const grid = document.getElementById('vza-results-grid');
   if (!grid) return;
+  const lib = await vzaLibGet();
   grid.innerHTML = '';
-  vzaState.items.forEach(item => grid.appendChild(vzaBuildCard(item)));
+  vzaState.items.forEach(item => grid.appendChild(vzaBuildCard(item, lib)));
 }
 
-function vzaBuildCard(item) {
+// Synchronous lookup against an already-fetched library map — see
+// vzaRenderResults(). vzaLibCheck() below is the async, fetch-it-yourself
+// version for any one-off caller that doesn't already have a map in hand.
+function _vzaLibCheckSync(item, lib) {
+  if (item.invSku && lib[item.invSku]) return lib[item.invSku];
+  const nameKey = (item.name || '').toLowerCase().trim();
+  return Object.values(lib).find(e => (e.name || '').toLowerCase().trim() === nameKey) || null;
+}
+
+function vzaBuildCard(item, lib) {
   const card = document.createElement('div');
   card.className = 'vza-item-card' + (item.added ? ' vza-done' : '');
   card.id = 'vza-card-' + item.id;
@@ -7464,7 +7455,7 @@ function vzaBuildCard(item) {
   // Thumbnail — prefer crop library photo if no local thumbSrc
   const thumbWrap = document.createElement('div');
   thumbWrap.className = 'vza-thumb-wrap';
-  const _libEntry = !item.thumbSrc ? vzaLibCheck(item) : null;
+  const _libEntry = !item.thumbSrc ? _vzaLibCheckSync(item, lib) : null;
   const _thumbSrc = item.thumbSrc || (_libEntry && _libEntry.imgSrc) || null;
   if (_thumbSrc) {
     const img = document.createElement('img');
@@ -7550,7 +7541,7 @@ function vzaBuildCard(item) {
   // Save to Library button (shown when thumbSrc exists)
   const libBtn = document.createElement('button');
   libBtn.className = 'vza-lib-save-btn'; libBtn.id = 'vza-lib-btn-' + item.id;
-  const libEntry = vzaLibCheck(item);
+  const libEntry = _vzaLibCheckSync(item, lib);
   libBtn.textContent = libEntry ? '✓ In Crop Library' : '🗂 Save to Crop Library';
   if (libEntry) libBtn.classList.add('vza-lib-saved');
   libBtn.onclick = () => vzaLibSave(item.id);
@@ -7715,26 +7706,73 @@ function _vzaMarkAdded(id) {
 // ── FEATURE 1: CROP LIBRARY ───────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════════════════
 
-const VZA_LIB_KEY = 'vzaCropLib_v1';
-
-function vzaLibGet() {
-  try { return JSON.parse(localStorage.getItem(VZA_LIB_KEY) || '{}'); } catch(e) { return {}; }
+// Shared upload helper for every Venue Visualizer image (venue photo,
+// current mockup, session/item thumbnails, crop library entries) — same
+// shape as Phase 1's setInventoryImage: unique timestamped path per upload,
+// returns the public URL on success, null on failure (toast already shown).
+// `silent` suppresses the per-image toast for callers that upload several
+// images in one action and want to show one aggregated summary instead of
+// a stack of toasts that just overwrite each other (this app shows one
+// toast at a time) — see vzaSessionDoSave.
+async function _vizUploadImage(dataUrl, prefix, silent) {
+  if (!sb) { if (!silent) showToast('Not connected to Supabase', 'toast-error'); return null; }
+  if (!dataUrl) return null;
+  try {
+    const blob = await (await fetch(dataUrl)).blob();
+    const ext = blob.type === 'image/png' ? 'png' : (blob.type === 'image/webp' ? 'webp' : 'jpg');
+    const path = (prefix || 'viz') + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6) + '.' + ext;
+    const { error: upErr } = await sb.storage.from('viz-images').upload(path, blob, { contentType: blob.type });
+    if (upErr) { if (!silent) showToast('Could not upload image: ' + upErr.message, 'toast-error'); return null; }
+    const { data: { publicUrl } } = sb.storage.from('viz-images').getPublicUrl(path);
+    return publicUrl;
+  } catch (e) {
+    if (!silent) showToast('Could not process/upload an image', 'toast-error');
+    return null;
+  }
 }
 
-// Check if item has a saved library entry — match by invSku first, then by name
-function vzaLibCheck(item) {
-  const lib = vzaLibGet();
-  if (item.invSku && lib[item.invSku]) return lib[item.invSku];
-  const nameKey = (item.name || '').toLowerCase().trim();
-  const byName = Object.values(lib).find(e => (e.name || '').toLowerCase().trim() === nameKey);
-  return byName || null;
+// Several places in the (unmigrated) Venue Visualizer code require a literal
+// "data:mime;base64,..." string, not just an image URL — vizIdentifyItems
+// and vzaAnalyzePhoto both regex-parse vizState.currentImageSrc /
+// vzaState.imgSrc directly to get raw base64 for a Claude vision call.
+// Restoring a session from Storage must reconstruct that exact shape rather
+// than handing back a plain https:// URL, or those two features would
+// break silently on any restored session.
+async function _urlToDataUrl(url) {
+  if (!url) return null;
+  const blob = await (await fetch(url)).blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
-function vzaLibSave(itemId) {
+async function vzaLibGet() {
+  if (!sb) return {};
+  const { data, error } = await sb.from('crop_library').select('*');
+  if (error) { showToast('Could not load crop library: ' + error.message, 'toast-error'); return {}; }
+  const map = {};
+  (data || []).forEach(row => {
+    map[row.key] = { key: row.key, name: row.name, category: row.category, imgSrc: row.image_url, savedAt: new Date(row.created_at).getTime() };
+  });
+  return map;
+}
+
+// Async, fetch-it-yourself version for a one-off caller — see
+// _vzaLibCheckSync for the hot-loop version used by vzaRenderResults.
+async function vzaLibCheck(item) {
+  const lib = await vzaLibGet();
+  return _vzaLibCheckSync(item, lib);
+}
+
+async function vzaLibSave(itemId) {
   const item = vzaState.items.find(i => i.id === itemId);
   if (!item) return;
   const thumbSrc = item.thumbSrc;
   if (!thumbSrc) { showToast('No crop image to save — confirm crops first', 'toast-info'); return; }
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
 
   const nameEl  = document.getElementById('vza-name-'  + itemId);
   const catEl   = document.getElementById('vza-cat-'   + itemId);
@@ -7742,21 +7780,19 @@ function vzaLibSave(itemId) {
   const cat  = (catEl  ? catEl.value         : item.category) || 'Other';
   const key  = item.invSku || ('VZA-' + name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,30) + '-' + Date.now());
 
-  const libEntry = { key, name, category: cat, imgSrc: thumbSrc, savedAt: Date.now() };
-  if (!_imageMapSetEntry(VZA_LIB_KEY, key, libEntry)) return; // budget/quota toast already shown — vzaCropLib_v1 stays in localStorage until Phase 3
+  const publicUrl = await _vizUploadImage(thumbSrc, 'crop');
+  if (!publicUrl) return; // upload error toast already shown
+
+  const { error } = await sb.from('crop_library').upsert({ key, name, category: cat, image_url: publicUrl }, { onConflict: 'key' });
+  if (error) { showToast('Could not save to crop library: ' + error.message, 'toast-error'); return; }
 
   // Mirror into the Inventory grid only when this crop is actually tied to a
-  // real catalog/custom item (item.invSku). An unmatched crop has no
-  // inventory row to attach a photo to — a real table can't upsert
-  // image_url onto a sku that was never a real item, unlike the old flat
-  // invImgs_v1 map, which tolerated an arbitrary VZA-... key that only ever
-  // showed up via a live DOM patch and was never reload-persistent anyway.
-  // The crop library save above is already complete and successful either
-  // way — this mirror is a best-effort secondary side-effect, so it doesn't
-  // block "✓ Saved to Crop Library" on its own network round trip.
+  // real catalog/custom item (item.invSku) — unchanged reasoning from the
+  // Phase 1 fix: an unmatched crop has no inventory row to attach a photo to.
+  // Best-effort secondary side-effect, doesn't block the crop library save.
   if (item.invSku) {
-    setInventoryImage(item.invSku, thumbSrc).then(publicUrl => {
-      if (publicUrl) _vzaUpdateInvCardImg(item.invSku, publicUrl, name);
+    setInventoryImage(item.invSku, thumbSrc).then(inventoryUrl => {
+      if (inventoryUrl) _vzaUpdateInvCardImg(item.invSku, inventoryUrl, name);
     });
   }
 
@@ -7792,10 +7828,10 @@ function vzaLibClose() {
   document.getElementById('viz-lib-overlay').classList.remove('open');
 }
 
-function vzaLibRender() {
+async function vzaLibRender() {
   const body = document.getElementById('viz-lib-panel-body');
   if (!body) return;
-  const lib = vzaLibGet();
+  const lib = await vzaLibGet();
   const entries = Object.values(lib).sort((a, b) => b.savedAt - a.savedAt);
   if (!entries.length) {
     body.innerHTML = '<div class="viz-lib-empty">No crops saved yet.<br>Confirm crops on a photo analysis, then click<br>"Save to Crop Library" on any item card.</div>';
@@ -7818,15 +7854,13 @@ function vzaLibRender() {
   body.appendChild(grid);
 }
 
-function vzaLibDelete(key) {
+async function vzaLibDelete(key) {
   if (!confirm('Remove this crop from the library?')) return;
-  const lib = vzaLibGet();
-  delete lib[key];
-  try {
-    localStorage.setItem(VZA_LIB_KEY, JSON.stringify(lib));
-  } catch (e) {
-    showToast('Could not remove this crop — ' + (e.name === 'QuotaExceededError' ? 'storage is full.' : (e.message || e)), 'toast-error');
-    vzaLibRender(); // re-render from the untouched persisted state (setItem never partially writes)
+  if (!sb) return;
+  const { error } = await sb.from('crop_library').delete().eq('key', key);
+  if (error) {
+    showToast('Could not remove this crop: ' + error.message, 'toast-error');
+    vzaLibRender();
     return;
   }
   // Best-effort mirror cleanup — its failure shouldn't hide the fact that the
@@ -7834,7 +7868,7 @@ function vzaLibDelete(key) {
   // clear the Inventory-side image when this crop was actually mirrored
   // there in the first place, i.e. key is a real invSku, not a generated
   // 'VZA-...' slug — same real-sku check as vzaLibSave's fix.
-  if (sb && !key.startsWith('VZA-')) {
+  if (!key.startsWith('VZA-')) {
     const table = key.startsWith('CUST-') ? 'inventory_custom_items' : 'inventory_overrides';
     sb.from(table).update({ image_url: null }).eq('sku', key).then(({ error }) => {
       if (error) showToast('Removed from library, but could not clear the Inventory photo: ' + error.message, 'toast-error');
@@ -7958,11 +7992,51 @@ function _vzaSplitEndDrag() {
 // ── FEATURE 3: SAVE AND NAME VISUALIZER SESSIONS ─────────────────────────────
 // ══════════════════════════════════════════════════════════════════════════════
 
-const VZA_SESSIONS_KEY = 'vzaSessions_v1';
-const VZA_SESSIONS_MAX = 20; // localStorage-size workaround, not a business rule — remove once sessions live in a real DB
+// Whether the currently-open proposal has a linked Venue Visualizer session.
+// _propUpdateSessionLink() is called from propRender() on nearly every
+// keystroke — same hot-path problem Phase 2 solved with _propCurrentPayments.
+// Populated by propLoadProposal()/propNewBlank(), refreshed by
+// vzaSessionDoSave()/vzaSessionDelete() when they touch the open proposal.
+let _propHasLinkedSession = false;
 
-function vzaSessionGet() {
-  try { return JSON.parse(localStorage.getItem(VZA_SESSIONS_KEY) || '[]'); } catch(e) { return []; }
+async function _propRefreshHasLinkedSession(key) {
+  if (!sb || !key) { _propHasLinkedSession = false; return; }
+  const { data } = await sb.from('viz_sessions').select('id').eq('proposal_id', key).limit(1);
+  _propHasLinkedSession = !!(data && data.length);
+}
+
+// Returns sessions shaped like the old localStorage records — same "keep
+// the shape" strategy as getSavedProposals()/getCRMClients(). itemCount is
+// derived from vzaItems.length rather than stored separately (it was always
+// computed from the same array at save time, so storing it too would just
+// be a second copy of the same number). venueBase64/venueMime are dropped —
+// see vzaSessionRestore for why a real data: URL gets reconstructed instead
+// of carrying those two fields forward.
+async function vzaSessionGet() {
+  if (!sb) return [];
+  const { data, error } = await sb.from('viz_sessions').select('*').order('created_at', { ascending: false });
+  if (error) { showToast('Could not load sessions: ' + error.message, 'toast-error'); return []; }
+  return (data || []).map(row => ({
+    id: row.id,
+    name: row.name,
+    savedAt: new Date(row.created_at).getTime(),
+    thumbnail: row.thumbnail_url,
+    itemCount: (row.vza_items || []).length,
+    proposalKey: row.proposal_id || '',
+    stage: row.stage,
+    venueImageUrl: row.venue_image_url,
+    currentImageSrc: row.current_image_url,
+    currentClaudeDesc: row.current_claude_desc,
+    versions: (row.versions || []).map(v => ({ thumb: v.thumb_url, desc: v.desc })),
+    callouts: row.callouts || [],
+    fromProposal: row.from_proposal,
+    vzaImgSrc: row.vza_img_url,
+    vzaItems: (row.vza_items || []).map(i => ({ id:i.id, name:i.name, category:i.category, qty:i.qty, description:i.description, region:i.region, colorIdx:i.colorIdx, added:i.added, skipped:i.skipped })),
+    vzaItemThumbs: (row.vza_items || []).reduce((acc, i) => { acc[i.id] = i.thumb_url || null; return acc; }, {}),
+    vzaAddedCount: row.vza_added_count,
+    cropEditorVisible: row.crop_editor_visible,
+    cropMode: row.crop_mode
+  }));
 }
 
 async function _vizMakeThumbnail(imgSrc) {
@@ -7986,17 +8060,12 @@ async function _vizMakeThumbnail(imgSrc) {
 async function vzaSessionSavePrompt() {
   const saved = await getSavedProposals();
   const propOpts = saved.map(p => `<option value="${escapeHtml(p.key)}">${escapeHtml(p.clientName || p.key)}</option>`).join('');
-  const sessions = vzaSessionGet();
-  const nearLimit = sessions.length >= VZA_SESSIONS_MAX - 2;
-  const atLimit   = sessions.length >= VZA_SESSIONS_MAX;
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-title">Save Visualizer Session</div>
-    ${atLimit ? `<div style="background:#FBEAE9;border:1px solid #B3261E;border-radius:6px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#B3261E;">You have reached the limit of ${VZA_SESSIONS_MAX} sessions. Delete an old session before saving a new one.</div>` : ''}
-    ${nearLimit && !atLimit ? `<div style="background:#F5EEDD;border:1px solid #A6742D;border-radius:6px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#A6742D;">You have ${sessions.length}/${VZA_SESSIONS_MAX} sessions saved — approaching the limit.</div>` : ''}
     <div style="margin-bottom:12px;">
       <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--stone);display:block;margin-bottom:4px;">Session Name</label>
-      <input id="viz-sname-in" type="text" placeholder="e.g. Johnson Wedding – Ballroom" ${atLimit ? 'disabled' : ''}
+      <input id="viz-sname-in" type="text" placeholder="e.g. Johnson Wedding – Ballroom"
         style="width:100%;padding:8px 10px;border:1px solid var(--border-mid);border-radius:6px;font-size:13px;font-family:var(--font-sans);box-sizing:border-box;"
         onkeydown="if(event.key==='Enter')vzaSessionDoSave()">
     </div>
@@ -8008,7 +8077,7 @@ async function vzaSessionSavePrompt() {
     </div>` : ''}
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="vzaSessionDoSave()" ${atLimit ? 'disabled' : ''}>Save Session</button>
+      <button class="btn btn-primary" onclick="vzaSessionDoSave()">Save Session</button>
     </div>`;
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(() => { const el = document.getElementById('viz-sname-in'); if (el) el.focus(); }, 60);
@@ -8020,109 +8089,128 @@ async function vzaSessionDoSave() {
   const name = nameEl ? nameEl.value.trim() : '';
   if (!name) { if (nameEl) { nameEl.focus(); nameEl.style.borderColor = '#B3261E'; } return; }
   closeModal();
-
-  const sessions = vzaSessionGet();
-  if (sessions.length >= VZA_SESSIONS_MAX) { showToast('Session limit reached — delete an old session first', 'toast-error'); return; }
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
 
   const thumbImgSrc = vizState.currentImageSrc || vzaState.imgSrc || null;
-  const thumbnail = await _vizMakeThumbnail(thumbImgSrc);
+  const thumbnailDataUrl = await _vizMakeThumbnail(thumbImgSrc);
 
-  // Build full state snapshot
   const stage = (['entry','input','generating','review','annotate','analyze']
     .find(s => { const el = document.getElementById('viz-stage-' + s); return el && el.classList.contains('active'); }) || 'entry');
   const cropEditorVisible = (document.getElementById('vza-crop-editor-wrap') || {}).style.display !== 'none';
-  const session = {
-    id: 'vzs-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
-    name,
-    savedAt: Date.now(),
-    thumbnail,
-    itemCount: vzaState.items.length,
-    proposalKey: propSel ? propSel.value : '',
-    stage,
-    venueBase64: vizState.venueBase64,
-    venueMime: vizState.venueMime,
-    currentImageSrc: vizState.currentImageSrc,
-    currentClaudeDesc: vizState.currentClaudeDesc,
-    versions: vizState.versions.map(v => ({ thumb: v.thumb, desc: v.desc })),
-    callouts: vizState.callouts,
-    fromProposal: vizState.fromProposal,
-    vzaImgSrc: vzaState.imgSrc,
-    vzaItems: vzaState.items.map(i => ({ id:i.id, name:i.name, category:i.category, qty:i.qty, description:i.description, region:i.region, colorIdx:i.colorIdx, added:i.added, skipped:i.skipped })),
-    vzaItemThumbs: vzaState.items.reduce((acc, i) => { acc[i.id] = i.thumbSrc || null; return acc; }, {}),
-    vzaAddedCount: vzaState.addedCount,
-    cropEditorVisible,
-    cropMode: _vzaCropMode
+
+  // Upload every present image independently — one failing shouldn't abort
+  // the whole session save (same spirit as the old code's own "retry
+  // without large images rather than lose the whole session" fallback).
+  // Each upload is silent — a stack of individual toasts would just
+  // overwrite each other (this app shows one toast at a time); the single
+  // summary toast at the end lists everything that didn't make it.
+  const failed = [];
+  const uploadOne = async (dataUrl, prefix, label) => {
+    if (!dataUrl) return null;
+    const url = await _vizUploadImage(dataUrl, prefix, true);
+    if (!url) failed.push(label);
+    return url;
   };
 
-  sessions.unshift(session);
-  try {
-    localStorage.setItem(VZA_SESSIONS_KEY, JSON.stringify(sessions));
-    showToast('✓ Session saved: ' + name, 'toast-success');
-    _propUpdateSessionLink();
-  } catch(e) {
-    // Retry without large images
-    session.currentImageSrc = null; session.venueBase64 = null;
-    Object.keys(session.vzaItemThumbs).forEach(k => session.vzaItemThumbs[k] = null);
-    try { localStorage.setItem(VZA_SESSIONS_KEY, JSON.stringify(sessions)); showToast('✓ Session saved (images omitted — storage full)', 'toast-info'); }
-    catch(e2) { showToast('Could not save — storage is full', 'toast-error'); }
-  }
+  const venueDataUrl = vizState.venueBase64 ? ('data:' + (vizState.venueMime || 'image/jpeg') + ';base64,' + vizState.venueBase64) : null;
+  const [venueImageUrl, currentImageUrl, thumbnailUrl, vzaImgUrl] = await Promise.all([
+    uploadOne(venueDataUrl, 'venue', 'venue photo'),
+    uploadOne(vizState.currentImageSrc, 'mockup', 'mockup image'),
+    uploadOne(thumbnailDataUrl, 'thumb', 'session thumbnail'),
+    uploadOne(vzaState.imgSrc, 'analyze', 'analyzed photo')
+  ]);
+
+  const vzaItems = await Promise.all(vzaState.items.map(async i => {
+    const thumb_url = i.thumbSrc ? await uploadOne(i.thumbSrc, 'item', '"' + i.name + '" thumbnail') : null;
+    return { id:i.id, name:i.name, category:i.category, qty:i.qty, description:i.description, region:i.region, colorIdx:i.colorIdx, added:i.added, skipped:i.skipped, thumb_url };
+  }));
+
+  const versions = await Promise.all(vizState.versions.map(async v => ({
+    thumb_url: v.thumb ? await uploadOne(v.thumb, 'version', 'a version thumbnail') : null,
+    desc: v.desc
+  })));
+
+  const row = {
+    name,
+    proposal_id: (propSel && propSel.value) ? propSel.value : null,
+    stage,
+    venue_image_url: venueImageUrl,
+    current_image_url: currentImageUrl,
+    current_claude_desc: vizState.currentClaudeDesc,
+    versions,
+    callouts: vizState.callouts,
+    from_proposal: vizState.fromProposal,
+    vza_img_url: vzaImgUrl,
+    vza_items: vzaItems,
+    vza_added_count: vzaState.addedCount,
+    crop_editor_visible: cropEditorVisible,
+    crop_mode: _vzaCropMode,
+    thumbnail_url: thumbnailUrl
+  };
+
+  const { error } = await sb.from('viz_sessions').insert(row);
+  if (error) { showToast('Could not save session: ' + error.message, 'toast-error'); return; }
+
+  showToast(failed.length
+    ? '✓ Session saved: ' + name + ' — but could not upload: ' + failed.join(', ')
+    : '✓ Session saved: ' + name, failed.length ? 'toast-error' : 'toast-success');
+
+  await _propRefreshHasLinkedSession(window._propEditingKey);
+  _propUpdateSessionLink();
 }
 
-function vzaSessionRestore(id) {
-  const sessions = vzaSessionGet();
+async function vzaSessionRestore(id) {
+  const sessions = await vzaSessionGet();
   const s = sessions.find(x => x.id === id);
   if (!s) { showToast('Session not found', 'toast-error'); return; }
 
-  // Restore into vizState / vzaState
-  vizState.venueBase64       = s.venueBase64      || null;
-  vizState.venueMime         = s.venueMime        || 'image/jpeg';
-  vizState.currentImageSrc   = s.currentImageSrc  || null;
-  vizState.currentClaudeDesc = s.currentClaudeDesc|| null;
+  // Reconstruct real "data:mime;base64,..." strings, not just URLs —
+  // vizIdentifyItems and vzaAnalyzePhoto both regex-parse currentImageSrc/
+  // vzaState.imgSrc directly for a Claude vision call, so a restored session
+  // needs to hand back the exact same shape those two features expect.
+  const venueDataUrl = await _urlToDataUrl(s.venueImageUrl);
+  const venueMatch = venueDataUrl ? venueDataUrl.match(/^data:([^;]+);base64,(.+)$/) : null;
+  vizState.venueBase64       = venueMatch ? venueMatch[2] : null;
+  vizState.venueMime         = venueMatch ? venueMatch[1] : 'image/jpeg';
+  vizState.currentImageSrc   = await _urlToDataUrl(s.currentImageSrc);
+  vizState.currentClaudeDesc = s.currentClaudeDesc || null;
   vizState.versions          = (s.versions || []).map(v => ({ thumb: v.thumb, desc: v.desc, src: null }));
   vizState.callouts          = s.callouts         || [];
   vizState.fromProposal      = s.fromProposal     || false;
-  vzaState.imgSrc     = s.vzaImgSrc    || null;
+  vzaState.imgSrc     = await _urlToDataUrl(s.vzaImgSrc);
   vzaState.addedCount = s.vzaAddedCount || 0;
   const thumbs = s.vzaItemThumbs || {};
   vzaState.items = (s.vzaItems || []).map(i => Object.assign({}, i, { thumbSrc: thumbs[i.id] || null }));
   if (vzaState.imgSrc) { vzaState.imgEl = new Image(); vzaState.imgEl.src = vzaState.imgSrc; }
 
-  // Save restored state as current persist state
+  // Save restored state as current persist state (vizState_v1 stays
+  // localStorage — see Phase 3 plan, this key isn't migrating)
   _vizDoSave();
   vzaSessionClosePanel();
   navigate('visualizer');
   showToast('✓ Session restored: ' + s.name, 'toast-success');
 }
 
-function vzaSessionDelete(id) {
+async function vzaSessionDelete(id) {
   if (!confirm('Delete this session?')) return;
-  const sessions = vzaSessionGet().filter(s => s.id !== id);
-  try {
-    localStorage.setItem(VZA_SESSIONS_KEY, JSON.stringify(sessions));
-  } catch (e) {
-    showToast('Could not delete session: ' + (e.message || e), 'toast-error');
-    return;
-  }
+  if (!sb) return;
+  const { error } = await sb.from('viz_sessions').delete().eq('id', id);
+  if (error) { showToast('Could not delete session: ' + error.message, 'toast-error'); return; }
   vzaSessionRenderPanel();
   showToast('Session deleted', 'toast-info');
+  await _propRefreshHasLinkedSession(window._propEditingKey);
   _propUpdateSessionLink();
 }
 
-function vzaSessionRename(id) {
-  const sessions = vzaSessionGet();
+async function vzaSessionRename(id) {
+  if (!sb) return;
+  const sessions = await vzaSessionGet();
   const s = sessions.find(x => x.id === id);
   if (!s) return;
   const newName = prompt('Rename session:', s.name);
   if (!newName || !newName.trim()) return;
-  const oldName = s.name;
-  s.name = newName.trim();
-  try {
-    localStorage.setItem(VZA_SESSIONS_KEY, JSON.stringify(sessions));
-  } catch (e) {
-    s.name = oldName; // keep in-memory state consistent with what's actually persisted
-    showToast('Could not rename session: ' + (e.message || e), 'toast-error');
-    return;
-  }
+  const { error } = await sb.from('viz_sessions').update({ name: newName.trim() }).eq('id', id);
+  if (error) { showToast('Could not rename session: ' + error.message, 'toast-error'); return; }
   vzaSessionRenderPanel();
 }
 
@@ -8134,17 +8222,17 @@ function vzaSessionClosePanel() {
   document.getElementById('viz-sessions-overlay').classList.remove('open');
 }
 
-function vzaSessionRenderPanel() {
+async function vzaSessionRenderPanel() {
   const body = document.getElementById('viz-sessions-panel-body');
   if (!body) return;
-  const sessions = vzaSessionGet();
+  const sessions = await vzaSessionGet();
   if (!sessions.length) {
     body.innerHTML = '<div class="viz-lib-empty">No saved sessions yet.<br>Click "Save Session" in the Venue Visualizer toolbar to save your current state.</div>';
     return;
   }
   const count = document.createElement('div');
   count.style.cssText = 'font-size:11px;color:var(--stone);margin-bottom:14px;';
-  count.textContent = sessions.length + ' of ' + VZA_SESSIONS_MAX + ' sessions used';
+  count.textContent = sessions.length + ' session' + (sessions.length !== 1 ? 's' : '') + ' saved';
 
   const grid = document.createElement('div'); grid.className = 'viz-sessions-grid';
   sessions.forEach(s => {
@@ -8177,24 +8265,24 @@ function vzaSessionRenderPanel() {
 }
 
 // Navigate to visualizer and restore session linked to the current proposal
-function vzaSessionFromProposal() {
+// — click-triggered, not a hot path, so a real fetch here is fine (unlike
+// _propUpdateSessionLink below).
+async function vzaSessionFromProposal() {
   const key = window._propEditingKey;
   if (!key) return;
-  const sessions = vzaSessionGet();
+  const sessions = await vzaSessionGet();
   const s = sessions.find(x => x.proposalKey === key);
   if (!s) return;
   vzaSessionRestore(s.id);
 }
 
-// Show/hide "View Visualizer Session" link in proposal builder
+// Show/hide "View Visualizer Session" link in proposal builder. Reads the
+// _propHasLinkedSession cache rather than fetching — this is called from
+// propRender() on nearly every keystroke (see the cache's own comment).
 function _propUpdateSessionLink() {
   const link = document.getElementById('prop-session-link');
   if (!link) return;
-  const key = window._propEditingKey;
-  if (!key) { link.style.display = 'none'; return; }
-  const sessions = vzaSessionGet();
-  const linked = sessions.find(s => s.proposalKey === key);
-  link.style.display = linked ? '' : 'none';
+  link.style.display = (window._propEditingKey && _propHasLinkedSession) ? '' : 'none';
 }
 </script>
   <script src="inventory.js"></script>
