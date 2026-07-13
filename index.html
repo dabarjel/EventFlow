@@ -2261,61 +2261,51 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
-// ── ID GENERATION ────────────────────────────────────────────────────────────
-// Timestamp + random suffix (matching the vzaSessions_v1 scheme) instead of a
-// bare Date.now() — closes the same-millisecond collision window that a plain
-// timestamp key leaves open (two saves in one ms, two tabs, etc). These IDs
-// are only ever compared for equality elsewhere (never parsed/split), so the
-// format is free to change without touching any other code.
-function _genId(prefix) {
-  return prefix + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
-}
-
-// Payments saved before this change don't carry an id, so lookups fall back
-// to treating the argument as a plain array index for that older data.
-function _findPaymentIndex(payments, idOrIdx) {
-  const byId = payments.findIndex(p => p.id === idOrIdx);
-  if (byId >= 0) return byId;
-  return (typeof idOrIdx === 'number') ? idOrIdx : -1;
-}
-
 // ── SAVED PROPOSALS ACCESSOR ─────────────────────────────────────────────────
-// Every read of the savedProposals key goes through here so a corrupted value
-// degrades to an empty array instead of throwing inside whichever renderer
-// happens to run next (propRender, renderMyProposals, the calendar, etc).
-let _savedProposalsCorrupt = false;
-function getSavedProposals() {
-  try {
-    return JSON.parse(localStorage.getItem('savedProposals') || '[]');
-  } catch (e) {
-    if (!_savedProposalsCorrupt) {
-      _savedProposalsCorrupt = true;
-      if (typeof showToast === 'function') {
-        showToast('Your saved proposal data appears to be corrupted — some proposals may not display correctly.', 'toast-error');
-      }
-    }
-    return [];
-  }
-}
-
-// Paired writer — every mutation of savedProposals goes through here so a
-// QuotaExceededError (or any other setItem failure) is caught, the user is
-// told, and the old value in localStorage is left untouched (setItem never
-// partially writes — it either fully replaces the key or throws and leaves
-// the previous value in place). Returns true on success, false on failure;
-// callers should bail out of any post-save UI update when this returns false.
-function saveSavedProposals(all) {
-  try {
-    localStorage.setItem('savedProposals', JSON.stringify(all));
-    return true;
-  } catch (e) {
-    if (e.name === 'QuotaExceededError') {
-      if (typeof showToast === 'function') showToast('Storage full — this change could not be saved. Free up space (delete an old proposal or a Venue Visualizer session) and try again.', 'toast-error');
-    } else {
-      if (typeof showToast === 'function') showToast('Could not save: ' + (e.message || e), 'toast-error');
-    }
-    return false;
-  }
+// Returns proposals shaped like the old localStorage records (key, clientName,
+// fields, items, payments embedded) even though payments now live in their
+// own table — the join happens once, here, so the many read-only callers
+// throughout the app (dashboard, calendar, CRM table, My Proposals, the
+// "load saved proposal" modal, Venue Visualizer's session-link dropdown)
+// don't each need their own fetch-and-merge logic. Two flat queries + a
+// client-side group-by is simple and plenty fast at this app's scale — no
+// need for a real SQL join. The one place that deliberately bypasses this —
+// propUpdateTotals()/propDocRender()'s payment ledger, re-rendered on nearly
+// every keystroke — uses the _propCurrentPayments in-memory cache instead,
+// so typing in the builder never fires a network request per keystroke.
+async function getSavedProposals() {
+  if (!sb) return [];
+  const { data: proposals, error } = await sb.from('proposals').select('*').order('created_at', { ascending: false });
+  if (error) { showToast('Could not load proposals: ' + error.message, 'toast-error'); return []; }
+  const { data: payments, error: payErr } = await sb.from('proposal_payments').select('*');
+  if (payErr) showToast('Could not load payment records: ' + payErr.message, 'toast-error');
+  const paymentsByProposal = {};
+  (payments || []).forEach(pay => {
+    (paymentsByProposal[pay.proposal_id] = paymentsByProposal[pay.proposal_id] || []).push({
+      id: pay.id,
+      amount: pay.amount,
+      note: pay.note,
+      date: pay.paid_on ? new Date(pay.paid_on + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '',
+      isoDate: pay.paid_on || ''
+    });
+  });
+  return (proposals || []).map(p => ({
+    key: p.id,
+    clientId: p.client_id,
+    clientName: p.client_name,
+    status: p.status,
+    total: p.total,
+    fields: p.fields || {},
+    schedule: p.schedule || [],
+    shipRate: p.ship_rate,
+    taxRate: p.tax_rate,
+    deposit: p.deposit,
+    items: p.items || [],
+    mockupImage: p.mockup_image_url,
+    savedAt: new Date(p.updated_at).toLocaleString(),
+    createdAt: new Date(p.created_at).getTime(),
+    payments: paymentsByProposal[p.id] || []
+  }));
 }
 
 // ── IMAGE RESIZE / COMPRESSION ───────────────────────────────────────────────
@@ -2411,6 +2401,15 @@ let proposalItems = [];   // [{id, name, category, price, imgSrc, qty}]
 let propActiveCat = 'Chairs & Barstools';
 let propInvBuilt = false;
 let propItemIdCounter = 0;
+
+// Payments now live in their own proposal_payments table instead of embedded
+// on the proposal row, but propUpdateTotals()/propDocRender()'s ledger are
+// re-rendered on nearly every keystroke — re-fetching from Supabase that
+// often would mean a network round trip per keystroke. This in-memory cache
+// holds the currently-open proposal's payments the same way proposalItems
+// already holds its line items: populated once by propLoadProposal()/
+// propNewBlank(), kept in sync by propLogPayment()/propDeletePayment().
+let _propCurrentPayments = [];
 
 let _currentPage = '';
 
@@ -3149,13 +3148,16 @@ function propRender() {
   const badge = document.getElementById('prop-preview-count');
   if (badge) { badge.textContent = proposalItems.length; badge.style.display = proposalItems.length ? '' : 'none'; }
 
-  // Show editing context
+  // Show editing context — reads the live prop-client input rather than
+  // fetching the saved record (propRender fires on nearly every keystroke;
+  // the live value is both cheaper and more current than whatever was last
+  // saved anyway).
   const editLabel = document.getElementById('prop-editing-label');
   if (editLabel) {
     if (window._propEditingKey) {
-      const all = getSavedProposals();
-      const p = all.find(x => x.key === window._propEditingKey);
-      editLabel.textContent = p ? '— editing: ' + p.clientName : '';
+      const nameEl = document.getElementById('prop-client');
+      const name = nameEl ? nameEl.value.trim() : '';
+      editLabel.textContent = name ? '— editing: ' + name : '';
     } else {
       editLabel.textContent = '';
     }
@@ -3180,11 +3182,12 @@ function propUpdateTotals() {
   const tax   = (sub + ship) * (taxRateIn / 100);
   const total = sub + ship + tax;
 
-  // Pull real payments from saved proposal (if one is loaded)
+  // Pull real payments from the in-memory cache (if a proposal is loaded) —
+  // kept in sync by propLoadProposal/propNewBlank/propLogPayment/
+  // propDeletePayment, never re-fetched here since this runs on nearly
+  // every keystroke.
   const savedKey = window._propEditingKey || null;
-  const all = getSavedProposals();
-  const saved = savedKey ? all.find(p => p.key === savedKey) : null;
-  const payments = saved ? (saved.payments || []) : [];
+  const payments = savedKey ? _propCurrentPayments : [];
   const totalPaid = payments.reduce((a, x) => a + (x.amount || 0), 0);
   const balance = Math.max(0, total - totalPaid);
   const isPaid  = balance <= 0 && total > 0;
@@ -3221,11 +3224,11 @@ function propUpdateTotals() {
     if (payments.length === 0) {
       logEl.innerHTML = '<div style="font-size:11px;color:var(--stone);font-style:italic;">No payments logged yet.</div>';
     } else {
-      logEl.innerHTML = payments.map((pay, i) => `
+      logEl.innerHTML = payments.map(pay => `
         <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--sage-light);border-radius:5px;font-size:12px;">
           <span style="color:var(--sage-dark);font-weight:600;">${fmt(pay.amount)}</span>
           <span style="color:var(--stone);flex:1;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(pay.note || 'Payment')} · ${escapeHtml(pay.date)}</span>
-          <button onclick="propDeletePayment(${pay.id ? `'${pay.id}'` : i})" style="background:none;border:none;cursor:pointer;color:var(--blush-mid);font-size:12px;padding:0;" title="Remove">✕</button>
+          <button onclick="propDeletePayment('${pay.id}')" style="background:none;border:none;cursor:pointer;color:var(--blush-mid);font-size:12px;padding:0;" title="Remove">✕</button>
         </div>`).join('');
     }
   }
@@ -3242,7 +3245,7 @@ function propShowPaymentAdd() {
   if (box) { box.style.display = 'flex'; document.getElementById('prop-pay-amt').focus(); }
 }
 
-function propLogPayment() {
+async function propLogPayment() {
   if (!window._propEditingKey) { alert('Save the proposal first, then log payments.'); return; }
   const amt  = parseFloat((document.getElementById('prop-pay-amt') || {value:''}).value);
   const note = (document.getElementById('prop-pay-note') || {value:''}).value.trim() || 'Payment';
@@ -3251,25 +3254,30 @@ function propLogPayment() {
     if (el) { el.focus(); el.style.borderColor='var(--blush-mid)'; setTimeout(()=>el.style.borderColor='',1500); }
     return;
   }
-  const all = getSavedProposals();
-  const idx = all.findIndex(p => p.key === window._propEditingKey);
-  if (idx < 0) { alert('Proposal not found — please save first.'); return; }
-  if (!all[idx].payments) all[idx].payments = [];
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
+
   const now = new Date();
-  all[idx].payments.push({
-    id: _genId('payment_'),
-    amount: amt,
-    note,
+  const { data, error } = await sb.from('proposal_payments').insert({
+    proposal_id: window._propEditingKey, amount: amt, note, paid_on: now.toISOString().slice(0,10)
+  }).select().single();
+  if (error) { showToast('Could not log payment: ' + error.message, 'toast-error'); return; } // nothing added to the cache/ledger — no fake success
+
+  _propCurrentPayments.push({
+    id: data.id, amount: amt, note,
     date: now.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
     isoDate: now.toISOString().slice(0,10)
   });
-  // Also update stored total so My Proposals reflects current items
-  all[idx].total = proposalItems.reduce((a,i) => {
+
+  // Also sync the stored total so My Proposals reflects current items — the
+  // payment itself already succeeded and is visible in the ledger either way,
+  // so this failing gets its own toast rather than undoing the payment log.
+  const newTotal = proposalItems.reduce((a,i) => {
     const p = parseFloat((i.price||'').replace(/[^0-9.]/g,''))||0;
     return a + p * i.qty;
   }, 0) * (1 + (parseFloat((document.getElementById('prop-ship-rate')||{value:'20'}).value)||0)/100)
     * (1 + (parseFloat((document.getElementById('prop-tax-rate')||{value:'6'}).value)||0)/100);
-  if (!saveSavedProposals(all)) return;
+  const { error: totalErr } = await sb.from('proposals').update({ total: newTotal }).eq('id', window._propEditingKey);
+  if (totalErr) showToast('Payment logged, but could not sync the stored total: ' + totalErr.message, 'toast-error');
 
   // Reset add form
   const box = document.getElementById('prop-payment-add');
@@ -3277,25 +3285,23 @@ function propLogPayment() {
   document.getElementById('prop-pay-amt').value  = '';
   document.getElementById('prop-pay-note').value = '';
 
-  propUpdateTotals(); // re-render ledger + balance
+  propUpdateTotals(); // re-render ledger + balance (sync — reads _propCurrentPayments)
 }
 
-function propDeletePayment(paymentIdOrIdx) {
+async function propDeletePayment(paymentId) {
   if (!confirm('Remove this payment?')) return;
-  const all = getSavedProposals();
-  const idx = all.findIndex(p => p.key === window._propEditingKey);
-  if (idx < 0) return;
-  const pidx = _findPaymentIndex(all[idx].payments, paymentIdOrIdx);
-  if (pidx < 0) return;
-  all[idx].payments.splice(pidx, 1);
-  if (!saveSavedProposals(all)) return;
+  if (!sb) return;
+  const { error } = await sb.from('proposal_payments').delete().eq('id', paymentId);
+  if (error) { showToast('Could not remove payment: ' + error.message, 'toast-error'); return; }
+  _propCurrentPayments = _propCurrentPayments.filter(p => p.id !== paymentId);
   propUpdateTotals();
 }
 
-function propSave() {
+async function propSave() {
   if (!proposalItems.length) { alert('Add some items first.'); return; }
   const gv = id => (document.getElementById(id) || {value:''}).value.trim();
   const clientName = gv('prop-client') || 'Unnamed';
+  if (!sb) { alert('Not connected to Supabase.'); return; }
 
   // Compute totals for display in My Proposals
   const sub = proposalItems.reduce((a,i) => a + (parseFloat((i.price||'').replace(/[^0-9.]/g,''))||0)*i.qty, 0);
@@ -3305,67 +3311,81 @@ function propSave() {
   const tax  = (sub + ship) * taxRate / 100;
   const total = sub + ship + tax;
 
-  // Use existing key if we're editing a loaded proposal, else create new
+  // Use existing id if we're editing a loaded proposal, else create new.
+  // A single targeted fetch (not the full getSavedProposals() list+payments
+  // join) — this only needs three fields off the one row being edited.
   const editingKey = window._propEditingKey || null;
-  const all = getSavedProposals();
-  const existingIdx = editingKey ? all.findIndex(p => p.key === editingKey) : -1;
-  const existing = existingIdx >= 0 ? all[existingIdx] : null;
+  let existing = null;
+  if (editingKey) {
+    const { data } = await sb.from('proposals').select('status, client_id, mockup_image_url').eq('id', editingKey).maybeSingle();
+    existing = data;
+  }
 
-  const data = {
-    key: editingKey || _genId('savedProposal_'),
-    clientName,
-    status: existing ? existing.status : 'draft',
-    payments: existing ? (existing.payments || []) : [],
-    total: total,
-    fields: {
-      client:  gv('prop-client'),  child:   gv('prop-child'),
-      phone:   gv('prop-phone'),   email:   gv('prop-email'),
-      date:    gv('prop-date'),    venue:   gv('prop-venue'),
-      colors:  gv('prop-colors'),  planner: gv('prop-planner'),
-      adults:  gv('prop-adults'),  kids:    gv('prop-kids'),
-      pickup:  gv('prop-pickup'),  notes:   gv('prop-notes'),
-    },
+  const fields = {
+    client:  gv('prop-client'),  child:   gv('prop-child'),
+    phone:   gv('prop-phone'),   email:   gv('prop-email'),
+    date:    gv('prop-date'),    venue:   gv('prop-venue'),
+    colors:  gv('prop-colors'),  planner: gv('prop-planner'),
+    adults:  gv('prop-adults'),  kids:    gv('prop-kids'),
+    pickup:  gv('prop-pickup'),  notes:   gv('prop-notes'),
+  };
+  const status = existing ? existing.status : 'draft';
+
+  // Resolve/create the CRM client BEFORE writing the proposal — but unlike
+  // the old localStorage version (one atomic blob write), this is now two
+  // separate network writes, so a failure here must stop the save entirely
+  // rather than pushing ahead with a possibly-stale clientId. Otherwise a
+  // failed client upsert combined with a "successful" proposal save could
+  // either orphan a proposal with no real client link, or (if the client
+  // write half-succeeded) leave a client record with nothing pointing at it.
+  const clientResult = await upsertCRMClient({
+    clientName, fields, total, status,
+    clientId: existing ? existing.client_id : null,
+    key: editingKey
+  });
+  if (clientResult.error) {
+    alert('Could not save the client record for this proposal, so the proposal itself was not saved either: ' + clientResult.error.message + '\n\nNothing was lost — your items and fields are still in the builder. Try saving again.');
+    return;
+  }
+
+  const row = {
+    client_id: clientResult.clientId,
+    client_name: clientName,
+    status,
+    total,
+    fields,
     schedule: getScheduleData(),
-    shipRate: gv('prop-ship-rate') || '20',
-    taxRate:  gv('prop-tax-rate')  || '6',
-    deposit:  gv('prop-deposit')   || '1000',
+    ship_rate: shipRate,
+    tax_rate: taxRate,
+    deposit: parseFloat(gv('prop-deposit')) || 1000,
     items: proposalItems.map(i => ({id:i.id,name:i.name,cat:i.cat,price:i.price,sku:i.sku,qty:i.qty,notes:i.notes||'',area:i.area||'',imgSrc:i.imgSrc||'',isCustom:i.isCustom||false,isVenueItem:i.isVenueItem||false,fromAnalysis:i.fromAnalysis||false})),
-    mockupImage: (typeof window !== 'undefined' && window._vizProposalMockup) || (existing && existing.mockupImage) || null,
-    savedAt: new Date().toLocaleString(),
-    createdAt: (existing && existing.createdAt) || Date.now(), // sortable epoch; savedAt above stays a display string and keeps updating on every save
-    clientId: existing ? existing.clientId : null // resolved below, before saving, so the persisted record carries it
+    // Still a base64 data URL here, not a Storage URL — Venue Visualizer
+    // (where window._vizProposalMockup comes from) doesn't move to Supabase
+    // until Phase 3; converting this to a real upload belongs there, at the
+    // source, not piecemeal here. Falls back to whatever's already stored so
+    // re-saving a proposal (e.g. just editing the venue field) without
+    // revisiting the Visualizer this session doesn't wipe an existing mockup.
+    mockup_image_url: (typeof window !== 'undefined' && window._vizProposalMockup) || (existing && existing.mockup_image_url) || null
   };
 
-  // Resolve/create the CRM client before saving so the proposal record can
-  // carry a stable clientId instead of relying on name matching every time.
-  if (typeof upsertCRMClient === 'function') {
-    const clientId = upsertCRMClient(data);
-    if (clientId) data.clientId = clientId;
+  let proposalId = editingKey;
+  let saveError;
+  if (editingKey) {
+    const { error } = await sb.from('proposals').update(row).eq('id', editingKey);
+    saveError = error;
+  } else {
+    const { data: inserted, error } = await sb.from('proposals').insert(row).select().single();
+    saveError = error;
+    if (inserted) proposalId = inserted.id;
   }
+  if (saveError) { alert('Could not save proposal: ' + saveError.message); return; }
 
-  try {
-    if (existingIdx >= 0) {
-      all[existingIdx] = data;
-    } else {
-      all.unshift(data);
-    }
-    const serialized = JSON.stringify(all.slice(0, 30)); // 30 is a localStorage-size workaround, not a business rule — remove once proposals live in a real DB
-    const kb = Math.round(serialized.length / 1024);
-    localStorage.setItem('savedProposals', serialized);
-    window._propEditingKey = data.key;
-    const btn = document.querySelector('[onclick="propSave()"]');
-    const msg = kb > 3000 ? '✓ Saved! (' + kb + 'KB)' : '✓ Saved!';
-    if (btn) { const orig = btn.textContent; btn.textContent = msg; btn.disabled = true; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000); }
-    if (typeof showToast === 'function') showToast('✓ Proposal saved — ' + clientName, 'toast-success');
-    localStorage.removeItem(DRAFT_KEY);
-    _propSetSaveStatus('· Saved ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
-  } catch(e) {
-    if (e.name === 'QuotaExceededError') {
-      alert('Storage full — this proposal (and its attached mockup image, if any) is too large for browser storage.\n\nPhotos you upload are already resized automatically, so that won\'t help here. Instead, free up space: delete an old proposal in My Proposals or an old Venue Visualizer session, then try saving again.');
-    } else {
-      alert('Could not save proposal: ' + (e.message || e));
-    }
-  }
+  window._propEditingKey = proposalId;
+  const btn = document.querySelector('[onclick="propSave()"]');
+  if (btn) { const orig = btn.textContent; btn.textContent = '✓ Saved!'; btn.disabled = true; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000); }
+  showToast('✓ Proposal saved — ' + clientName, 'toast-success');
+  localStorage.removeItem(DRAFT_KEY);
+  _propSetSaveStatus('· Saved ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
 }
 
 function propDrop(e) { e.preventDefault(); }   // handled via addEventListener above
@@ -3454,9 +3474,10 @@ function updateSummary() { propUpdateTotals(); }
 const _calNow = new Date();
 let calYear = _calNow.getFullYear(), calMonth = _calNow.getMonth();
 
-function _getCalEvents() {
+async function _getCalEvents() {
+  await _authReady; // called at page-init time, before sign-in may have resolved — see _authReady's comment
   // Build an index of events from saved proposals + pipeline seed data
-  const proposals = getSavedProposals();
+  const proposals = await getSavedProposals();
   const events = {};
 
   // Seed events from static pipeline data (always visible even with no proposals saved)
@@ -3488,9 +3509,9 @@ function _getCalEvents() {
   return events;
 }
 
-function renderCalendar() {
+async function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const calEvents  = _getCalEvents();
+  const calEvents  = await _getCalEvents();
   const titleEl    = document.getElementById('cal-month-name');
   if (titleEl) titleEl.textContent = monthNames[calMonth] + ' ' + calYear;
 
@@ -3596,92 +3617,73 @@ function changeMonth(d) {
 }
 
 // ── CRM — Client Data (seed + dynamic from proposals) ────────────────────────
-const CRM_KEY = 'crmClients_v1';
 const _CRM_AVATAR_COLORS = ['var(--sage)','#185FA5','#854F0B','#5B21B6','#0F6E56','#C0392B','#8B6A72','#B8955A'];
-const _crmSeed = [
-  {id:'demo_1',name:'Sarah Thompson',  email:'sarah@email.com',       phone:'(912) 555-0142',initials:'ST',color:'var(--sage)', type:'Wedding',    dateStr:'2025-06-14',value:22400,proposalKeys:[],status:'active'},
-  {id:'demo_2',name:'Azure Tech Corp', email:'events@azure.com',      phone:'(415) 555-0288',initials:'AZ',color:'#185FA5',    type:'Corporate',   dateStr:'2025-06-18',value:14600,proposalKeys:[],status:'contract'},
-  {id:'demo_3',name:'Robert Hargrove', email:'robert@hargrove.net',   phone:'(912) 555-0099',initials:'HG',color:'#854F0B',    type:'Anniversary', dateStr:'2025-06-22',value:6200, proposalKeys:[],status:'proposal'},
-  {id:'demo_4',name:'Emily Chen',      email:'emily.chen@mail.com',   phone:'(770) 555-0321',initials:'CW',color:'#5B21B6',    type:'Wedding',     dateStr:'2025-06-29',value:8400, proposalKeys:[],status:'inquiry'},
-  {id:'demo_5',name:'Yuki Nakamura',   email:'yuki@nakamura.jp',      phone:'(404) 555-0174',initials:'NK',color:'#0F6E56',    type:'Wedding',     dateStr:'2025-05-28',value:18200,proposalKeys:[],status:'complete'},
-];
 
-function _initCRM() {
-  try {
-    if (localStorage.getItem(CRM_KEY) !== null) return;
-    localStorage.setItem(CRM_KEY, JSON.stringify(_crmSeed));
-  } catch (e) {}
+// The five demo clients that used to seed a fresh crmClients_v1 key were
+// always decorative/fake (CRM was never a named focus page during the design
+// overhaul) — deliberately not ported to Supabase. Real staff on a real
+// backend should see a genuinely empty CRM, not five fake people.
+async function getCRMClients() {
+  if (!sb) return [];
+  const { data, error } = await sb.from('clients').select('*').order('created_at', { ascending: false });
+  if (error) { showToast('Could not load clients: ' + error.message, 'toast-error'); return []; }
+  return (data || []).map(c => ({
+    id: c.id, name: c.name, email: c.email, phone: c.phone, initials: c.initials,
+    color: c.color, type: c.type, dateStr: c.event_date, value: c.value,
+    status: c.status, source: c.source, createdAt: new Date(c.created_at).getTime()
+  }));
 }
 
-function getCRMClients() {
-  _initCRM();
-  try { return JSON.parse(localStorage.getItem(CRM_KEY) || '[]'); } catch(e) { return []; }
-}
-
-function saveCRMClients(clients) {
-  try {
-    localStorage.setItem(CRM_KEY, JSON.stringify(clients));
-    return true;
-  } catch (e) {
-    if (e.name === 'QuotaExceededError') {
-      showToast('Storage full — this client could not be saved. Free up space (delete an old proposal or Venue Visualizer session) and try again.', 'toast-error');
-    } else {
-      showToast('Could not save client: ' + (e.message || e), 'toast-error');
-    }
-    return false;
-  }
-}
-
-// Called from propSave() — creates or updates the client record, and returns
-// the client's id so the caller can stash it onto the proposal (data.clientId)
-// for a stable link instead of re-resolving by name on every future save.
-function upsertCRMClient(proposal) {
+// Called from propSave() — creates or updates the client record and returns
+// { clientId, error }. Returning the error (rather than just null on
+// failure, the way Phase 1's functions do) matters here specifically: propSave
+// must be able to tell "no client name was given" (error: null, clientId:
+// null — fine, proceed) apart from "the write actually failed" (error set —
+// propSave must NOT proceed to write the proposal, or a failed client upsert
+// combined with a "successful" proposal save would orphan a proposal with no
+// real client link, or leave a half-written client with no proposal pointing
+// at it, depending on which half failed).
+async function upsertCRMClient(proposal) {
   const name = (proposal.clientName || '').trim();
-  if (!name) return null;
-  const clients = getCRMClients();
+  if (!name) return { clientId: null, error: null };
+  if (!sb) return { clientId: null, error: { message: 'Not connected to Supabase' } };
+
+  const clients = await getCRMClients();
   // Prefer the stable id link when the proposal already carries one; name
   // matching is only a fallback for proposals saved before clientId existed.
   const match = (proposal.clientId && clients.find(c => c.id === proposal.clientId))
     || clients.find(c => c.name.toLowerCase() === name.toLowerCase());
-  const f       = proposal.fields || {};
-  const fmt     = n => '$' + Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2});
-  let clientId;
+  const f = proposal.fields || {};
 
   if (match) {
-    if (f.email)     match.email   = f.email;
-    if (f.phone)     match.phone   = f.phone;
-    if (f.date)      match.dateStr = f.date;
-    if (proposal.total > 0) match.value = Math.max(match.value || 0, proposal.total);
-    if (!match.proposalKeys) match.proposalKeys = [];
-    if (proposal.key && !match.proposalKeys.includes(proposal.key))
-      match.proposalKeys.push(proposal.key);
-    match.status = proposal.status || match.status;
-    clientId = match.id;
+    const patch = {};
+    if (f.email) patch.email = f.email;
+    if (f.phone) patch.phone = f.phone;
+    if (f.date)  patch.event_date = f.date;
+    if (proposal.total > 0) patch.value = Math.max(match.value || 0, proposal.total);
+    if (proposal.status) patch.status = proposal.status;
+    const { error } = await sb.from('clients').update(patch).eq('id', match.id);
+    return { clientId: error ? null : match.id, error };
   } else {
     const words    = name.split(/\s+/);
     const initials = ((words[0]||'')[0] + ((words[1]||'')[0]||'')).toUpperCase();
     const newClient = {
-      id: _genId('client_'),
       name,
       email:       f.email || '',
       phone:       f.phone || '',
       initials,
       color:       _CRM_AVATAR_COLORS[clients.length % _CRM_AVATAR_COLORS.length],
       type:        f.eventType || 'Event',
-      dateStr:     f.date || '',
+      event_date:  f.date || '',
       value:       proposal.total || 0,
-      proposalKeys: proposal.key ? [proposal.key] : [],
-      status:      proposal.status || 'draft',
-      createdAt:   Date.now()
+      status:      proposal.status || 'draft'
     };
-    clients.unshift(newClient);
-    clientId = newClient.id;
+    const { data, error } = await sb.from('clients').insert(newClient).select().single();
+    return { clientId: error ? null : data.id, error };
   }
-  saveCRMClients(clients);
-  return clientId;
 }
 
-function crmAddClientFromModal() {
+async function crmAddClientFromModal() {
   const first  = (document.getElementById('nc-first')  || {value:''}).value.trim();
   const last   = (document.getElementById('nc-last')   || {value:''}).value.trim();
   const email  = (document.getElementById('nc-email')  || {value:''}).value.trim();
@@ -3689,34 +3691,31 @@ function crmAddClientFromModal() {
   const source = (document.getElementById('nc-source') || {value:''}).value;
   const name   = (first + ' ' + last).trim();
   if (!name) { showToast('Enter at least a first or last name', 'toast-error'); return; }
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
 
-  const clients  = getCRMClients();
+  const clients  = await getCRMClients();
   const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || name[0].toUpperCase();
-  clients.unshift({
-    id: _genId('client_'),
+  const { error } = await sb.from('clients').insert({
     name, email, phone, initials, source,
-    color:        _CRM_AVATAR_COLORS[clients.length % _CRM_AVATAR_COLORS.length],
-    type:         'Event',
-    dateStr:      '',
-    value:        0,
-    proposalKeys: [],
-    status:       'inquiry',
-    createdAt:    Date.now()
+    color:      _CRM_AVATAR_COLORS[clients.length % _CRM_AVATAR_COLORS.length],
+    type:       'Event',
+    event_date: '',
+    value:      0,
+    status:     'inquiry'
   });
-  if (!saveCRMClients(clients)) return; // saveCRMClients already toasted the error
+  if (error) { showToast('Could not add client: ' + error.message, 'toast-error'); return; }
   showToast('✓ Client added — ' + name, 'toast-success');
   closeModal();
   _crmRestoreFilter();
 }
 
-function renderCRMTable(filterType, searchQuery) {
-  const clients = getCRMClients();
+async function renderCRMTable(filterType, searchQuery) {
+  const clients = await getCRMClients();
   const q       = (searchQuery || '').toLowerCase();
   const ft      = (filterType  || '').toLowerCase();
   const tbody   = document.getElementById('crm-table-body');
   if (!tbody) return;
 
-  const proposals = getSavedProposals();
   const statusBadge = {
     active:'<span class="badge badge-active">Active</span>',
     contract:'<span class="badge badge-contract">Contract</span>',
@@ -3768,12 +3767,12 @@ function renderCRMTable(filterType, searchQuery) {
     </tr>`).join('');
 }
 
-function showCRMClient(id) {
-  const clients   = getCRMClients();
+async function showCRMClient(id) {
+  const clients   = await getCRMClients();
   const c         = clients.find(x => x.id === id);
   if (!c) return;
-  const proposals = getSavedProposals();
-  const linked    = proposals.filter(p => c.proposalKeys && c.proposalKeys.includes(p.key));
+  const proposals = await getSavedProposals();
+  const linked    = proposals.filter(p => p.clientId === c.id);
   const _esc      = escapeHtml;
   const fmt       = n => '$' + Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2});
   const fmtDate   = s => { if (!s) return '—'; const d = new Date(s+'T00:00:00'); return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); };
@@ -4235,11 +4234,12 @@ function renderProposalDoc() {
   const taxLabel = 'Tax ' + _taxRate + '% (on subtotal + shipping)';
   const total = subtotal + shipping + tax;
 
-  // Pull real payments from saved proposal
+  // Pull real payments from the same in-memory cache the builder's
+  // propUpdateTotals() uses — kept in sync there, no need to duplicate a
+  // fetch here (this doc is always synced from the currently-open proposal
+  // via propSyncToDoc()).
   const _savedKey  = window._propEditingKey || null;
-  const _allSaved  = getSavedProposals();
-  const _savedProp = _savedKey ? _allSaved.find(p => p.key === _savedKey) : null;
-  const _payments  = _savedProp ? (_savedProp.payments || []) : [];
+  const _payments  = _savedKey ? _propCurrentPayments : [];
   const _totalPaid = _payments.reduce((a, x) => a + (x.amount || 0), 0);
   const balanceDue = Math.max(0, total - _totalPaid);
   const _isPaid    = balanceDue <= 0 && total > 0;
@@ -5110,8 +5110,8 @@ function _propDocUpdateTotals() {
 }
 
 // ── LOAD SAVED PROPOSALS ─────────────────────────────────────────────────────
-function propShowSaved() {
-  const all = getSavedProposals();
+async function propShowSaved() {
+  const all = await getSavedProposals();
   if (!all.length) { alert('No saved proposals yet. Build a proposal and click 💾 Save.'); return; }
   const _esc = escapeHtml;
   const rows = all.map(p => {
@@ -5134,19 +5134,20 @@ function propShowSaved() {
   document.getElementById('modal-overlay').classList.add('open');
 }
 
-function propDeleteSavedByKey(key) {
+async function propDeleteSavedByKey(key) {
   if (!confirm('Delete this proposal?')) return;
-  let all = getSavedProposals();
-  all = all.filter(p => p.key !== key);
-  if (!saveSavedProposals(all)) return;
+  if (!sb) return;
+  const { error } = await sb.from('proposals').delete().eq('id', key); // cascades to proposal_payments
+  if (error) { showToast('Could not delete proposal: ' + error.message, 'toast-error'); return; }
   propShowSaved();
 }
 
-function propLoadProposal(key) {
-  const all = getSavedProposals();
+async function propLoadProposal(key) {
+  const all = await getSavedProposals();
   const p = typeof key === 'number' ? all[key] : all.find(x => x.key === key);
   if (!p) return;
   window._propEditingKey = p.key; // track which proposal we're editing
+  _propCurrentPayments = p.payments || []; // repopulate the builder's payment-ledger cache for this proposal
   const setVal = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
   const f = p.fields || {};
   setVal('prop-client',    f.client   || p.clientName || '');
@@ -5181,10 +5182,10 @@ function propLoadProposal(key) {
 const STATUS_LABELS = { draft:'Draft', sent:'Sent to Client', approved:'Approved', complete:'Complete' };
 const STATUS_CHIPS  = { draft:'mp-chip-draft', sent:'mp-chip-sent', approved:'mp-chip-approved', complete:'mp-chip-complete' };
 
-function renderMyProposals() {
+async function renderMyProposals() {
   const container = document.getElementById('mp-list');
   if (!container) return;
-  let all = getSavedProposals();
+  let all = await getSavedProposals();
   const q = ((document.getElementById('mp-search-input')||{}).value||'').toLowerCase();
   const sf = ((document.getElementById('mp-status-filter')||{}).value||'');
   if (q)  all = all.filter(p => (p.clientName||'').toLowerCase().includes(q) || ((p.fields||{}).venue||'').toLowerCase().includes(q) || ((p.fields||{}).date||'').includes(q));
@@ -5219,25 +5220,22 @@ function renderMyProposals() {
     const dateStr = f.date ? new Date(f.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Date TBD';
     const venue = f.venue || 'Venue TBD';
 
-    const paymentLogHtml = payments.map((pay, pi) => {
-      const payArg = pay.id ? `'${pay.id}'` : pi; // fall back to index for pre-existing payments without an id
-      return `
+    const paymentLogHtml = payments.map((pay, pi) => `
       <div class="mp-payment-entry" id="mp-pay-${p.key}-${pi}">
         <div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;">
           <strong style="white-space:nowrap;">${fmtMoney(pay.amount)}</strong>
           <input type="text" value="${escapeHtml(pay.note || 'Payment')}"
             style="border:none;border-bottom:1px dashed var(--sage);background:transparent;font-size:12px;font-family:var(--font-sans);color:var(--sage-dark);outline:none;flex:1;min-width:80px;"
-            onchange="mpEditPayment('${p.key}',${payArg},'note',this.value)"
+            onchange="mpEditPayment('${pay.id}','note',this.value)"
             title="Click to edit note">
           <input type="date" value="${pay.isoDate || ''}"
             style="border:none;border-bottom:1px dashed var(--sage);background:transparent;font-size:11px;font-family:var(--font-sans);color:var(--stone);outline:none;width:130px;"
-            onchange="mpEditPayment('${p.key}',${payArg},'date',this.value)"
+            onchange="mpEditPayment('${pay.id}','date',this.value)"
             title="Click to change date">
           <span style="font-size:11px;color:var(--stone);">${!pay.isoDate ? '· '+pay.date : ''}</span>
         </div>
-        <button class="mp-payment-del" onclick="mpDeletePayment('${p.key}',${payArg})" title="Remove">✕</button>
-      </div>`;
-    }).join('');
+        <button class="mp-payment-del" onclick="mpDeletePayment('${pay.id}')" title="Remove">✕</button>
+      </div>`).join('');
 
     const card = document.createElement('div');
     card.className = 'mp-card';
@@ -5286,74 +5284,53 @@ function renderMyProposals() {
   });
 }
 
-function mpAddPayment(key) {
+async function mpAddPayment(key) {
   const amtEl  = document.getElementById('mp-amt-' + key);
   const noteEl = document.getElementById('mp-note-' + key);
   const amt = parseFloat((amtEl||{}).value);
   if (!amt || amt <= 0) { if (amtEl) { amtEl.focus(); amtEl.style.borderColor='var(--blush-mid)'; setTimeout(()=>amtEl.style.borderColor='',1500); } return; }
   const note = (noteEl||{}).value || 'Payment';
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
   const now = new Date();
-  const all = getSavedProposals();
-  const idx = all.findIndex(p => p.key === key);
-  if (idx < 0) return;
-  if (!all[idx].payments) all[idx].payments = [];
-  all[idx].payments.push({
-    id: _genId('payment_'),
-    amount: amt,
-    note,
-    date: now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
-    isoDate: now.toISOString().slice(0,10)
+  const { error } = await sb.from('proposal_payments').insert({
+    proposal_id: key, amount: amt, note, paid_on: now.toISOString().slice(0,10)
   });
-  if (!saveSavedProposals(all)) return;
+  if (error) { showToast('Could not log payment: ' + error.message, 'toast-error'); return; }
   renderMyProposals();
 }
 
-function mpEditPayment(key, paymentIdOrIdx, field, value) {
-  const all = getSavedProposals();
-  const idx = all.findIndex(p => p.key === key);
-  if (idx < 0) return;
-  const pidx = _findPaymentIndex(all[idx].payments, paymentIdOrIdx);
-  const pay = all[idx].payments[pidx];
-  if (!pay) return;
-  if (field === 'note') {
-    pay.note = value;
-  } else if (field === 'date') {
-    pay.isoDate = value;
-    // Also update the display date string
-    if (value) {
-      pay.date = new Date(value + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    }
-  }
-  saveSavedProposals(all);
+// Payments are addressed by their own id now — no proposal key needed to
+// scope the lookup, since a real uuid is already globally unique.
+async function mpEditPayment(paymentId, field, value) {
+  if (!sb) return;
+  const patch = {};
+  if (field === 'note') patch.note = value;
+  else if (field === 'date') patch.paid_on = value || null;
+  const { error } = await sb.from('proposal_payments').update(patch).eq('id', paymentId);
+  if (error) showToast('Could not update payment: ' + error.message, 'toast-error');
   // Don't re-render (user is mid-edit) — balance will update on next render
 }
 
-function mpDeletePayment(key, paymentIdOrIdx) {
+async function mpDeletePayment(paymentId) {
   if (!confirm('Remove this payment record?')) return;
-  const all = getSavedProposals();
-  const idx = all.findIndex(p => p.key === key);
-  if (idx < 0) return;
-  const pidx = _findPaymentIndex(all[idx].payments, paymentIdOrIdx);
-  if (pidx < 0) return;
-  all[idx].payments.splice(pidx, 1);
-  if (!saveSavedProposals(all)) return;
+  if (!sb) return;
+  const { error } = await sb.from('proposal_payments').delete().eq('id', paymentId);
+  if (error) { showToast('Could not remove payment: ' + error.message, 'toast-error'); return; }
   renderMyProposals();
 }
 
-function mpSetStatus(key, status) {
-  const all = getSavedProposals();
-  const idx = all.findIndex(p => p.key === key);
-  if (idx < 0) return;
-  all[idx].status = status;
-  if (!saveSavedProposals(all)) return;
+async function mpSetStatus(key, status) {
+  if (!sb) return;
+  const { error } = await sb.from('proposals').update({ status }).eq('id', key);
+  if (error) { showToast('Could not update status: ' + error.message, 'toast-error'); return; }
   renderMyProposals();
 }
 
-function mpDelete(key) {
+async function mpDelete(key) {
   if (!confirm('Permanently delete this proposal? This cannot be undone.')) return;
-  let all = getSavedProposals();
-  all = all.filter(p => p.key !== key);
-  if (!saveSavedProposals(all)) return;
+  if (!sb) return;
+  const { error } = await sb.from('proposals').delete().eq('id', key); // cascades to proposal_payments
+  if (error) { showToast('Could not delete proposal: ' + error.message, 'toast-error'); return; }
   if (window._propEditingKey === key) window._propEditingKey = null;
   renderMyProposals();
 }
@@ -5370,6 +5347,7 @@ function propNewBlank() {
   window._vizProposalMockup = null;  // clear any attached mockup
   proposalItems = [];
   propItemIdCounter = 0;
+  _propCurrentPayments = []; // no proposal loaded — nothing for the builder's payment ledger to show
   propRender();
   ['prop-client','prop-child','prop-phone','prop-email','prop-date','prop-venue','prop-colors','prop-planner','prop-adults','prop-kids','prop-pickup','prop-notes'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -5587,8 +5565,8 @@ function filterContracts(el, status, searchOverride) {
 // Scopes the Invoices page to one client instead of just dumping the user on
 // the generic unfiltered list — matches on any word of the client's name
 // since the invoice rows are static demo data, not really linked to CRM records.
-function viewClientInvoices(clientId) {
-  const clients = getCRMClients();
+async function viewClientInvoices(clientId) {
+  const clients = await getCRMClients();
   const c     = clients.find(x => x.id === clientId);
   const name  = c ? c.name : '';
   const words = name.toLowerCase().split(/\s+/).filter(w => w.length > 2);
@@ -5717,9 +5695,10 @@ document.addEventListener('click', e => {
 renderCalendar();
 // applyInvEdits() called after inventory.js loads
 
-// ── Dashboard stats (live from localStorage) ─────────────────────────────────
-function renderDashboard() {
-  const saved   = getSavedProposals();
+// ── Dashboard stats (live from Supabase) ──────────────────────────────────────
+async function renderDashboard() {
+  await _authReady; // called at page-init time, before sign-in may have resolved — see _authReady's comment
+  const saved   = await getSavedProposals();
   const active  = saved.filter(p => !['complete','cancelled'].includes(p.status||'draft'));
   const totalRevenue = saved.reduce((a, p) => a + (p.total || 0), 0);
 
@@ -5776,33 +5755,33 @@ _pipelineRefreshCounts();
 // as a CRM client (status: inquiry) rather than faked into the pipeline/
 // dashboard DOM, which used to vanish on reload and leak into whichever
 // page happened to be open via a `.event-list` / `.stat-value` first-match.
-function createNewEvent() {
+// Note: the original localStorage version also stashed ad-hoc venue/guests
+// fields on the client record, but nothing anywhere ever read them back
+// (confirmed by search) — dropped rather than added to the clients schema
+// for two write-only fields.
+async function createNewEvent() {
   const client = (document.getElementById('ne-client')||{value:''}).value.trim();
   const type   = (document.getElementById('ne-type')||{value:'Event'}).value;
   const dateVal= (document.getElementById('ne-date')||{value:''}).value;
-  const guests = (document.getElementById('ne-guests')||{value:''}).value.trim();
-  const venue  = (document.getElementById('ne-venue')||{value:''}).value.trim();
   const email  = (document.getElementById('ne-email')||{value:''}).value.trim();
   const phone  = (document.getElementById('ne-phone')||{value:''}).value.trim();
   const value  = parseFloat((document.getElementById('ne-value')||{value:''}).value.replace(/[^0-9.]/g,'')) || 0;
 
   if (!client) { showToast('Enter a client name', 'toast-error'); return; }
+  if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
 
-  const clients  = getCRMClients();
+  const clients  = await getCRMClients();
   const words    = client.split(/\s+/);
   const initials = ((words[0]||'')[0] + ((words[1]||'')[0]||'')).toUpperCase();
-  clients.unshift({
-    id: _genId('client_'),
-    name: client, email, phone, initials, venue, guests,
-    color:        _CRM_AVATAR_COLORS[clients.length % _CRM_AVATAR_COLORS.length],
-    type:         type || 'Event',
-    dateStr:      dateVal || '',
+  const { error } = await sb.from('clients').insert({
+    name: client, email, phone, initials,
+    color:      _CRM_AVATAR_COLORS[clients.length % _CRM_AVATAR_COLORS.length],
+    type:       type || 'Event',
+    event_date: dateVal || '',
     value,
-    proposalKeys: [],
-    status:       'inquiry',
-    createdAt:    Date.now()
+    status:     'inquiry'
   });
-  if (!saveCRMClients(clients)) return; // saveCRMClients already toasted the error
+  if (error) { showToast('Could not add event: ' + error.message, 'toast-error'); return; }
 
   showToast('✓ Event added — ' + client, 'toast-success');
   closeModal();
@@ -8004,8 +7983,8 @@ async function _vizMakeThumbnail(imgSrc) {
   });
 }
 
-function vzaSessionSavePrompt() {
-  const saved = getSavedProposals();
+async function vzaSessionSavePrompt() {
+  const saved = await getSavedProposals();
   const propOpts = saved.map(p => `<option value="${escapeHtml(p.key)}">${escapeHtml(p.clientName || p.key)}</option>`).join('');
   const sessions = vzaSessionGet();
   const nearLimit = sessions.length >= VZA_SESSIONS_MAX - 2;
