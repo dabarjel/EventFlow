@@ -2217,9 +2217,18 @@ async function _authRenderUser(session) {
   const email = session.user.email || '';
   let displayName = email;
   try {
-    const { data } = await sb.from('profiles').select('display_name').eq('id', session.user.id).single();
-    if (data && data.display_name) displayName = data.display_name;
-  } catch (e) {}
+    // supabase-js resolves API-level errors (permission denied, RLS denial,
+    // etc.) as { data: null, error } rather than throwing — a previous
+    // version of this code destructured only `data` and silently fell back
+    // to the email on ANY failure, including a genuine misconfiguration, with
+    // no visible signal that profiles was never actually being read. Logging
+    // here isn't optional polish — it's what would have caught the missing
+    // GRANT on profiles for the authenticated role immediately instead of it
+    // going unnoticed until an unrelated Inventory bug surfaced it.
+    const { data, error } = await sb.from('profiles').select('display_name').eq('id', session.user.id).single();
+    if (error) console.warn('Could not load profile display_name, falling back to email:', error.message);
+    else if (data && data.display_name) displayName = data.display_name;
+  } catch (e) { console.warn('Could not load profile display_name, falling back to email:', e); }
   const nameEl   = document.getElementById('auth-user-name');
   const emailEl  = document.getElementById('auth-user-email');
   const avatarEl = document.getElementById('auth-user-avatar');
