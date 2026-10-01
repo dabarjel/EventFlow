@@ -29,6 +29,16 @@ function escapeHtml(s) {
 // propUpdateTotals()/propDocRender()'s payment ledger, re-rendered on nearly
 // every keystroke — uses the _propCurrentPayments in-memory cache instead,
 // so typing in the builder never fires a network request per keystroke.
+// Proposals saved while a floral-only catalog image was still on its
+// "media rentals/" first attempt stored a path that 404s. Point those at
+// "media floral/" when read; the corrected path is written on the next save.
+function fixCatalogImgSrc(src) {
+  const m = /^\.\/media(?: |%20)rentals\/(.+)$/.exec(src);
+  if (!m || typeof EF_FLORAL_ONLY === 'undefined') return src;
+  const file = decodeURIComponent(m[1]);
+  return EF_FLORAL_ONLY.has(file) ? './media floral/' + file : src;
+}
+
 async function getSavedProposals() {
   if (!sb) return [];
   const { data: proposals, error } = await sb.from('proposals').select('*').order('created_at', { ascending: false });
@@ -56,7 +66,7 @@ async function getSavedProposals() {
     shipRate: p.ship_rate,
     taxRate: p.tax_rate,
     deposit: p.deposit,
-    items: p.items || [],
+    items: (p.items || []).map(it => it && it.imgSrc ? { ...it, imgSrc: fixCatalogImgSrc(it.imgSrc) } : it),
     mockupImage: p.mockup_image_url,
     savedAt: new Date(p.updated_at).toLocaleString(),
     createdAt: new Date(p.created_at).getTime(),

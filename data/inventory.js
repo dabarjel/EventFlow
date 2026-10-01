@@ -804,13 +804,16 @@ function setCardImg(imgDiv, srcFile, emoji) {
   if (!srcFile) { imgDiv.textContent = emoji; return; }
   var img = document.createElement('img');
   img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-  img.src = './media rentals/' + srcFile;
+  // Ask the right folder first (see data/image-folders.js); the other folder is
+  // still tried on error as a safety net.
+  var floralFirst = typeof EF_FLORAL_ONLY !== 'undefined' && EF_FLORAL_ONLY.has(srcFile);
+  img.src = (floralFirst ? './media floral/' : './media rentals/') + srcFile;
   img.onerror = function() {
     img.onerror = function() {
       imgDiv.removeChild(img);
       imgDiv.textContent = emoji;
     };
-    img.src = './media floral/' + srcFile;
+    img.src = (floralFirst ? './media rentals/' : './media floral/') + srcFile;
   };
   imgDiv.appendChild(img);
 }
