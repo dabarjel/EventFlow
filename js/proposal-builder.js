@@ -28,7 +28,7 @@ function propBuildInventory() {
   if (!grid) return;
   const invCards = document.querySelectorAll('#inv-grid .inv-card');
   if (!invCards.length) {
-    grid.innerHTML = '<div style="padding:20px;color:var(--stone);text-align:center;">No inventory items found.</div>';
+    grid.innerHTML = '<div style="padding:20px;color:var(--text-3);text-align:center;">No inventory items found.</div>';
     return;
   }
 
@@ -100,9 +100,9 @@ function propBuildInventory() {
 
     // Render placeholder immediately — no grey flash, no lazy loading race
     const safeName = escapeHtml(name);
-    div.innerHTML = '<div class="prop-img-placeholder" style="width:100%;height:100px;background:linear-gradient(135deg,var(--champagne) 0%,var(--sage-light) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">'
-      + '<span style="font-size:20px;">' + emoji + '</span>'
-      + '<span style="font-size:9px;color:var(--stone);text-align:center;padding:0 6px;line-height:1.3;max-height:28px;overflow:hidden;">' + safeName + '</span>'
+    div.innerHTML = '<div class="prop-img-placeholder" style="width:100%;height:100px;background:linear-gradient(135deg,var(--surface-raised) 0%,var(--surface-active) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">'
+      + '<span style="font-size:var(--fs-xl);">' + emoji + '</span>'
+      + '<span style="font-size:var(--fs-2xs);color:var(--text-3);text-align:center;padding:0 6px;line-height:1.3;max-height:28px;overflow:hidden;">' + safeName + '</span>'
       + '</div>'
       + '<div class="prop-inv-card-body">'
       + '<div class="prop-inv-card-name">' + safeName + '</div>'
@@ -121,7 +121,7 @@ function propBuildInventory() {
       propAddItem({name, cat, price, imgSrc, sku});
       div.style.transition = 'transform 0.12s, box-shadow 0.12s';
       div.style.transform = 'scale(0.94)';
-      div.style.boxShadow = '0 0 0 2px var(--sage)';
+      div.style.boxShadow = '0 0 0 2px var(--accent-text)';
       setTimeout(() => { div.style.transform = ''; div.style.boxShadow = ''; }, 200);
     }
 
@@ -240,7 +240,7 @@ function propFilter() {
         // with escaped output.
         nameEl.innerHTML = (c.dataset.name || '').split(re).map((part, i) =>
           i % 2 === 1
-            ? '<mark style="background:#F5EEDD;border-radius:2px;padding:0 1px;">' + escapeHtml(part) + '</mark>'
+            ? '<mark style="background:var(--warning-bg);color:var(--warning-text);border-radius:var(--radius-xs);padding:0 1px;">' + escapeHtml(part) + '</mark>'
             : escapeHtml(part)
         ).join('');
       }
@@ -345,7 +345,7 @@ function ciAddItem() {
 
   if (!name) {
     const nameEl = document.getElementById('ci-name');
-    if (nameEl) { nameEl.focus(); nameEl.style.borderColor = 'var(--blush-mid)'; setTimeout(() => nameEl.style.borderColor = '', 1500); }
+    if (nameEl) { nameEl.focus(); nameEl.style.borderColor = 'var(--danger-border)'; setTimeout(() => nameEl.style.borderColor = '', 1500); }
     return;
   }
 
@@ -375,7 +375,7 @@ function ciAddItem() {
   if (btn) {
     const orig = btn.textContent;
     btn.textContent = '✓ Added!';
-    btn.style.background = 'var(--sage-dark)';
+    btn.style.background = 'var(--accent-hover)';
     setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1400);
   }
 
@@ -474,7 +474,7 @@ function buildItemRow(item) {
     wrap.appendChild(thumb);
     const badge = document.createElement('div');
     badge.textContent = 'CUSTOM';
-    badge.style.cssText = 'position:absolute;bottom:2px;left:2px;background:var(--champagne-dark);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;letter-spacing:0.5px;pointer-events:none;';
+    badge.style.cssText = 'position:absolute;bottom:2px;left:2px;background:var(--accent);color:var(--accent-on);font-size:var(--fs-2xs);font-weight:var(--weight-medium);padding:1px 5px;border-radius:var(--radius-xs);letter-spacing:0.5px;pointer-events:none;';
     wrap.appendChild(badge);
     main.appendChild(wrap);
   } else if (item.isVenueItem) {
@@ -483,7 +483,7 @@ function buildItemRow(item) {
     wrap.appendChild(thumb);
     const badge = document.createElement('div');
     badge.textContent = 'VENUE';
-    badge.style.cssText = 'position:absolute;bottom:2px;left:2px;background:#2F7D5A;color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;letter-spacing:0.5px;pointer-events:none;';
+    badge.style.cssText = 'position:absolute;bottom:2px;left:2px;background:var(--success);color:var(--on-solid);font-size:var(--fs-2xs);font-weight:var(--weight-medium);padding:1px 5px;border-radius:var(--radius-xs);letter-spacing:0.5px;pointer-events:none;';
     wrap.appendChild(badge);
     main.appendChild(wrap);
   } else {
@@ -616,7 +616,7 @@ function buildItemRow(item) {
   // Click-away also commits (handles mouse navigation between items)
   priceIn.addEventListener('blur', _commitPrice);
   const totalSpan = document.createElement('div');
-  totalSpan.style.cssText = 'font-size:9px;color:var(--stone);text-align:right;white-space:nowrap;margin-top:1px;';
+  totalSpan.style.cssText = 'font-size:var(--fs-2xs);color:var(--text-3);text-align:right;white-space:nowrap;margin-top:1px;';
   totalSpan.textContent = priceNum > 0 && item.qty > 1 ? 'x'+item.qty+' = $'+(priceNum*item.qty).toLocaleString('en-US',{minimumFractionDigits:2}) : '';
   priceWrap.appendChild(priceIn);
   priceWrap.appendChild(totalSpan);
@@ -765,7 +765,7 @@ function propUpdateTotals() {
   const balEl = document.getElementById('prop-balance');
   if (balEl) {
     balEl.textContent = isPaid ? '✓ Paid in Full' : fmt(balance);
-    balEl.style.color = isPaid ? 'var(--sage-dark)' : '#B3261E';
+    balEl.style.color = isPaid ? 'var(--success-text)' : 'var(--danger-text)';
   }
 
   const sl = document.getElementById('prop-ship-label');
@@ -783,13 +783,13 @@ function propUpdateTotals() {
   const logEl = document.getElementById('prop-payment-log');
   if (logEl) {
     if (payments.length === 0) {
-      logEl.innerHTML = '<div style="font-size:11px;color:var(--stone);font-style:italic;">No payments logged yet.</div>';
+      logEl.innerHTML = '<div style="font-size:var(--fs-2xs);color:var(--text-3);font-style:italic;">No payments logged yet.</div>';
     } else {
       logEl.innerHTML = payments.map(pay => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--sage-light);border-radius:5px;font-size:12px;">
-          <span style="color:var(--sage-dark);font-weight:600;">${fmt(pay.amount)}</span>
-          <span style="color:var(--stone);flex:1;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(pay.note || 'Payment')} · ${escapeHtml(pay.date)}</span>
-          <button onclick="propDeletePayment('${pay.id}')" style="background:none;border:none;cursor:pointer;color:var(--blush-mid);font-size:12px;padding:0;" title="Remove">✕</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--surface-active);border-radius:var(--radius-sm);font-size:var(--fs-xs);">
+          <span style="color:var(--text);font-weight:var(--weight-medium);">${fmt(pay.amount)}</span>
+          <span style="color:var(--text-3);flex:1;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(pay.note || 'Payment')} · ${escapeHtml(pay.date)}</span>
+          <button onclick="propDeletePayment('${pay.id}')" style="background:none;border:none;cursor:pointer;color:var(--danger-text);font-size:var(--fs-xs);padding:0;" title="Remove">✕</button>
         </div>`).join('');
     }
   }
@@ -812,7 +812,7 @@ async function propLogPayment() {
   const note = (document.getElementById('prop-pay-note') || {value:''}).value.trim() || 'Payment';
   if (!amt || amt <= 0) {
     const el = document.getElementById('prop-pay-amt');
-    if (el) { el.focus(); el.style.borderColor='var(--blush-mid)'; setTimeout(()=>el.style.borderColor='',1500); }
+    if (el) { el.focus(); el.style.borderColor='var(--danger-border)'; setTimeout(()=>el.style.borderColor='',1500); }
     return;
   }
   if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
@@ -1043,11 +1043,11 @@ async function propShowSaved() {
     return `
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
       <div style="flex:1;">
-        <div style="font-size:13.5px;font-weight:600;">${_esc(p.clientName)}</div>
-        <div style="font-size:11px;color:var(--stone);">${_esc(dateDisp)} · ${_esc(venueDisp)} · ${(p.items||[]).length} items · Saved ${_esc(p.savedAt||'')}</div>
+        <div style="font-size:var(--fs-sm);font-weight:var(--weight-medium);">${_esc(p.clientName)}</div>
+        <div style="font-size:var(--fs-2xs);color:var(--text-3);">${_esc(dateDisp)} · ${_esc(venueDisp)} · ${(p.items||[]).length} items · Saved ${_esc(p.savedAt||'')}</div>
       </div>
-      <button class="btn btn-primary" style="font-size:12px;" onclick="propLoadProposal('${_esc(p.key)}');closeModal()">Load</button>
-      <button class="btn btn-danger" style="font-size:12px;" onclick="propDeleteSavedByKey('${_esc(p.key)}')">✕</button>
+      <button class="btn btn-primary" style="font-size:var(--fs-xs);" onclick="propLoadProposal('${_esc(p.key)}');closeModal()">Load</button>
+      <button class="btn btn-danger" style="font-size:var(--fs-xs);" onclick="propDeleteSavedByKey('${_esc(p.key)}')">✕</button>
     </div>`;
   }).join('');
   document.getElementById('modal-content').innerHTML =
@@ -1150,7 +1150,7 @@ function renderScheduleRows() {
   const PHASE_SUGGESTIONS = ['Ceremony','Cocktail Hour','Reception','Dinner','Party','Setup Only','Teen Area','Kids Area','Photo Booth','After Party','Other'];
 
   if (scheduleRows.length === 0) {
-    container.innerHTML = '<div style="font-size:11px;color:var(--stone);padding:4px 0 8px;font-style:italic;">No phases added yet. Click + Add Phase above.</div>';
+    container.innerHTML = '<div style="font-size:var(--fs-2xs);color:var(--text-3);padding:4px 0 8px;font-style:italic;">No phases added yet. Click + Add Phase above.</div>';
     return;
   }
 
@@ -1189,7 +1189,7 @@ function renderScheduleRows() {
     const del = document.createElement('button');
     del.type = 'button';
     del.textContent = '✕';
-    del.style.cssText = 'background:none;border:none;color:var(--stone);cursor:pointer;font-size:14px;padding:0;align-self:center;margin-top:14px;';
+    del.style.cssText = 'background:none;border:none;color:var(--text-3);cursor:pointer;font-size:var(--fs-md);padding:0;align-self:center;margin-top:14px;';
     del.onclick = () => propRemoveScheduleRow(row.id);
     wrap.appendChild(del);
 

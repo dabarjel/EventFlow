@@ -12,9 +12,9 @@ function openContractDetail(rowEl) {
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-title">${escapeHtml(name)}</div>
-    <div style="font-size:12px;color:var(--stone);margin:-8px 0 14px;">${escapeHtml(sub)} &nbsp;·&nbsp; <span class="${badgeCls}">${escapeHtml(status)}</span></div>
-    <div style="background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;font-size:13px;line-height:1.8;max-height:360px;overflow-y:auto;">
-      <div style="font-family:var(--font-serif);font-size:17px;margin-bottom:10px;">Event Rental Agreement</div>
+    <div style="font-size:var(--fs-xs);color:var(--text-3);margin:-8px 0 14px;">${escapeHtml(sub)} &nbsp;·&nbsp; <span class="${badgeCls}">${escapeHtml(status)}</span></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;font-size:var(--fs-sm);line-height:1.8;max-height:360px;overflow-y:auto;">
+      <div style="font-family:var(--font-heading);font-size:var(--fs-lg);margin-bottom:10px;">Event Rental Agreement</div>
       <p>This agreement is made between <strong>Da Vinci's Florist, LLC</strong> ("Company") and the client named above ("Client") for the event referenced in this contract.</p>
       <p style="margin-top:10px;"><strong>Total Value:</strong> ${escapeHtml(amount)}</p>
       <p style="margin-top:10px;"><strong>Rental Items:</strong> As itemized in the attached proposal and inventory list.</p>
@@ -58,7 +58,7 @@ async function editContractTemplate() {
   if (!tmpl || !btn) return;
   const editing = tmpl.contentEditable === 'true';
   tmpl.contentEditable = editing ? 'false' : 'true';
-  tmpl.style.boxShadow = editing ? '' : '0 0 0 2px var(--sage)';
+  tmpl.style.boxShadow = editing ? '' : '0 0 0 2px var(--accent-text)';
   btn.textContent      = editing ? '✏ Edit Template' : '✓ Done';
   if (!editing) {
     tmpl.focus();

@@ -1,6 +1,7 @@
 // Boot: runs after every other script has defined its functions. Kick-off calls were
 // moved here (same order as before) so no async work starts until everything exists.
 
+shellInit();
 _authInit();
 
 // ── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────

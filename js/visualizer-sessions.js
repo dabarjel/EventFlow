@@ -76,14 +76,14 @@ async function vzaSessionSavePrompt() {
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-title">Save Visualizer Session</div>
     <div style="margin-bottom:12px;">
-      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--stone);display:block;margin-bottom:4px;">Session Name</label>
+      <label style="font-size:var(--fs-2xs);font-weight:var(--weight-medium);text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);display:block;margin-bottom:4px;">Session Name</label>
       <input id="viz-sname-in" type="text" placeholder="e.g. Johnson Wedding – Ballroom"
-        style="width:100%;padding:8px 10px;border:1px solid var(--border-mid);border-radius:6px;font-size:13px;font-family:var(--font-sans);box-sizing:border-box;"
+        style="width:100%;padding:8px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-sm);font-family:var(--font-sans);box-sizing:border-box;"
         onkeydown="if(event.key==='Enter')vzaSessionDoSave()">
     </div>
     ${saved.length ? `<div style="margin-bottom:12px;">
-      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--stone);display:block;margin-bottom:4px;">Link to Proposal (optional)</label>
-      <select id="viz-sprop-in" style="width:100%;padding:7px 10px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);background:var(--warm-white);">
+      <label style="font-size:var(--fs-2xs);font-weight:var(--weight-medium);text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);display:block;margin-bottom:4px;">Link to Proposal (optional)</label>
+      <select id="viz-sprop-in" style="width:100%;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);background:var(--surface);">
         <option value="">— No link —</option>${propOpts}
       </select>
     </div>` : ''}
@@ -99,7 +99,7 @@ async function vzaSessionDoSave() {
   const nameEl  = document.getElementById('viz-sname-in');
   const propSel = document.getElementById('viz-sprop-in');
   const name = nameEl ? nameEl.value.trim() : '';
-  if (!name) { if (nameEl) { nameEl.focus(); nameEl.style.borderColor = '#B3261E'; } return; }
+  if (!name) { if (nameEl) { nameEl.focus(); nameEl.style.borderColor = 'var(--danger-border)'; } return; }
   closeModal();
   if (!sb) { showToast('Not connected to Supabase', 'toast-error'); return; }
 
@@ -243,7 +243,7 @@ async function vzaSessionRenderPanel() {
     return;
   }
   const count = document.createElement('div');
-  count.style.cssText = 'font-size:11px;color:var(--stone);margin-bottom:14px;';
+  count.style.cssText = 'font-size:var(--fs-2xs);color:var(--text-3);margin-bottom:14px;';
   count.textContent = sessions.length + ' session' + (sessions.length !== 1 ? 's' : '') + ' saved';
 
   const grid = document.createElement('div'); grid.className = 'viz-sessions-grid';
@@ -266,7 +266,7 @@ async function vzaSessionRenderPanel() {
     const restoreBtn = document.createElement('button'); restoreBtn.className = 'viz-session-restore'; restoreBtn.textContent = 'Restore';
     restoreBtn.onclick = () => vzaSessionRestore(s.id);
     const renameBtn = document.createElement('button'); renameBtn.className = 'viz-session-del'; renameBtn.textContent = 'Rename';
-    renameBtn.style.cssText = 'border-color:var(--border-mid);color:var(--stone);';
+    renameBtn.style.cssText = 'border-color:var(--border-strong);color:var(--text-3);';
     renameBtn.onclick = () => vzaSessionRename(s.id);
     const delBtn = document.createElement('button'); delBtn.className = 'viz-session-del'; delBtn.textContent = '×';
     delBtn.onclick = () => vzaSessionDelete(s.id);

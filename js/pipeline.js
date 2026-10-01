@@ -16,7 +16,7 @@ function openEventDetail(cardEl) {
     const m = document.getElementById('ed-meta');    if (m) m.textContent = meta;
     const v = document.getElementById('ed-value');   if (v) v.textContent = value;
     const b = document.getElementById('ed-badge');
-    if (b) { b.className = 'badge ' + badgeClass; b.style.cssText = 'font-size:12px;padding:5px 12px;'; b.textContent = headerText.trim() || 'Event'; }
+    if (b) { b.className = 'badge ' + badgeClass; b.style.cssText = 'font-size:var(--fs-xs);padding:5px 12px;'; b.textContent = headerText.trim() || 'Event'; }
   }, 10);
 }
 
@@ -86,4 +86,42 @@ async function createNewEvent() {
   showToast('✓ Event added — ' + client, 'toast-success');
   closeModal();
   navigate('clients');
+}
+
+// ── PIPELINE FROM SAVED PROPOSALS ────────────────────────────────────────────
+// Columns come from proposal status: draft → Inquiry, sent → Proposal,
+// approved → Contract signed (or Active / Prep when the event is within 14 days),
+// complete → Complete. Uses the same getSavedProposals() read as the dashboard.
+async function renderPipeline() {
+  await _authReady;
+  const saved = await getSavedProposals();
+  const cols = {};
+  document.querySelectorAll('#section-pipeline .pipeline-col').forEach(col => {
+    const key = ['inquiry', 'proposal', 'contract', 'active', 'complete'].find(k => col.classList.contains('ph-' + k));
+    if (key) cols[key] = col.querySelector('.pipeline-body');
+  });
+  Object.values(cols).forEach(body => { if (body) body.innerHTML = ''; });
+  const soon = new Date(); soon.setHours(0,0,0,0); soon.setDate(soon.getDate() + 14);
+  const _esc = escapeHtml;
+  saved.forEach(pr => {
+    const st = pr.status || 'draft';
+    const date = pr.fields && pr.fields.date ? new Date(pr.fields.date + 'T00:00:00') : null;
+    let key = { draft: 'inquiry', sent: 'proposal', approved: 'contract', complete: 'complete' }[st] || 'inquiry';
+    if (key === 'contract' && date && date <= soon) key = 'active';
+    const body = cols[key];
+    if (!body) return;
+    const card = document.createElement('div');
+    card.className = 'pipeline-card';
+    card.dataset.type = '';
+    card.onclick = () => propLoadProposal(pr.key);
+    const when = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date TBD';
+    card.innerHTML = `<div class="pipeline-card-name">${_esc(pr.clientName)}</div>
+      <div class="pipeline-card-meta">${when}, ${_esc((pr.fields && pr.fields.venue) || 'Venue TBD')}</div>
+      <div class="pipeline-card-value">$${(pr.total || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>`;
+    body.appendChild(card);
+  });
+  Object.values(cols).forEach(body => {
+    if (body && !body.children.length) body.innerHTML = '<div class="dash-empty">Nothing here yet</div>';
+  });
+  _pipelineRefreshCounts();
 }

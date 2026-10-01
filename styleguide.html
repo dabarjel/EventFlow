@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en" data-dir="a" data-side="green" data-accent="gold">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventFlow Style Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────────────────────
+   Shared brand (fixed): design-system/eventflow/MASTER.md
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --green: #1F3D2B;  --green-600: #2A4F38;  --green-900: #16301F;
+  --gold: #9C6B1F;   --gold-700: #86591A;   --brass-light: #D9B26F;
+  --ivory: #FAF7F2;  --white: #FFFFFF;      --wash: #F0ECE3;  --sage-wash: #E8EFE9;
+  --ink: #2A2822;    --ink-2: #4A453D;      --muted: #6B6455;
+  --line: #E4DFD3;   --line-2: #D3CBB8;
+  --danger: #B3261E; --danger-wash: #FBEAE9;
+  /* Status pairs, darkened where MASTER.md's values fail AA (see "Shared fixes") */
+  --st-draft-fg: #6B6455;    --st-draft-bg: #F0ECE3;
+  --st-sent-fg: #3B6E91;     --st-sent-bg: #E8F0F5;
+  --st-approved-fg: #28704F; --st-approved-bg: #E6F2EC;
+  --st-complete-fg: #1F3D2B; --st-complete-bg: #E9EFEA;
+  --serif: 'Playfair Display', Georgia, serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --st-viewed-fg: #8A6420;   --st-viewed-bg: #F5EEDD;
+  --st-signed-fg: #5B4B9A;   --st-signed-bg: #EEEAF8;
+  --st-paid-fg: #28704F;     --st-paid-bg: #E6F2EC;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+
+/* ── Direction A: Ledger ── quiet paper workspace, rules instead of shadows */
+[data-dir="a"] {
+  --page: var(--ivory);  --surface: var(--white);  --surface-2: var(--ivory);
+  --nav-bg: var(--ivory); --nav-ink: var(--muted); --nav-ink-strong: var(--ink);
+  --nav-active-bg: var(--white); --nav-active-ink: var(--green); --nav-marker: var(--gold);
+  --nav-line: var(--line); --nav-group: var(--muted);
+  --r-sm: 6px; --r-md: 8px; --r-lg: 10px;
+  --card-border: 1px solid var(--line); --card-shadow: none; --card-shadow-hover: none;
+  --title-weight: 600; --title-size: 28px; --title-track: -0.01em;
+  --card-title-font: var(--sans); --card-title-size: 15px; --card-title-weight: 600;
+  --btn-h: 38px;
+}
+/* ── Direction B: Conservatory ── brand fills the frame, photo-led, soft depth */
+[data-dir="b"] {
+  --page: var(--ivory);  --surface: var(--white);  --surface-2: var(--wash);
+  --nav-bg: var(--green); --nav-ink: #C8D3C9; --nav-ink-strong: var(--ivory);
+  --nav-active-bg: var(--green-600); --nav-active-ink: var(--ivory); --nav-marker: var(--brass-light);
+  --nav-line: rgba(250,247,242,.12); --nav-group: #B7C4B9;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+  --card-border: 1px solid transparent; --card-shadow: 0 1px 2px rgba(31,61,43,.06), 0 4px 14px rgba(31,61,43,.07);
+  --card-shadow-hover: 0 2px 4px rgba(31,61,43,.08), 0 10px 24px rgba(31,61,43,.10);
+  --title-weight: 500; --title-size: 32px; --title-track: -0.005em;
+  --card-title-font: var(--serif); --card-title-size: 17px; --card-title-weight: 600;
+  --btn-h: 40px;
+}
+
+/* ── Direction C: Atelier ── B's personality in the details, on a light frame */
+[data-dir="c"] {
+  --green: #1F3A2E; --green-600: #2C4F3F; --green-900: #16291F;
+  --ivory: #F4F1EA; --line: #E3DED3; --line-2: #958C7A; --sage-wash: #E8EEE8;
+  --gold: #A57C2E; --brass-text: #7A5A1C; --brass-hover: #6A4E18;
+  --page: #F4F1EA; --surface: #FFFFFF; --surface-2: #E8EEE8;
+  --r-sm: 8px; --r-md: 10px; --r-lg: 14px;
+  --card-border: 1px solid #E3DED3;
+  --card-shadow: 0 1px 2px rgba(31,58,46,.05), 0 2px 8px rgba(31,58,46,.04);
+  --card-shadow-hover: 0 2px 4px rgba(31,58,46,.07), 0 8px 20px rgba(31,58,46,.08);
+  --title-weight: 600; --title-size: 30px; --title-track: -0.01em;
+  --card-title-font: var(--sans); --card-title-size: 15px; --card-title-weight: 600;
+  --btn-h: 40px;
+}
+[data-dir="c"][data-side="green"] {
+  --nav-bg: #1F3A2E; --nav-ink: #C8D3C9; --nav-ink-strong: #F4F1EA; --nav-active-bg: #2C4F3F;
+  --nav-active-ink: #FFFFFF; --nav-marker: #D9B26F; --nav-line: rgba(244,241,234,.12); --nav-group: #B7C4B9;
+}
+[data-dir="c"][data-side="sage"] {
+  --nav-bg: #E8EEE8; --nav-ink: #2F4A3C; --nav-ink-strong: #1F3A2E; --nav-active-bg: #FFFFFF;
+  --nav-active-ink: #1F3A2E; --nav-marker: #A57C2E; --nav-line: #D6DED7; --nav-group: #556A5E;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { font-family: var(--sans); font-size: 15px; line-height: 1.55; color: var(--ink); background: var(--page); }
+img { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; border-radius: 4px; }
+.tnum { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+svg.i { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Guide chrome ───────────────────────────────────────────────────────────── */
+.guide-head { max-width: 1200px; margin: 0 auto; padding: 40px 24px 8px; }
+.guide-head h1 { font-family: var(--serif); font-weight: 600; font-size: 36px; color: var(--green); letter-spacing: -0.01em; }
+.guide-head p { max-width: 64ch; color: var(--ink-2); margin-top: 8px; }
+.switch-bar { position: sticky; top: 0; z-index: 20; background: var(--page); border-bottom: 1px solid var(--line); }
+.switch { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.switch button {
+  height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--white);
+  cursor: pointer; font-weight: 500; font-size: 14px; color: var(--ink-2); transition: background .15s, color .15s, border-color .15s;
+}
+.switch button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--ivory); }
+.switch .hint { font-size: 13px; color: var(--muted); margin-left: auto; }
+.side-switch { display: flex; align-items: center; gap: 6px; padding-left: 12px; margin-left: 4px; border-left: 1px solid var(--line-2); font-size: 13px; color: var(--muted); }
+.side-switch[hidden] { display: none; }
+.switch .side-switch button { height: 32px; padding: 0 12px; font-size: 13px; }
+.brand .mark, .rail-toggle, .rail-demo { display: none; }
+
+main { background: var(--page); }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+.concept { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.concept h2 { font-family: var(--serif); font-weight: var(--title-weight); font-size: 30px; color: var(--green); letter-spacing: var(--title-track); }
+.concept p { margin-top: 10px; color: var(--ink-2); max-width: 62ch; }
+.concept dl { display: grid; gap: 12px; align-self: start; font-size: 14px; }
+.concept dt { font-weight: 600; color: var(--ink); }
+.concept dd { color: var(--ink-2); }
+
+.block { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding: 40px 0; border-bottom: 1px solid var(--line); }
+.block > header h3 { font-size: 17px; font-weight: 600; color: var(--ink); }
+.block > header p { font-size: 13.5px; color: var(--muted); margin-top: 6px; }
+.demo { container-type: inline-size; min-width: 0; }
+
+/* ── Color usage ───────────────────────────────────────────────────────────── */
+.ratio { display: flex; height: 56px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--line); }
+.ratio span { display: block; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-top: 16px; }
+.sw { display: flex; gap: 12px; align-items: center; font-size: 13px; }
+.sw b { display: block; font-weight: 600; color: var(--ink); }
+.sw i { font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip { width: 40px; height: 40px; border-radius: var(--r-sm); border: 1px solid rgba(42,40,34,.12); flex-shrink: 0; }
+
+/* ── Type scale ────────────────────────────────────────────────────────────── */
+.type-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--line); }
+.type-row:first-child { border-top: 0; padding-top: 0; }
+.type-row small { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.t-display { font-family: var(--serif); font-weight: 600; font-size: 40px; line-height: 1.1; color: var(--green); letter-spacing: -0.015em; }
+.t-title { font-family: var(--serif); font-weight: var(--title-weight); font-size: var(--title-size); line-height: 1.15; color: var(--ink); letter-spacing: var(--title-track); }
+.t-section { font-size: 19px; font-weight: 600; line-height: 1.3; }
+[data-dir="b"] .t-section { font-family: var(--serif); font-size: 21px; font-weight: 500; }
+.t-card { font-family: var(--card-title-font); font-size: var(--card-title-size); font-weight: var(--card-title-weight); line-height: 1.3; }
+.t-body { font-size: 15px; line-height: 1.55; max-width: 62ch; }
+.t-small { font-size: 13px; color: var(--muted); }
+.t-label { font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--btn-h); padding: 0 16px; border-radius: var(--r-sm); border: 1px solid transparent;
+  font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  transition: background-color .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { cursor: not-allowed; opacity: .45; }
+.btn-primary { background: var(--green); color: var(--ivory); }
+.btn-primary:hover:not(:disabled) { background: var(--green-600); }
+.btn-secondary { background: var(--surface); color: var(--green); border-color: var(--line-2); }
+.btn-secondary:hover:not(:disabled) { border-color: var(--green); }
+[data-dir="b"] .btn-secondary { border-color: var(--green); border-width: 1.5px; }
+[data-dir="b"] .btn-secondary:hover:not(:disabled) { background: var(--sage-wash); }
+.btn-accent { background: var(--gold); color: var(--white); }
+.btn-accent:hover:not(:disabled) { background: var(--gold-700); }
+.btn-quiet { background: transparent; color: var(--ink-2); }
+.btn-quiet:hover:not(:disabled) { background: var(--wash); color: var(--ink); }
+.btn-danger { background: var(--surface); color: var(--danger); border-color: #E7B9B5; }
+.btn-danger:hover:not(:disabled) { background: var(--danger-wash); border-color: var(--danger); }
+.btn-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+@media (pointer: coarse) { .btn { min-height: 44px; } }
+
+/* ── Inputs ────────────────────────────────────────────────────────────────── */
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; max-width: 640px; }
+.form .full { grid-column: 1 / -1; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.field .help { font-size: 12.5px; color: var(--muted); }
+.field .err { font-size: 12.5px; color: var(--danger); display: flex; gap: 6px; align-items: center; }
+.input {
+  width: 100%; height: 42px; padding: 0 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font-size: 15px;
+  transition: border-color .15s, box-shadow .15s;
+}
+textarea.input { height: auto; min-height: 84px; padding: 10px 12px; resize: vertical; line-height: 1.5; }
+select.input { appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%236B6455' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1 1.5 5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; }
+.input:hover { border-color: var(--muted); }
+.input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(31,61,43,.16); }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+.input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px rgba(179,38,30,.16); }
+[data-dir="b"] .input { background: var(--white); border-color: var(--line); box-shadow: inset 0 1px 1px rgba(31,61,43,.04); }
+
+/* ── Status badge (color + dot + words, never color alone) ─────────────────── */
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.st-draft { color: var(--st-draft-fg); background: var(--st-draft-bg); }
+.st-sent { color: var(--st-sent-fg); background: var(--st-sent-bg); }
+.st-approved { color: var(--st-approved-fg); background: var(--st-approved-bg); }
+.st-complete { color: var(--st-complete-fg); background: var(--st-complete-bg); }
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+.table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: var(--card-border); border-radius: var(--r-lg); box-shadow: var(--card-shadow); overflow: hidden; font-size: 14px; }
+.table th { text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+[data-dir="a"] .table th { background: var(--surface); }
+.table td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table tr:last-child td { border-bottom: 0; }
+.table tbody tr { cursor: pointer; transition: background-color .12s; }
+.table tbody tr:hover, .table tbody tr:focus-within { background: var(--ivory); }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.client { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.client a { color: var(--ink); font-weight: 600; text-decoration: none; }
+.client a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.client small { display: block; color: var(--muted); font-size: 13px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 12.5px; font-weight: 600; flex-shrink: 0; background: var(--sage-wash); color: var(--green); }
+[data-dir="b"] .avatar { background: var(--green); color: var(--ivory); font-family: var(--serif); font-size: 14px; }
+@container (max-width: 600px) {
+  .table, .table tbody, .table tr, .table td { display: block; }
+  .table thead { display: none; }
+  .table tr { padding: 14px 16px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+  .table tr:last-child { border-bottom: 0; }
+  .table td { padding: 0; border: 0; }
+  .table td.c-client { grid-column: 1 / -1; }
+  .table td.c-type, .table td.c-date { display: none; }
+  .table td.num { text-align: left; font-weight: 600; }
+  .table td.c-status { justify-self: end; }
+}
+
+/* ── Inventory cards ───────────────────────────────────────────────────────── */
+.inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.inv { background: var(--surface); border: var(--card-border); border-radius: var(--r-lg); box-shadow: var(--card-shadow); overflow: hidden; display: flex; flex-direction: column; transition: box-shadow .2s var(--ease), border-color .2s; }
+.inv:hover { box-shadow: var(--card-shadow-hover); }
+[data-dir="a"] .inv:hover { border-color: var(--line-2); }
+.inv-img { aspect-ratio: 4 / 3; background: var(--white); display: grid; place-items: center; border-bottom: 1px solid var(--line); overflow: hidden; }
+.inv-img img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+[data-dir="b"] .inv-img { border-bottom: 0; background: var(--wash); }
+[data-dir="b"] .inv-img img { object-fit: cover; padding: 0; }
+.inv-img.empty { background: var(--wash); color: var(--muted); gap: 8px; align-content: center; text-align: center; font-size: 13px; }
+.inv-img.empty svg.i { width: 32px; height: 32px; stroke-width: 1.4; color: var(--gold); margin: 0 auto; }
+.inv-body { padding: 14px 16px 16px; display: grid; gap: 4px; flex: 1; }
+.inv-body .t-card { color: var(--ink); }
+.inv-meta { font-size: 13px; color: var(--muted); }
+.inv-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.inv-foot span { font-size: 13px; color: var(--ink-2); }
+.link-btn { background: none; border: 0; padding: 0; color: var(--green); font-weight: 600; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* ── Proposal summary ──────────────────────────────────────────────────────── */
+.summary { max-width: 560px; background: var(--surface); border: var(--card-border); border-radius: var(--r-lg); box-shadow: var(--card-shadow); overflow: hidden; }
+.sum-head { padding: 20px 24px; display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; border-bottom: 1px solid var(--line); }
+.sum-head h4 { font-family: var(--serif); font-weight: 600; font-size: 22px; line-height: 1.2; color: var(--ink); }
+.sum-head p { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+.sum-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.sum-facts dt { color: var(--muted); font-size: 12.5px; }
+.sum-facts dd { color: var(--ink); font-weight: 500; }
+.sum-lines { padding: 8px 24px; }
+.sum-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.sum-line:last-child { border-bottom: 0; }
+.sum-line small { grid-column: 1; color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.sum-line .amt { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-variant-numeric: tabular-nums; }
+.sum-totals { padding: 16px 24px 20px; background: var(--surface-2); border-top: 1px solid var(--line); font-size: 14px; display: grid; gap: 6px; }
+.sum-totals div { display: flex; justify-content: space-between; gap: 16px; font-variant-numeric: tabular-nums; }
+.sum-totals .sub { color: var(--ink-2); }
+.grand { margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--gold); align-items: baseline; }
+.grand span:first-child { font-weight: 600; }
+.grand span:last-child { font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1; color: var(--green); letter-spacing: -0.01em; }
+.due { color: var(--ink); font-weight: 600; }
+.sum-actions { padding: 16px 24px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; border-top: 1px solid var(--line); }
+/* B: the summary looks like the client document, set on deep green */
+[data-dir="b"] .summary { background: var(--green); color: var(--ivory); border-color: var(--green); }
+[data-dir="b"] .sum-head, [data-dir="b"] .sum-facts, [data-dir="b"] .sum-line, [data-dir="b"] .sum-actions { border-color: rgba(250,247,242,.14); }
+[data-dir="b"] .sum-head h4, [data-dir="b"] .sum-facts dd, [data-dir="b"] .due { color: var(--ivory); }
+[data-dir="b"] .sum-head p, [data-dir="b"] .sum-facts dt, [data-dir="b"] .sum-line small, [data-dir="b"] .sum-totals .sub { color: #C8D3C9; }
+[data-dir="b"] .sum-totals { background: var(--green-900); border-color: rgba(250,247,242,.14); }
+[data-dir="b"] .grand { border-color: var(--brass-light); }
+[data-dir="b"] .grand span:last-child { color: var(--brass-light); font-size: 38px; }
+[data-dir="b"] .summary .badge { background: rgba(250,247,242,.12); color: var(--ivory); }
+[data-dir="b"] .summary .btn-secondary { background: transparent; color: var(--ivory); border-color: rgba(250,247,242,.5); }
+[data-dir="b"] .summary .btn-secondary:hover { background: var(--green-600); }
+[data-dir="b"] .summary :focus-visible { outline-color: var(--brass-light); }
+@container (max-width: 480px) {
+  .sum-facts { grid-template-columns: 1fr 1fr; }
+  .sum-head { flex-direction: column; }
+  .sum-actions .btn { flex: 1; }
+}
+
+/* ── App shell / navigation ────────────────────────────────────────────────── */
+.block.wide { grid-template-columns: 1fr; gap: 20px; }
+.block.wide > header { display: grid; grid-template-columns: 220px minmax(0, 60ch); gap: 32px; }
+.frames { display: grid; grid-template-columns: minmax(0, 1fr) 387px; gap: 24px; align-items: start; }
+.frame-label { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+.shell-wrap { container: shell / inline-size; border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; background: var(--page); }
+.shell { display: grid; grid-template-columns: 216px minmax(0, 1fr); min-height: 520px; }
+.side { background: var(--nav-bg); border-right: 1px solid var(--nav-line); display: flex; flex-direction: column; color: var(--nav-ink); }
+.brand { padding: 20px 18px 16px; }
+.brand b { display: block; font-family: var(--serif); font-weight: 600; font-size: 21px; color: var(--nav-ink-strong); letter-spacing: -0.01em; }
+[data-dir="a"] .brand b { color: var(--green); }
+.brand span { font-size: 12px; color: var(--nav-group); }
+.nav { padding: 4px 10px; display: grid; gap: 2px; flex: 1; align-content: start; }
+.nav-group { font-size: 12px; font-weight: 600; color: var(--nav-group); padding: 14px 10px 6px; }
+.nav a {
+  position: relative; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: var(--r-sm);
+  color: var(--nav-ink); text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color .12s, color .12s;
+}
+.nav a:hover { color: var(--nav-ink-strong); background: var(--nav-active-bg); }
+[data-dir="a"] .nav a:hover { background: var(--wash); }
+.nav a[aria-current="page"] { background: var(--nav-active-bg); color: var(--nav-active-ink); font-weight: 600; }
+[data-dir="a"] .nav a[aria-current="page"] { box-shadow: inset 0 0 0 1px var(--line); }
+.nav a[aria-current="page"]::before { content: ""; position: absolute; left: -10px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--nav-marker); }
+.nav :focus-visible { outline-color: var(--nav-marker); }
+.side-user { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--nav-line); font-size: 13px; }
+.side-user b { display: block; color: var(--nav-ink-strong); font-weight: 600; }
+.side-user .avatar { width: 30px; height: 30px; font-size: 12px; }
+.app { min-width: 0; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 18px 24px; }
+.topbar h5 { font-family: var(--serif); font-weight: var(--title-weight); font-size: 26px; color: var(--ink); letter-spacing: var(--title-track); margin-right: auto; white-space: nowrap; }
+.search { position: relative; flex: 0 1 240px; min-width: 150px; }
+[data-dir="b"] .side .avatar { background: var(--green-600); color: var(--ivory); }
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); width: 16px; height: 16px; }
+.search .input { height: 38px; padding-left: 34px; font-size: 14px; }
+.app-body { padding: 4px 24px 24px; display: grid; gap: 10px; }
+.mini { background: var(--surface); border: var(--card-border); border-radius: var(--r-md); box-shadow: var(--card-shadow); padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+.mini b { font-weight: 600; font-size: 14.5px; }
+.mini span:not(.badge) { font-size: 13px; color: var(--muted); }
+.mini .badge { grid-row: 1 / span 2; grid-column: 2; }
+.tabbar { display: none; }
+.mobile-top { display: none; }
+@container shell (max-width: 640px) {
+  .shell { grid-template-columns: 1fr; min-height: 600px; }
+  .side { display: none; }
+  .mobile-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--nav-bg); border-bottom: 1px solid var(--nav-line); }
+  .mobile-top b { font-family: var(--serif); font-weight: 600; font-size: 19px; color: var(--nav-ink-strong); }
+  [data-dir="a"] .mobile-top b { color: var(--green); }
+  .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--r-sm); background: transparent; border: 0; color: var(--nav-ink-strong); cursor: pointer; }
+  .topbar { flex-wrap: wrap; padding: 16px 16px 12px; }
+  .topbar h5 { font-size: 24px; }
+  .topbar .btn { display: none; }
+  .search { flex: 1 1 100%; order: 3; }
+  .app-body { padding: 0 16px 88px; flex: 1; align-content: start; }
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--nav-bg); border-top: 1px solid var(--nav-line); padding: 6px 4px 10px; }
+  .tabbar a { display: grid; justify-items: center; gap: 3px; padding: 6px 0; color: var(--nav-ink); text-decoration: none; font-size: 11.5px; font-weight: 500; border-radius: var(--r-sm); }
+  .tabbar a svg.i { width: 22px; height: 22px; }
+  .tabbar a[aria-current="page"] { color: var(--nav-active-ink); font-weight: 600; }
+  [data-dir="a"] .tabbar a[aria-current="page"] svg { color: var(--green); }
+  [data-dir="b"] .tabbar a[aria-current="page"] svg { color: var(--brass-light); }
+  .tabbar :focus-visible { outline-color: var(--nav-marker); }
+  .fab { position: absolute; right: 16px; bottom: 84px; }
+}
+.app { position: relative; }
+.fab { display: none; }
+@container shell (max-width: 640px) {
+  .fab { display: inline-flex; height: 48px; border-radius: 999px; padding: 0 18px; box-shadow: 0 6px 16px rgba(31,61,43,.22); }
+}
+.phone .shell-wrap { width: 387px; border-radius: 28px; border-width: 6px; border-color: var(--ink); }
+
+/* ── Dashboard stats + status badges (all directions) ───────────────────────── */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stat { display: flex; gap: 12px; align-items: flex-start; padding: 16px; background: var(--surface); border: var(--card-border); border-radius: var(--r-lg); box-shadow: var(--card-shadow); min-width: 0; }
+.tile { width: 36px; height: 36px; border-radius: var(--r-sm); border: 1px solid var(--line); display: grid; place-items: center; color: var(--green); flex-shrink: 0; background: var(--surface); }
+.stat-label { display: block; font-size: 12.5px; color: var(--muted); }
+.stat-value { display: block; font-family: var(--serif); font-size: 26px; font-weight: 600; color: var(--ink); line-height: 1.2; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stat-sub { display: block; font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+.panel { margin-top: 12px; padding: 20px; background: var(--surface); border: var(--card-border); border-radius: var(--r-lg); box-shadow: var(--card-shadow); display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 24px; align-items: center; }
+.panel h4 { font-family: var(--serif); font-size: 21px; font-weight: 600; margin-top: 4px; line-height: 1.25; }
+.panel p { color: var(--ink-2); font-size: 14px; margin-top: 2px; }
+.panel-facts { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 24px; justify-content: start; }
+.panel-facts dt { font-size: 12.5px; color: var(--muted); }
+.panel-facts dd { font-weight: 500; font-variant-numeric: tabular-nums; }
+@container (max-width: 900px) { .stats { grid-template-columns: 1fr 1fr; } .panel { grid-template-columns: 1fr; gap: 16px; } }
+@container (max-width: 420px) { .stats { grid-template-columns: 1fr; } .panel-facts { grid-template-columns: 1fr 1fr; } }
+.st-viewed { color: var(--st-viewed-fg); background: var(--st-viewed-bg); }
+.st-signed { color: var(--st-signed-fg); background: var(--st-signed-bg); }
+.st-paid { color: var(--st-paid-fg); background: var(--st-paid-bg); }
+
+/* ── Direction C details ───────────────────────────────────────────────────── */
+[data-dir="c"] .btn-accent { background: var(--brass-text); }
+[data-dir="c"] .btn-accent:hover:not(:disabled) { background: var(--brass-hover); }
+[data-dir="c"] .btn-secondary:hover:not(:disabled) { background: var(--sage-wash); border-color: var(--green); }
+[data-dir="c"] .inv-img { border-bottom: 0; background: var(--sage-wash); }
+[data-dir="c"] .inv-img img { object-fit: cover; padding: 0; }
+[data-dir="c"] .inv-img.empty { background: var(--sage-wash); }
+[data-dir="c"] .avatar { background: var(--sage-wash); color: var(--green); }
+[data-dir="c"][data-side="sage"] .side .avatar { background: var(--white); }
+[data-dir="c"] .shell-wrap { border-color: #CFC8B8; }
+[data-dir="c"][data-side="sage"] .nav a[aria-current="page"] { box-shadow: 0 1px 2px rgba(31,58,46,.10); }
+[data-dir="c"] .summary { background: #FBF9F4; border: 1px solid var(--gold); }
+[data-dir="c"] .sum-totals { background: var(--ivory); }
+[data-dir="c"] .grand span:last-child { color: var(--brass-text); font-size: 36px; }
+@container shell (max-width: 640px) {
+  [data-dir="c"] .mobile-top { background: var(--surface); border-bottom-color: var(--line); }
+  [data-dir="c"] .mobile-top b, [data-dir="c"] .icon-btn { color: var(--green); }
+  [data-dir="c"] .tabbar { background: var(--surface); border-top-color: var(--line); }
+  [data-dir="c"] .tabbar a { color: #556A5E; }
+  [data-dir="c"] .tabbar a[aria-current="page"] { color: var(--green); }
+  [data-dir="c"] .tabbar a[aria-current="page"] svg { background: var(--sage-wash); border-radius: 999px; width: 52px; height: 28px; padding: 3px 15px; }
+  [data-dir="c"] .tabbar :focus-visible, [data-dir="c"] .mobile-top :focus-visible { outline-color: var(--green); }
+}
+
+/* ── Direction D: Studio ── dark, layered, restrained ──────────────────────── */
+[data-dir="d"] {
+  color-scheme: dark;
+  --page: #141414; --surface: #1B1B1B; --surface-2: #232323; --hover: #262626; --line-soft: #3A3A3A;
+  --ink: #EDEDED; --ink-2: #A3A3A3; --muted: #8F8F8F;
+  --line: #2E2E2E; --line-2: #6B6B6B;
+  --ivory: #232323; --wash: #232323; --white: #1B1B1B; --sage-wash: #232323;
+  --r-sm: 6px; --r-md: 6px; --r-lg: 8px;
+  --card-border: 1px solid #2E2E2E; --card-shadow: none; --card-shadow-hover: none;
+  --title-weight: 500; --title-size: 20px; --title-track: -0.01em;
+  --card-title-font: var(--sans); --card-title-size: 14px; --card-title-weight: 500;
+  --btn-h: 30px;
+  --nav-bg: #141414; --nav-ink: #A3A3A3; --nav-ink-strong: #EDEDED; --nav-active-bg: #262626;
+  --nav-active-ink: #FFFFFF; --nav-marker: transparent; --nav-line: #2E2E2E; --nav-group: #8F8F8F;
+  --st-draft-fg: #B5B5B5;    --st-draft-bg: #2A2A2A;
+  --st-sent-fg: #93BDEB;     --st-sent-bg: #172636;
+  --st-viewed-fg: #E3C17E;   --st-viewed-bg: #30271A;
+  --st-signed-fg: #C3B2F2;   --st-signed-bg: #272040;
+  --st-paid-fg: #86D1A6;     --st-paid-bg: #16301F;
+  --st-approved-fg: #C3B2F2; --st-approved-bg: #272040;
+  --st-complete-fg: #86D1A6; --st-complete-bg: #16301F;
+}
+[data-dir="d"][data-accent="gold"] { --accent: #CDAE73; --accent-hover: #D8BD88; --accent-on: #17130A; --accent-text: #CDAE73; --accent-border: #B8995E; }
+[data-dir="d"][data-accent="green"] { --accent: #3F7A5A; --accent-hover: #478663; --accent-on: #FFFFFF; --accent-text: #7DB896; --accent-border: #4F8C6A; }
+
+/* Two weights only: regular and medium */
+[data-dir="d"] :is(h1, h2, h3, h4, h5, b, strong, th, dt, .btn, .badge, .client a, .t-card, .field label, .nav a, .sum-head h4, .grand span, .due, .mini b, .switch button, .tabbar a, .link-btn, .sw b, .fix b, .panel-facts dd, .stat-value, .avatar, .t-section, .nav-group) { font-weight: 500; }
+[data-dir="d"] svg.i { stroke-width: 1.5; }
+[data-dir="d"] :focus-visible, [data-dir="d"] .nav :focus-visible, [data-dir="d"] .tabbar :focus-visible { outline-color: var(--ink); }
+
+/* Page chrome */
+[data-dir="d"] .guide-head h1, [data-dir="d"] .concept h2 { font-family: var(--sans); font-weight: 500; color: var(--ink); letter-spacing: -0.02em; }
+[data-dir="d"] .guide-head h1 { font-size: 30px; }
+[data-dir="d"] .concept h2 { font-size: 24px; }
+[data-dir="d"] .switch button { background: var(--surface); border-color: var(--line-soft); color: var(--ink-2); }
+[data-dir="d"] .switch button[aria-pressed="true"] { background: var(--hover); border-color: var(--line-2); color: #FFFFFF; }
+[data-dir="d"] .side-switch { border-left-color: var(--line-soft); }
+[data-dir="d"] .block > header h3 { font-size: 15px; }
+[data-dir="d"] .ratio, [data-dir="d"] .chip { border-color: var(--line-soft); }
+
+/* Type */
+[data-dir="d"] .t-display { font-family: var(--sans); font-weight: 500; font-size: 30px; color: var(--ink); letter-spacing: -0.02em; }
+[data-dir="d"] .t-title { font-family: var(--sans); }
+[data-dir="d"] .t-section { font-size: 15px; }
+[data-dir="d"] .t-body { font-size: 14px; }
+[data-dir="d"] .t-small { font-size: 12.5px; }
+[data-dir="d"] :is(.t-label, .stat-label, .sum-facts dt, .panel-facts dt, .inv-meta, .grand span:first-child) {
+  font-family: var(--mono); font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+}
+
+/* Buttons: compact, 1px border, subtle fill */
+[data-dir="d"] .btn { height: 30px; padding: 0 12px; font-size: 13px; border-radius: 6px; gap: 6px; }
+[data-dir="d"] .btn svg.i { width: 16px; height: 16px; }
+[data-dir="d"] .btn-sm { height: 28px; padding: 0 10px; font-size: 12.5px; }
+[data-dir="d"] .btn-primary, [data-dir="d"] .btn-accent { background: var(--accent); color: var(--accent-on); border-color: var(--accent-border); }
+[data-dir="d"] .btn-primary:hover:not(:disabled), [data-dir="d"] .btn-accent:hover:not(:disabled) { background: var(--accent-hover); }
+[data-dir="d"] .btn-secondary { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line-soft); }
+[data-dir="d"] .btn-secondary:hover:not(:disabled) { background: #2A2A2A; border-color: #4A4A4A; }
+[data-dir="d"] .btn-quiet { color: var(--ink-2); }
+[data-dir="d"] .btn-quiet:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+/* One accent: in D the client step is just the primary action, so no separate accent variant */
+[data-dir="d"] section[aria-labelledby="h-btn"] .btn-accent { display: none; }
+[data-dir="d"] .btn-danger { background: #2A1716; color: #F1A39C; border-color: #5A2A26; }
+[data-dir="d"] .btn-danger:hover:not(:disabled) { background: #351B19; border-color: #7A3630; }
+
+/* Inputs */
+[data-dir="d"] .field label { font-size: 13px; color: var(--ink-2); }
+[data-dir="d"] .input { height: 32px; font-size: 13.5px; background: var(--page); border-color: var(--line-2); border-radius: 6px; box-shadow: none; }
+[data-dir="d"] textarea.input { height: auto; }
+[data-dir="d"] .input:hover { border-color: #808080; }
+[data-dir="d"] .input:focus { border-color: var(--accent-text); box-shadow: 0 0 0 1px var(--accent-text); }
+[data-dir="d"] .input[aria-invalid="true"] { border-color: #E5655C; }
+[data-dir="d"] .input[aria-invalid="true"]:focus { box-shadow: 0 0 0 1px #E5655C; }
+[data-dir="d"] .field .err { color: #F1A39C; }
+
+/* Badges */
+[data-dir="d"] .badge { height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; }
+
+/* Stats + dot-grid panel */
+[data-dir="d"] .stat { padding: 14px 16px; }
+[data-dir="d"] .tile { width: 32px; height: 32px; border-color: var(--line-soft); background: var(--surface-2); color: var(--ink-2); }
+[data-dir="d"] .tile svg.i { width: 16px; height: 16px; }
+[data-dir="d"] .stat-value { font-family: var(--sans); font-size: 22px; letter-spacing: -0.01em; margin-top: 6px; }
+[data-dir="d"] .panel h4 { font-family: var(--sans); font-size: 16px; }
+[data-dir="d"] .panel-facts dd { font-size: 14px; }
+[data-dir="d"] .panel.next-event {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='%23FFFFFF' fill-opacity='.08'/%3E%3C/svg%3E");
+  background-size: 16px 16px;
+}
+/* Over the dots, labels use the brighter gray so a glyph on a dot pixel still clears 4.5:1 */
+[data-dir="d"] .panel.next-event :is(.stat-label, .panel-facts dt) { color: var(--ink-2); }
+
+/* Table */
+[data-dir="d"] .table { font-size: 13px; }
+[data-dir="d"] .table th { background: var(--surface); font-size: 12px; color: var(--muted); padding: 10px 16px; }
+[data-dir="d"] .table td { padding: 10px 16px; }
+[data-dir="d"] .table tbody tr:hover, [data-dir="d"] .table tbody tr:focus-within { background: var(--surface-2); }
+[data-dir="d"] .avatar { width: 28px; height: 28px; font-size: 11.5px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line-soft); font-family: var(--sans); }
+[data-dir="d"] .client small { font-size: 12px; }
+
+/* Inventory: catalog photos are shot on white, so the well stays light */
+[data-dir="d"] .inv-img { background: #F2F2F2; border-bottom: 1px solid var(--line); }
+[data-dir="d"] .inv-img img { object-fit: contain; padding: 10px; }
+[data-dir="d"] .inv-img.empty { background: var(--surface-2); color: var(--ink-2); }
+[data-dir="d"] .inv-img.empty svg.i { color: var(--ink-2); width: 24px; height: 24px; stroke-width: 1.5; }
+[data-dir="d"] .inv-body { padding: 12px 14px 14px; }
+[data-dir="d"] .inv-foot span { font-size: 12.5px; color: var(--ink-2); }
+[data-dir="d"] .link-btn { color: var(--ink); font-size: 12.5px; }
+
+/* Proposal summary */
+[data-dir="d"] .sum-head h4 { font-family: var(--sans); font-size: 16px; }
+[data-dir="d"] .sum-facts dd { font-size: 13.5px; margin-top: 2px; }
+[data-dir="d"] .sum-line, [data-dir="d"] .sum-totals { font-size: 13px; }
+[data-dir="d"] .sum-totals { background: var(--surface-2); }
+[data-dir="d"] .grand { border-top: 1px solid var(--line-soft); align-items: center; }
+[data-dir="d"] .grand span:last-child { font-family: var(--sans); font-weight: 500; font-size: 26px; color: var(--ink); letter-spacing: -0.02em; }
+
+/* App shell: icon rail that expands on hover, keyboard focus, or the toggle */
+[data-dir="d"] .shell-wrap { border-color: var(--line); }
+[data-dir="d"] .phone .shell-wrap { border-color: #3A3A3A; }
+[data-dir="d"] .shell { grid-template-columns: 52px minmax(0, 1fr); position: relative; min-height: 540px; }
+[data-dir="d"] .shell[data-rail="expanded"] { grid-template-columns: 220px minmax(0, 1fr); }
+/* Keep the workspace in column 2 so the hover overlay never reflows it */
+[data-dir="d"] .app { grid-column: 2; grid-row: 1; }
+[data-dir="d"] .side { width: 52px; overflow: hidden; position: relative; z-index: 5; transition: width .16s var(--ease); }
+[data-dir="d"] .shell:not([data-rail="expanded"]) .side:is(:hover, :has(:focus-visible)) { position: absolute; top: 0; bottom: 0; left: 0; width: 220px; }
+[data-dir="d"] .shell[data-rail="expanded"] .side, [data-dir="d"] .rail-demo .expanded .side { width: 220px; }
+[data-dir="d"] .brand { display: flex; align-items: center; gap: 10px; padding: 12px 14px; white-space: nowrap; border-bottom: 1px solid var(--line); }
+[data-dir="d"] .brand .mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: #EDEDED; color: #141414; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+[data-dir="d"] .brand b { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--ink); letter-spacing: 0; }
+[data-dir="d"] .brand-text span { display: block; font-size: 11.5px; color: var(--muted); }
+[data-dir="d"] .nav { padding: 8px; gap: 1px; }
+[data-dir="d"] .nav a, [data-dir="d"] .rail-toggle { height: 32px; padding: 0 9px; gap: 12px; font-size: 13.5px; border-radius: 6px; white-space: nowrap; color: var(--nav-ink); }
+[data-dir="d"] .nav a:hover, [data-dir="d"] .rail-toggle:hover { background: #1F1F1F; color: var(--ink); }
+[data-dir="d"] .nav a[aria-current="page"] { background: var(--nav-active-bg); color: #FFFFFF; box-shadow: none; }
+[data-dir="d"] .nav a[aria-current="page"]::before { display: none; }
+[data-dir="d"] .nav a[aria-current="page"] svg { color: var(--accent-text); }
+[data-dir="d"] .nav-group { font-size: 0; padding: 0; height: 1px; background: var(--line); margin: 7px 2px; }
+/* Collapsed rail: labels fade out instead of peeking past the 52px edge */
+[data-dir="d"] .side :is(.lbl, .brand-text, .side-user > div) { opacity: 0; transition: opacity .12s var(--ease); }
+[data-dir="d"] .shell[data-rail="expanded"] .side :is(.lbl, .brand-text, .side-user > div),
+[data-dir="d"] .shell .side:is(:hover, :has(:focus-visible)) :is(.lbl, .brand-text, .side-user > div),
+[data-dir="d"] .rail-demo .expanded .side :is(.lbl, .brand-text, .side-user > div) { opacity: 1; }
+[data-dir="d"] .rail-toggle { display: flex; align-items: center; margin: 0 8px 8px; border: 0; background: transparent; cursor: pointer; text-align: left; font-family: inherit; }
+[data-dir="d"] .side-user { padding: 10px 11px; gap: 10px; white-space: nowrap; font-size: 12.5px; }
+[data-dir="d"] .side-user .avatar { width: 28px; height: 28px; }
+[data-dir="d"] .side-user b { font-size: 13px; }
+[data-dir="d"] .topbar { padding: 12px 20px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+[data-dir="d"] .topbar h5 { font-family: var(--sans); font-size: 16px; font-weight: 500; }
+[data-dir="d"] .search .input { height: 30px; font-size: 13px; }
+[data-dir="d"] .app-body { padding: 0 20px 20px; gap: 8px; }
+[data-dir="d"] .mini { padding: 10px 14px; border-radius: 6px; }
+[data-dir="d"] .mini b { font-size: 13.5px; }
+[data-dir="d"] .mini span:not(.badge) { font-size: 12.5px; }
+[data-dir="d"] .rail-demo { display: flex; gap: 24px; align-items: flex-start; margin-top: 24px; flex-wrap: wrap; }
+[data-dir="d"] .rail-demo > div > div { height: 540px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; }
+[data-dir="d"] .rail-demo .side { height: 100%; border-right: 0; }
+@container shell (max-width: 640px) {
+  [data-dir="d"] .shell, [data-dir="d"] .shell[data-rail="expanded"] { grid-template-columns: 1fr; }
+  [data-dir="d"] .app { grid-column: 1; }
+  [data-dir="d"] .app-body { padding: 0 16px 76px; }
+  [data-dir="d"] .mobile-top { background: var(--page); }
+  [data-dir="d"] .mobile-top b { font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--ink); }
+  [data-dir="d"] .topbar { border-bottom: 0; margin-bottom: 0; }
+  [data-dir="d"] .tabbar { background: var(--page); }
+  [data-dir="d"] .tabbar a { font-size: 11px; }
+  [data-dir="d"] .tabbar a svg.i { width: 20px; height: 20px; }
+  [data-dir="d"] .tabbar a[aria-current="page"] { color: #FFFFFF; }
+  [data-dir="d"] .tabbar a[aria-current="page"] svg { color: var(--accent-text); }
+  [data-dir="d"] .fab { height: 36px; border-radius: 8px; box-shadow: none; }
+}
+
+/* ── Shared fixes ──────────────────────────────────────────────────────────── */
+.fixes { display: grid; gap: 10px; font-size: 14px; max-width: 760px; }
+.fix { display: grid; grid-template-columns: 28px 28px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 14px; background: var(--white); border: 1px solid var(--line); border-radius: 8px; }
+.fix .chip { width: 28px; height: 28px; border-radius: 6px; }
+.fix b { font-weight: 600; }
+.fix span { color: var(--ink-2); }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .frames { grid-template-columns: 1fr; }
+  .phone, .frame-label { display: none; }
+}
+@media (max-width: 900px) {
+  .block { grid-template-columns: 1fr; gap: 16px; padding: 32px 0; }
+  .concept { grid-template-columns: 1fr; gap: 20px; }
+  .block.wide > header { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (max-width: 600px) {
+  .guide-head { padding: 28px 16px 4px; }
+  .guide-head h1 { font-size: 28px; }
+  .switch { padding: 10px 16px; }
+  .switch .hint { display: none; }
+  .switch-bar { position: static; }
+  .side-switch { border-left: 0; padding-left: 0; margin-left: 0; }
+  .wrap { padding: 24px 16px 64px; }
+  .form { grid-template-columns: 1fr; }
+  .type-row { grid-template-columns: 1fr; gap: 4px; }
+  .t-display { font-size: 32px; }
+  .inv-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .inv-body { padding: 12px; }
+  .inv-foot { flex-direction: column; align-items: stretch; }
+  .inv-foot .btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Icons: Lucide v1.49.0 (ISC license), lucide.dev -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol>
+  <symbol id="i-columns" viewBox="0 0 24 24"><path d="M5 3v14"/><path d="M12 3v8"/><path d="M19 3v18"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
+  <symbol id="i-sprig" viewBox="0 0 24 24"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+  <symbol id="i-panel-open" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></symbol>
+  <symbol id="i-panel-close" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></symbol>
+  <symbol id="i-banknote" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol>
+  <symbol id="i-calendar-days" viewBox="0 0 24 24"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></symbol>
+  <symbol id="i-hand-coins" viewBox="0 0 24 24"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/></symbol>
+</svg>
+
+<header class="guide-head">
+  <h1>EventFlow style guide</h1>
+  <p>Four directions for the redesign. A to C keep the botanical brand: green, brass, ivory, Playfair Display and Inter. C sits between A and B. D is a dark, dashboard-style take on DaVinci's black and white. Pick one, and Phase 2 turns it into <code>css/tokens.css</code>.</p>
+</header>
+
+<div class="switch-bar">
+  <div class="switch" role="group" aria-label="Choose a direction">
+    <button type="button" data-set="a" aria-pressed="true">A: Ledger</button>
+    <button type="button" data-set="b" aria-pressed="false">B: Conservatory</button>
+    <button type="button" data-set="c" aria-pressed="false">C: Atelier</button>
+    <button type="button" data-set="d" aria-pressed="false">D: Studio</button>
+    <div class="side-switch" data-for="c" role="group" aria-label="Sidebar for direction C" hidden>
+      <span>Sidebar</span>
+      <button type="button" data-side="green" aria-pressed="true">Dark green</button>
+      <button type="button" data-side="sage" aria-pressed="false">Light sage</button>
+    </div>
+    <div class="side-switch" data-for="d" role="group" aria-label="Accent for direction D" hidden>
+      <span>Accent</span>
+      <button type="button" data-accent="gold" aria-pressed="true">Champagne gold</button>
+      <button type="button" data-accent="green" aria-pressed="false">Botanical green</button>
+    </div>
+    <span class="hint">Same components, restyled. Switch to compare at the same scroll position.</span>
+  </div>
+</div>
+
+<main id="guide">
+<div class="wrap">
+
+  <section class="concept" aria-labelledby="concept-title">
+    <div>
+      <h2 id="concept-title" data-a="Ledger" data-b="Conservatory" data-c="Atelier" data-d="Studio">Ledger</h2>
+      <p data-a="A calm, paper-like workspace. An ivory page with white working surfaces, and thin warm rules instead of shadows. Green is the ink for navigation and main actions. Brass appears only where money or selection is involved. Playfair is kept for page titles and totals, so a proposal's grand total reads like the bottom line of a florist's ledger."
+         data-b="The brand fills the frame. A deep green sidebar holds an ivory workspace, photos lead the inventory, and cards sit on soft green-tinted shadows. Playfair carries titles and card headings for a more editorial feel. The proposal summary is a dark green card, so it already looks like the document the client will receive." data-c="Conservatory's character on a lighter frame. A warm ivory workspace holds white cards with soft borders and a hint of shadow. Dark green is kept for the sidebar, primary buttons and whatever is selected, so it always means where you are or what to do next. The personality lives in the details: Playfair on titles and money, brass on totals, photo-led inventory, and light sage behind table headers and empty states." data-d="DaVinci's own black and white, laid out like a well-made dashboard. Near-black surfaces sit in layers separated by 1px borders, with no shadows. Controls are compact and text is 13 to 14px. Every icon comes from one outline set, and small monospace labels sit above the numbers that matter. One accent color appears only on primary buttons, the active nav icon and key statuses.">A calm, paper-like workspace. An ivory page with white working surfaces, and thin warm rules instead of shadows. Green is the ink for navigation and main actions. Brass appears only where money or selection is involved. Playfair is kept for page titles and totals, so a proposal's grand total reads like the bottom line of a florist's ledger.</p>
+    </div>
+    <dl>
+      <div><dt>Where it's bold</dt><dd data-a="The proposal total, set large in Playfair over a brass rule." data-b="The green shell and the dark proposal summary card." data-c="The brass-bordered proposal summary and its Playfair total." data-d="Nowhere, on purpose. The numbers and the catalog photos are what stand out.">The proposal total, set large in Playfair over a brass rule.</dd></div>
+      <div><dt>Good for</dt><dd data-a="Long working sessions in dense tables. It stays quiet on a phone." data-b="A strong first impression at a demo. It feels like the florist's brand, not a generic dashboard." data-c="Everyday use and the demo. It looks like the florist's brand without dark blocks in the workspace." data-d="Long, dense sessions, and looking like a serious tool at the fair.">Long working sessions in dense tables. It stays quiet on a phone.</dd></div>
+      <div><dt>Trade-off</dt><dd data-a="Less memorable at first glance. It relies on typography and spacing to look premium." data-b="Heavier on screen. Brass text on green needs the lighter brass tint to stay readable." data-c="More rules to follow. The brass fill (#A57C2E) is only for lines, borders and markers, because text on it fails AA." data-d="The least florist-like. The luxury moves into the client-facing proposal document, which keeps Playfair and the light palette. Catalog photos are shot on white, so image wells stay light.">Less memorable at first glance. It relies on typography and spacing to look premium.</dd></div>
+    </dl>
+  </section>
+
+  <!-- NAVIGATION -->
+  <section class="block wide" aria-labelledby="h-nav">
+    <header>
+      <h3 id="h-nav">Navigation</h3>
+      <p data-a="Sidebar on laptops. Below 640px it becomes a top bar, a five-tab bottom bar, and a floating &quot;New proposal&quot; button. On a wide screen, a phone frame shows the same thing at 375px." data-b="Sidebar on laptops. Below 640px it becomes a top bar, a five-tab bottom bar, and a floating &quot;New proposal&quot; button. On a wide screen, a phone frame shows the same thing at 375px." data-c="Sidebar on laptops. Below 640px it becomes a top bar, a five-tab bottom bar, and a floating &quot;New proposal&quot; button. On a wide screen, a phone frame shows the same thing at 375px." data-d="An icon rail that expands on hover, on keyboard focus, or with the toggle at its foot. Below 640px it becomes a top bar and a five-tab bottom bar. Both rail states are shown below the frames.">Sidebar on laptops. Below 640px it becomes a top bar, a five-tab bottom bar, and a floating "New proposal" button. On a wide screen, a phone frame shows the same thing at 375px.</p>
+    </header>
+    <div class="demo">
+      <div class="frames">
+        <div>
+          <p class="frame-label">Laptop</p>
+          <div class="shell-wrap" data-shell></div>
+        </div>
+        <div class="phone">
+          <p class="frame-label">Phone</p>
+          <div class="shell-wrap" data-shell></div>
+        </div>
+      </div>
+      <div class="rail-demo" aria-hidden="true" inert>
+        <div class="collapsed"><p class="frame-label">Rail collapsed</p><div data-rail-demo></div></div>
+        <div class="expanded"><p class="frame-label">Rail expanded</p><div data-rail-demo="expanded"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="block wide" aria-labelledby="h-stats">
+    <header>
+      <h3 id="h-stats">Dashboard stats</h3>
+      <p>Top of the dashboard. In Phase 3 these numbers come from Supabase, and any number that needs a complex query shows an empty state instead.</p>
+    </header>
+    <div class="demo">
+      <div class="stats">
+        <div class="stat"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span><div><span class="stat-label">Open proposals</span><span class="stat-value">12</span><span class="stat-sub">4 waiting on a signature</span></div></div>
+        <div class="stat"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-banknote"/></svg></span><div><span class="stat-label">Booked, next 90 days</span><span class="stat-value">$86,420</span><span class="stat-sub">9 events</span></div></div>
+        <div class="stat"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-calendar-days"/></svg></span><div><span class="stat-label">Events this month</span><span class="stat-value">7</span><span class="stat-sub">Next one Oct 17</span></div></div>
+        <div class="stat"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-hand-coins"/></svg></span><div><span class="stat-label">Balance outstanding</span><span class="stat-value">$23,180</span><span class="stat-sub">Across 3 proposals</span></div></div>
+      </div>
+      <div class="panel next-event">
+        <div><span class="stat-label">Next event</span><h4>Thompson–Reyes wedding</h4><p>Saturday, October 17 at Glenstone Pavilion, Potomac MD</p></div>
+        <dl class="panel-facts">
+          <div><dt>Guests</dt><dd>180</dd></div>
+          <div><dt>Balance due</dt><dd>$8,768.96</dd></div>
+          <div><dt>Status</dt><dd><span class="badge st-sent">Sent</span></dd></div>
+        </dl>
+        <button class="btn btn-secondary btn-sm" type="button">Open proposal</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLOR -->
+  <section class="block" aria-labelledby="h-color">
+    <header>
+      <h3 id="h-color">Color usage</h3>
+      <p>The bar shows roughly how much of a typical screen each color covers.</p>
+    </header>
+    <div class="demo">
+      <div class="ratio" data-ratio aria-hidden="true"></div>
+      <div class="swatches" data-swatches></div>
+    </div>
+  </section>
+
+  <!-- TYPE -->
+  <section class="block" aria-labelledby="h-type">
+    <header>
+      <h3 id="h-type">Type scale</h3>
+      <p>Playfair Display for titles and money. Inter for everything you read or type. Numbers use tabular figures so columns line up.</p>
+    </header>
+    <div class="demo">
+      <div class="type-row"><small data-a="Display 40" data-b="Display 40" data-c="Display 40" data-d="Money 30">Display 40</small><div class="t-display tnum">$9,768.96</div></div>
+      <div class="type-row"><small data-a="Page title 28" data-b="Page title 32" data-c="Page title 30" data-d="Page title 20">Page title 28</small><div class="t-title">Thompson–Reyes wedding</div></div>
+      <div class="type-row"><small data-a="Section 19" data-b="Section 21" data-c="Section 19" data-d="Section 15">Section 19</small><div class="t-section">Ceremony</div></div>
+      <div class="type-row"><small data-a="Card title 15" data-b="Card title 17" data-c="Card title 15" data-d="Card title 14">Card title 15</small><div class="t-card">White chuppah with floral accents</div></div>
+      <div class="type-row"><small data-a="Body 15" data-b="Body 15" data-c="Body 15" data-d="Body 14">Body 15</small><p class="t-body">Ceremony arch moves to the reception after cocktail hour. Candles must be enclosed, per venue rules.</p></div>
+      <div class="type-row"><small data-a="Label 12.5" data-b="Label 12.5" data-c="Label 12.5" data-d="Mono label 11">Label 12.5</small><div class="t-label">Event date</div></div>
+      <div class="type-row"><small data-a="Small 13" data-b="Small 13" data-c="Small 13" data-d="Small 12.5">Small 13</small><div class="t-small">Saved 2 minutes ago</div></div>
+    </div>
+  </section>
+
+  <!-- BUTTONS -->
+  <section class="block" aria-labelledby="h-btn">
+    <header>
+      <h3 id="h-btn">Buttons</h3>
+      <p data-a="One primary action per screen. Brass is only for the step that reaches the client. Press Tab to see focus rings." data-b="One primary action per screen. Brass is only for the step that reaches the client. Press Tab to see focus rings." data-c="One primary action per screen. Brass is only for the step that reaches the client. Press Tab to see focus rings." data-d="Compact: 30px tall, 13px text, 6px radius, 1px border. The accent fill is for the main action only. Secondary is a dark fill with a border, and ghost has neither. Press Tab to see focus rings.">One primary action per screen. Brass is only for the step that reaches the client. Press Tab to see focus rings.</p>
+    </header>
+    <div class="demo">
+      <div class="row">
+        <button class="btn btn-primary" type="button">Save proposal</button>
+        <button class="btn btn-secondary" type="button">Preview document</button>
+        <button class="btn btn-accent" type="button">Send to client</button>
+        <button class="btn btn-quiet" type="button">Cancel</button>
+        <button class="btn btn-danger" type="button">Delete proposal</button>
+      </div>
+      <div class="row" style="margin-top:16px;">
+        <button class="btn btn-primary" type="button" disabled>Save proposal</button>
+        <button class="btn btn-secondary btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Add item</button>
+        <span class="t-small">Disabled, and a small button with an icon</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section class="block" aria-labelledby="h-status">
+    <header>
+      <h3 id="h-status">Status badges</h3>
+      <p>Color appears only on badges, always with a dot and a word. Today the app stores draft, sent, approved and complete. Viewed and paid would be new.</p>
+    </header>
+    <div class="demo">
+      <div class="row">
+        <span class="badge st-draft">Draft</span>
+        <span class="badge st-sent">Sent</span>
+        <span class="badge st-viewed">Viewed</span>
+        <span class="badge st-signed">Signed</span>
+        <span class="badge st-paid">Paid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="block" aria-labelledby="h-input">
+    <header>
+      <h3 id="h-input">Inputs</h3>
+      <p>Labels sit above fields and stay visible. Errors say what to type, right under the field.</p>
+    </header>
+    <div class="demo">
+      <form class="form" onsubmit="return false">
+        <div class="field">
+          <label for="f-client">Client name</label>
+          <input class="input" id="f-client" value="Avery Thompson & Daniel Reyes" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="f-date">Event date</label>
+          <input class="input" id="f-date" type="date" value="2026-10-17">
+        </div>
+        <div class="field">
+          <label for="f-venue">Venue</label>
+          <select class="input" id="f-venue">
+            <option>Glenstone Pavilion, Potomac MD</option>
+            <option>The Line Hotel, Washington DC</option>
+            <option>Stone Tower Winery, Leesburg VA</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-guests">Guest count</label>
+          <input class="input" id="f-guests" value="about 180" aria-invalid="true" aria-describedby="f-guests-err">
+          <span class="err" id="f-guests-err"><svg class="i" aria-hidden="true" style="width:15px;height:15px"><use href="#i-alert"/></svg>Enter a number, like 180.</span>
+        </div>
+        <div class="field full">
+          <label for="f-notes">Notes for the team</label>
+          <textarea class="input" id="f-notes" aria-describedby="f-notes-help">Ceremony arch moves to the reception after cocktail hour.</textarea>
+          <span class="help" id="f-notes-help">Only your team sees this. It isn't printed on the proposal.</span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- TABLE -->
+  <section class="block" aria-labelledby="h-table">
+    <header>
+      <h3 id="h-table">Table rows</h3>
+      <p>Clients &amp; CRM. Rows are clickable, and money is right-aligned. On a phone each row becomes a two-line card.</p>
+    </header>
+    <div class="demo">
+      <table class="table">
+        <thead><tr><th scope="col">Client</th><th scope="col">Event</th><th scope="col">Date</th><th scope="col" class="num">Value</th><th scope="col">Status</th></tr></thead>
+        <tbody>
+          <tr><td class="c-client"><div class="client"><span class="avatar" aria-hidden="true">AT</span><div><a href="#h-table">Avery Thompson &amp; Daniel Reyes</a><small>thompson.reyes@example.com</small></div></div></td><td class="c-type">Wedding</td><td class="c-date tnum">Oct 17, 2026</td><td class="num">$9,768.96</td><td class="c-status"><span class="badge st-sent">Sent to client</span></td></tr>
+          <tr><td class="c-client"><div class="client"><span class="avatar" aria-hidden="true">PN</span><div><a href="#h-table">Priya Nakamura</a><small>Meridian Partners</small></div></div></td><td class="c-type">Corporate gala</td><td class="c-date tnum">Nov 6, 2026</td><td class="num">$14,250.00</td><td class="c-status"><span class="badge st-approved">Approved</span></td></tr>
+          <tr><td class="c-client"><div class="client"><span class="avatar" aria-hidden="true">HF</span><div><a href="#h-table">Hargrove family</a><small>Bar mitzvah</small></div></div></td><td class="c-type">Social</td><td class="c-date tnum">Dec 12, 2026</td><td class="num">$3,180.00</td><td class="c-status"><span class="badge st-draft">Draft</span></td></tr>
+          <tr><td class="c-client"><div class="client"><span class="avatar" aria-hidden="true">CW</span><div><a href="#h-table">Mei Chen &amp; James Williams</a><small>chen.williams@example.com</small></div></div></td><td class="c-type">Wedding</td><td class="c-date tnum">Sep 19, 2026</td><td class="num">$11,940.00</td><td class="c-status"><span class="badge st-complete">Complete</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- INVENTORY -->
+  <section class="block" aria-labelledby="h-inv">
+    <header>
+      <h3 id="h-inv">Inventory cards</h3>
+      <p>Real catalog items. Catalog items are priced "MP" (market price) and get a real price inside each proposal. The last card shows the fallback when an item has no photo.</p>
+    </header>
+    <div class="demo">
+      <div class="inv-grid">
+        <article class="inv"><div class="inv-img"><img src="media rentals/image147.png" alt="White chuppah draped in sheer fabric with floral accents" loading="lazy"></div>
+          <div class="inv-body"><h4 class="t-card">White Chuppah with Floral Accents</h4><span class="inv-meta">Décor &amp; Props</span>
+          <div class="inv-foot"><span>Market price</span><button class="btn btn-secondary btn-sm" type="button">Add</button></div></div></article>
+        <article class="inv"><div class="inv-img"><img src="media rentals/image342.png" alt="Gold chiavari chair with navy cushion" loading="lazy"></div>
+          <div class="inv-body"><h4 class="t-card">Gold Chiavari Chair with Navy Cushion</h4><span class="inv-meta">Seating</span>
+          <div class="inv-foot"><span>Market price</span><button class="btn btn-secondary btn-sm" type="button">Add</button></div></div></article>
+        <article class="inv"><div class="inv-img"><img src="media rentals/image273.png" alt="Silver mercury glass votive holder" loading="lazy"></div>
+          <div class="inv-body"><h4 class="t-card">Silver Mercury Glass Votive Holder</h4><span class="inv-meta">Décor &amp; Props</span>
+          <div class="inv-foot"><span>Market price</span><button class="btn btn-secondary btn-sm" type="button">Add</button></div></div></article>
+        <article class="inv"><div class="inv-img empty"><svg class="i" aria-hidden="true"><use href="#i-sprig"/></svg><span>No photo yet</span><button class="link-btn" type="button">Add a photo</button></div>
+          <div class="inv-body"><h4 class="t-card">Garden Rose Low Centerpiece</h4><span class="inv-meta">Floral Arrangements</span>
+          <div class="inv-foot"><span>Market price</span><button class="btn btn-secondary btn-sm" type="button">Add</button></div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROPOSAL SUMMARY -->
+  <section class="block" aria-labelledby="h-sum">
+    <header>
+      <h3 id="h-sum">Proposal summary</h3>
+      <p>Used in My Proposals and beside the builder. Totals follow the app's math: shipping is a percentage of the subtotal, and tax applies to subtotal plus shipping.</p>
+    </header>
+    <div class="demo">
+      <article class="summary" aria-label="Proposal summary for Thompson–Reyes wedding">
+        <div class="sum-head">
+          <div><h4>Thompson–Reyes wedding</h4><p>Avery Thompson &amp; Daniel Reyes</p></div>
+          <span class="badge st-sent">Sent to client</span>
+        </div>
+        <dl class="sum-facts">
+          <div><dt>Date</dt><dd class="tnum">Sat, Oct 17, 2026</dd></div>
+          <div><dt>Venue</dt><dd>Glenstone Pavilion</dd></div>
+          <div><dt>Guests</dt><dd class="tnum">180</dd></div>
+        </dl>
+        <div class="sum-lines">
+          <div class="sum-line"><span>Gold Chiavari Chair with Navy Cushion</span><small>180 × $9.50</small><span class="amt">$1,710.00</span></div>
+          <div class="sum-line"><span>Oversized Organza Flower Centerpieces</span><small>18 × $185.00</small><span class="amt">$3,330.00</span></div>
+          <div class="sum-line"><span>White Chuppah with Floral Accents</span><small>1 × $2,400.00</small><span class="amt">$2,400.00</span></div>
+          <div class="sum-line"><span>Silver Mercury Glass Votive Holder</span><small>60 × $4.00</small><span class="amt">$240.00</span></div>
+        </div>
+        <div class="sum-totals">
+          <div class="sub"><span>Subtotal</span><span>$7,680.00</span></div>
+          <div class="sub"><span>Shipping (20%)</span><span>$1,536.00</span></div>
+          <div class="sub"><span>Tax (6% on subtotal and shipping)</span><span>$552.96</span></div>
+          <div class="grand"><span>Total</span><span>$9,768.96</span></div>
+          <div class="sub" style="margin-top:6px;"><span>Deposit paid Sep 2</span><span>−$1,000.00</span></div>
+          <div class="due"><span>Balance due by Sep 17</span><span>$8,768.96</span></div>
+        </div>
+        <div class="sum-actions">
+          <button class="btn btn-secondary" type="button">Open proposal</button>
+          <button class="btn btn-accent" type="button">Send to client</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- SHARED FIXES -->
+  <section class="block" aria-labelledby="h-fix">
+    <header>
+      <h3 id="h-fix">Shared fixes</h3>
+      <p>Applies to every direction. Some of today's colors fail WCAG AA (4.5:1 for small text), so Phase 2 tokens will use these instead.</p>
+    </header>
+    <div class="demo">
+      <div class="fixes">
+        <div class="fix"><span class="chip" style="background:#8A8374"></span><span class="chip" style="background:#6B6455"></span><div><b>Draft badge text</b> <span>#8A8374 is 3.19:1 on its fill. Use #6B6455 (4.98:1).</span></div></div>
+        <div class="fix"><span class="chip" style="background:#A6742D"></span><span class="chip" style="background:#8A6420"></span><div><b>"Viewed" badge text</b> <span>#A6742D is 3.52:1. Use #8A6420 (4.63:1).</span></div></div>
+        <div class="fix"><span class="chip" style="background:#2F7D5A"></span><span class="chip" style="background:#28704F"></span><div><b>Approved badge text</b> <span>#2F7D5A is 4.35:1. Use #28704F (5.19:1).</span></div></div>
+        <div class="fix"><span class="chip" style="background:#9C6B1F"></span><span class="chip" style="background:#86591A"></span><div><b>Brass text on ivory</b> <span>#9C6B1F is 4.33:1 on #FAF7F2. Use brass text on white only, or #86591A on ivory (5.68:1).</span></div></div>
+        <div class="fix"><span class="chip" style="background:#9C9686"></span><span class="chip" style="background:#6B6455"></span><div><b>Placeholder-grey text</b> <span>#9C9686 is 2.95:1 on white. Keep it for decoration only. Readable text uses #6B6455.</span></div></div>
+        <div class="fix"><span class="chip" style="background:#9C6B1F"></span><span class="chip" style="background:#D9B26F"></span><div><b>Brass on dark green</b> <span>#9C6B1F is too dark there. Use #D9B26F (5.99:1) on dark green.</span></div></div>
+        <div class="fix"><span class="chip" style="background:#D3CBB8"></span><span class="chip" style="background:#958C7A"></span><div><b>Input borders</b> <span>#D3CBB8 is 1.61:1 on white, under the 3:1 a field edge needs. Use #958C7A (3.33:1). C already does. A and B would adopt it too.</span></div></div>
+        <div class="fix"><span class="chip" style="background:#A57C2E"></span><span class="chip" style="background:#7A5A1C"></span><div><b>Text on brass (C)</b> <span>White on #A57C2E is 3.80:1. Brass buttons use #7A5A1C (6.35:1). #A57C2E stays for rules, borders and markers, which need 3:1.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<template id="shell-tpl">
+  <div class="shell">
+    <aside class="side" aria-label="Main navigation">
+      <div class="brand"><span class="mark" aria-hidden="true">E</span><div class="brand-text"><b>EventFlow</b><span>DaVinci's Florist</span></div></div>
+      <nav class="nav">
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span class="lbl">Dashboard</span></a>
+        <span class="nav-group">Proposals</span>
+        <a href="#h-nav" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="lbl">My proposals</span></a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-camera"/></svg><span class="lbl">Venue visualizer</span></a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-box"/></svg><span class="lbl">Inventory</span></a>
+        <span class="nav-group">Business</span>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg><span class="lbl">Clients</span></a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-columns"/></svg><span class="lbl">Event pipeline</span></a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg><span class="lbl">Availability</span></a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-receipt"/></svg><span class="lbl">Invoices</span></a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg><span class="lbl">Contracts</span></a>
+      </nav>
+      <button class="rail-toggle" type="button" aria-expanded="false"><svg class="i" aria-hidden="true"><use href="#i-panel-open"/></svg><span class="lbl">Expand sidebar</span></button>
+      <div class="side-user"><span class="avatar" aria-hidden="true">SA</span><div><b>Sharone Abarjel</b>Owner</div></div>
+    </aside>
+    <div class="app">
+      <div class="mobile-top"><b>EventFlow</b><button class="icon-btn" type="button" aria-label="Open menu"><svg class="i" aria-hidden="true"><use href="#i-menu"/></svg></button></div>
+      <div class="topbar">
+        <h5>My proposals</h5>
+        <label class="search"><span class="sr-only">Search proposals</span><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input class="input" placeholder="Search"></label>
+        <button class="btn btn-primary" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>New proposal</button>
+      </div>
+      <div class="app-body">
+        <div class="mini"><b>Thompson–Reyes wedding</b><span class="tnum">Oct 17, 2026, $9,768.96</span><span class="badge st-sent">Sent to client</span></div>
+        <div class="mini"><b>Meridian Partners gala</b><span class="tnum">Nov 6, 2026, $14,250.00</span><span class="badge st-approved">Approved</span></div>
+        <div class="mini"><b>Hargrove bar mitzvah</b><span class="tnum">Dec 12, 2026, $3,180.00</span><span class="badge st-draft">Draft</span></div>
+        <div class="mini"><b>Chen–Williams wedding</b><span class="tnum">Sep 19, 2026, $11,940.00</span><span class="badge st-complete">Complete</span></div>
+      </div>
+      <button class="btn btn-primary fab" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>New proposal</button>
+      <nav class="tabbar" aria-label="Main navigation">
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg>Home</a>
+        <a href="#h-nav" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Proposals</a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-box"/></svg>Inventory</a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Clients</a>
+        <a href="#h-nav"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg>More</a>
+      </nav>
+    </div>
+  </div>
+</template>
+
+<script>
+// Static demo content only — no user data is rendered here.
+const COLORS = {
+  a: [
+    ['Ivory', '#FAF7F2', 'Page background', 58],
+    ['White', '#FFFFFF', 'Working surfaces: tables, cards, inputs', 26],
+    ['Rule', '#E4DFD3', 'Borders and dividers instead of shadows', 4],
+    ['Charcoal', '#2A2822', 'Text', 6],
+    ['Botanical green', '#1F3D2B', 'Navigation, primary buttons, titles', 4],
+    ['Brass', '#9C6B1F', 'Totals rule, active marker, client-facing actions', 2],
+  ],
+  b: [
+    ['Ivory', '#FAF7F2', 'Workspace background', 46],
+    ['Botanical green', '#1F3D2B', 'Sidebar, proposal summary, primary buttons', 22],
+    ['White', '#FFFFFF', 'Cards and inputs', 20],
+    ['Charcoal', '#2A2822', 'Text on light surfaces', 6],
+    ['Linen', '#F0ECE3', 'Image wells, table headers', 3],
+    ['Brass light', '#D9B26F', 'Accents on green: active marker, totals', 2],
+    ['Brass', '#9C6B1F', 'Client-facing actions on light surfaces', 1],
+  ],
+};
+
+COLORS.c = [
+  ['Warm ivory', '#F4F1EA', 'Workspace background', 54],
+  ['White', '#FFFFFF', 'Cards, tables and inputs', 28],
+  ['Light sage', '#E8EEE8', 'Table headers, image wells, empty states, sage sidebar', 7],
+  ['Charcoal', '#2A2822', 'Text', 5],
+  ['Botanical green', '#1F3A2E', 'Sidebar, primary buttons, active states', 4],
+  ['Brass', '#A57C2E', 'Rules, borders and markers. No text on it', 1],
+  ['Brass text', '#7A5A1C', 'Totals, brass buttons, key highlights', 1],
+];
+
+COLORS.d = () => {
+  const gold = document.documentElement.dataset.accent !== 'green';
+  return [
+    ['Page', '#141414', 'Page and sidebar', 44],
+    ['Card', '#1B1B1B', 'Cards, tables and panels', 30],
+    ['Raised', '#232323', 'Table hover, totals, secondary buttons', 9],
+    ['Border', '#2E2E2E', '1px borders between layers', 3],
+    ['Text', '#EDEDED', 'Primary text', 6],
+    ['Secondary text', '#A3A3A3', 'Labels, metadata, inactive nav', 6],
+    [gold ? 'Champagne gold' : 'Botanical green', gold ? '#CDAE73' : '#3F7A5A', 'Primary buttons, active nav icon, key status', 2],
+  ];
+};
+
+const root = document.documentElement;
+const tpl = document.getElementById('shell-tpl');
+document.querySelectorAll('[data-shell]').forEach(el => el.appendChild(tpl.content.cloneNode(true)));
+document.querySelectorAll('[data-rail-demo]').forEach(el => {
+  const side = tpl.content.querySelector('.side').cloneNode(true);
+  if (el.dataset.railDemo === 'expanded') {
+    side.querySelector('.rail-toggle use').setAttribute('href', '#i-panel-close');
+    side.querySelector('.rail-toggle .lbl').textContent = 'Collapse sidebar';
+  }
+  el.appendChild(side);
+});
+
+// Rail toggle (direction D): pins the sidebar open or closed
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.rail-toggle');
+  const shell = btn && btn.closest('.shell');
+  if (!shell) return;
+  const open = shell.dataset.rail !== 'expanded';
+  if (open) shell.dataset.rail = 'expanded'; else delete shell.dataset.rail;
+  btn.setAttribute('aria-expanded', String(open));
+  btn.querySelector('use').setAttribute('href', open ? '#i-panel-close' : '#i-panel-open');
+  btn.querySelector('.lbl').textContent = open ? 'Collapse sidebar' : 'Expand sidebar';
+});
+
+const DIRS = ['a', 'b', 'c', 'd'];
+const store = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const recall = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const param = k => new URLSearchParams(location.search).get(k);
+
+function renderSwatches(dir) {
+  const ratio = document.querySelector('[data-ratio]');
+  const sw = document.querySelector('[data-swatches]');
+  ratio.replaceChildren(); sw.replaceChildren();
+  const list = typeof COLORS[dir] === 'function' ? COLORS[dir]() : COLORS[dir];
+  list.forEach(([name, hex, role, pct]) => {
+    const seg = document.createElement('span');
+    seg.style.cssText = `flex:${pct};background:${hex}`;
+    ratio.appendChild(seg);
+    const row = document.createElement('div'); row.className = 'sw';
+    const chip = document.createElement('span'); chip.className = 'chip'; chip.style.background = hex;
+    const txt = document.createElement('div');
+    const b = document.createElement('b'); b.textContent = name;
+    const i = document.createElement('i'); i.textContent = `${hex}, about ${pct}%`;
+    const r = document.createElement('div'); r.textContent = role; r.style.color = 'var(--ink-2)';
+    txt.append(b, i, r); row.append(chip, txt); sw.appendChild(row);
+  });
+}
+
+function render(dir) {
+  root.dataset.dir = dir;
+  document.querySelectorAll('.switch button[data-set]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.set === dir)));
+  document.querySelectorAll('.side-switch[data-for]').forEach(g => { g.hidden = g.dataset.for !== dir; });
+  document.querySelectorAll('[data-a]').forEach(el => { el.textContent = el.dataset[dir]; });
+  renderSwatches(dir);
+  store('efStyleDir', dir);
+}
+function setSide(side) {
+  root.dataset.side = side;
+  document.querySelectorAll('.switch button[data-side]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === side)));
+  store('efStyleSide', side);
+}
+function setAccent(accent) {
+  root.dataset.accent = accent;
+  document.querySelectorAll('.switch button[data-accent]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.accent === accent)));
+  store('efStyleAccent', accent);
+  if (root.dataset.dir === 'd') renderSwatches('d');
+}
+document.querySelectorAll('.switch button[data-set]').forEach(b => b.addEventListener('click', () => render(b.dataset.set)));
+document.querySelectorAll('.switch button[data-side]').forEach(b => b.addEventListener('click', () => setSide(b.dataset.side)));
+document.querySelectorAll('.switch button[data-accent]').forEach(b => b.addEventListener('click', () => setAccent(b.dataset.accent)));
+
+const pick = (key, store, allowed, fallback) => [param(key), recall(store)].find(v => allowed.includes(v)) || fallback;
+setSide(pick('side', 'efStyleSide', ['green', 'sage'], 'green'));
+setAccent(pick('accent', 'efStyleAccent', ['gold', 'green'], 'gold'));
+render(pick('dir', 'efStyleDir', DIRS, 'a'));
+</script>
+</body>
+</html>

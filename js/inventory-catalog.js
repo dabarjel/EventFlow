@@ -49,8 +49,8 @@ function filterInventory(val) {
     if (!emptyEl) {
       emptyEl = document.createElement('div');
       emptyEl.id = 'inv-empty-state';
-      emptyEl.style.cssText = 'grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--stone);';
-      emptyEl.innerHTML = '<div style="font-size:24px;margin-bottom:10px;opacity:.35;">◫</div><div style="font-weight:600;color:var(--charcoal);margin-bottom:6px;">No items match that search</div><div style="font-size:12.5px;margin-bottom:14px;">Try a different keyword or select a different category.</div>';
+      emptyEl.style.cssText = 'grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--text-3);';
+      emptyEl.innerHTML = '<div style="font-size:var(--fs-2xl);margin-bottom:10px;opacity:.35;">◫</div><div style="font-weight:var(--weight-medium);color:var(--text);margin-bottom:6px;">No items match that search</div><div style="font-size:var(--fs-xs);margin-bottom:14px;">Try a different keyword or select a different category.</div>';
       document.getElementById('inv-grid').appendChild(emptyEl);
     }
     emptyEl.style.display = '';
@@ -90,14 +90,14 @@ function openItemDetail(card) {
   // Use getAttribute to preserve the relative path; imgEl.src returns an absolute URL
   const imgSrc = imgEl ? imgEl.getAttribute('src') : null;
   const priceDisplay = price === 'MP'
-    ? '<span style="color:var(--blush-mid);">Market Price — call (301) 588-8900</span>'
-    : '<span style="font-weight:600;">' + _esc(price) + ' / unit</span>';
+    ? '<span style="color:var(--danger-text);">Market Price — call (301) 588-8900</span>'
+    : '<span style="font-weight:var(--weight-medium);">' + _esc(price) + ' / unit</span>';
   const imgHtml = imgSrc
     ? '<img src="' + _esc(imgSrc) + '" style="width:100%;height:200px;object-fit:cover;border-radius:var(--radius-sm);margin-bottom:14px;">'
-    : '<div style="width:100%;height:120px;background:var(--champagne);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:14px;">📦</div>';
+    : '<div style="width:100%;height:120px;background:var(--surface-raised);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:var(--fs-3xl);margin-bottom:14px;">📦</div>';
   const desc    = card.dataset.desc    || '';
   const section = card.dataset.section || '';
-  const descHtml    = desc    ? '<div style="font-size:12.5px;color:var(--stone);line-height:1.6;margin-bottom:14px;padding:10px 12px;background:var(--cream);border-radius:var(--radius-sm);">' + _esc(desc) + '</div>' : '';
+  const descHtml    = desc    ? '<div style="font-size:var(--fs-xs);color:var(--text-3);line-height:1.6;margin-bottom:14px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);">' + _esc(desc) + '</div>' : '';
   const sectionHtml = section ? '<div class="detail-row"><span class="detail-label">Type</span><span>' + _esc(section) + '</span></div>' : '';
   // Store SKU on the modal element — avoids embedding JSON inside onclick attributes
   const modalContent = document.getElementById('modal-content');
@@ -107,7 +107,7 @@ function openItemDetail(card) {
     imgHtml + descHtml + sectionHtml +
     (sku ? '<div class="detail-row"><span class="detail-label">SKU</span><span>' + _esc(sku) + '</span></div>' : '') +
     '<div class="detail-row"><span class="detail-label">Price</span><span>' + priceDisplay + '</span></div>' +
-    '<div class="detail-row"><span class="detail-label">Availability</span><span style="color:#2F7D5A;font-weight:600;">✓ Available</span></div>' +
+    '<div class="detail-row"><span class="detail-label">Availability</span><span style="color:var(--success-text);font-weight:var(--weight-medium);">✓ Available</span></div>' +
     '<div class="modal-actions">' +
       '<button class="btn" onclick="closeModal()">Close</button>' +
       '<button class="btn btn-primary" onclick="addInvItemToProposal()">Add to Proposal →</button>' +
@@ -436,7 +436,7 @@ function toggleInvEditMode(btn) {
     injectInvOverlays();
     btn.textContent = '✓ Done Editing';
     document.getElementById('inv-edit-hint').innerHTML =
-      '<strong style="color:var(--sage-dark);">Bulk edit ON</strong> — click any card to edit · <kbd style="background:var(--champagne);padding:1px 5px;border-radius:3px;font-size:10px;">Enter</kbd> saves &amp; advances · <kbd style="background:var(--champagne);padding:1px 5px;border-radius:3px;font-size:10px;">Shift+Enter</kbd> goes back · <kbd style="background:var(--champagne);padding:1px 5px;border-radius:3px;font-size:10px;">Esc</kbd> cancels · ↑↓ skip without saving.';
+      '<strong style="color:var(--text);">Bulk edit ON</strong> — click any card to edit · <kbd style="background:var(--surface-raised);padding:1px 5px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);">Enter</kbd> saves &amp; advances · <kbd style="background:var(--surface-raised);padding:1px 5px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);">Shift+Enter</kbd> goes back · <kbd style="background:var(--surface-raised);padding:1px 5px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);">Esc</kbd> cancels · ↑↓ skip without saving.';
   } else {
     // Close any open overlays
     document.querySelectorAll('.inv-edit-overlay.open').forEach(o => o.classList.remove('open'));
@@ -472,7 +472,7 @@ async function addInvItemFromModal() {
   const notesEl = document.getElementById('new-item-notes');
   const name = nameEl ? nameEl.value.trim() : '';
   if (!name) {
-    if (nameEl) { nameEl.focus(); nameEl.style.borderColor = 'var(--blush-mid)'; setTimeout(() => nameEl.style.borderColor = '', 1800); }
+    if (nameEl) { nameEl.focus(); nameEl.style.borderColor = 'var(--danger-border)'; setTimeout(() => nameEl.style.borderColor = '', 1800); }
     return;
   }
   const rawPrice = priceEl ? parseFloat(priceEl.value) : NaN;
@@ -500,7 +500,7 @@ async function addInvItemFromModal() {
   const grid = document.getElementById('inv-grid');
   if (grid) {
     const last = grid.lastElementChild;
-    if (last) { last.style.outline = '2px solid var(--sage)'; setTimeout(() => last.style.outline = '', 1500); }
+    if (last) { last.style.outline = '2px solid var(--accent-text)'; setTimeout(() => last.style.outline = '', 1500); }
   }
 }
 

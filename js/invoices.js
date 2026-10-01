@@ -20,18 +20,18 @@ function showInvoice(rowEl) {
       <div class="invoice-header">
         <div>
           <div class="invoice-logo">Da Vinci's Florist, LLC</div>
-          <div style="font-size:12px;color:var(--stone);margin-top:6px;">2756 Garfield Ave<br>Silver Spring, MD 20910<br>devika@davinciflorist.com</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:6px;">2756 Garfield Ave<br>Silver Spring, MD 20910<br>devika@davinciflorist.com</div>
         </div>
         <div style="text-align:right;">
           <div class="invoice-title">Invoice</div>
           <div class="invoice-num">#${escapeHtml(invLabel || name)}</div>
-          <div style="margin-top:10px;font-size:12px;color:var(--stone);">${escapeHtml(sub)}</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--text-3);">${escapeHtml(sub)}</div>
           <div style="margin-top:10px;"><span class="${statusCls}">${escapeHtml(statusText)}</span></div>
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:24px;">
-        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin-bottom:6px;">Bill To</div><div style="font-weight:500;">${escapeHtml(clientLabel || '—')}</div></div>
-        <div style="text-align:right;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin-bottom:6px;">Event</div><div>${escapeHtml(clientLabel || '—')}</div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:6px;">Bill To</div><div style="font-weight:500;">${escapeHtml(clientLabel || '—')}</div></div>
+        <div style="text-align:right;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:6px;">Event</div><div>${escapeHtml(clientLabel || '—')}</div></div>
       </div>
       <table class="invoice-table">
         <thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
@@ -44,7 +44,7 @@ function showInvoice(rowEl) {
         ${totalsHtml}
       </div>
       <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:12px;color:var(--stone);">Payment via bank transfer, check, or credit card.<br>Thank you for choosing Da Vinci's Florist, LLC.</div>
+        <div style="font-size:12px;color:var(--text-3);">Payment via bank transfer, check, or credit card.<br>Thank you for choosing Da Vinci's Florist, LLC.</div>
         <div style="display:flex;gap:10px;">
           <button class="btn" onclick="printInvoicePreview()">🖨️ Print</button>
           <button class="btn btn-primary" onclick="showToast('📧 Email functionality coming in a future update','toast-info')">Send Invoice</button>

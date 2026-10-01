@@ -96,7 +96,7 @@ async function vzaAnalyzePhoto() {
     const firstBrace   = raw.indexOf('{');
     if (firstBracket === -1 && firstBrace === -1) {
       console.error('[VZA] No JSON structure found. Full raw text:', rawText);
-      if (status) status.innerHTML = 'Claude returned non-JSON text.<br><small style="font-size:10px;opacity:0.8">' + escapeHtml(rawText.slice(0, 120)) + '…</small>';
+      if (status) status.innerHTML = 'Claude returned non-JSON text.<br><small style="font-size:var(--fs-2xs);opacity:0.8">' + escapeHtml(rawText.slice(0, 120)) + '…</small>';
       throw new Error('No JSON in response — see status bar for details');
     }
 
@@ -126,7 +126,7 @@ async function vzaAnalyzePhoto() {
       }
 
       if (!items || !items.length) {
-        if (status) status.innerHTML = 'JSON parse error: ' + escapeHtml(parseErr.message) + '<br><small style="font-size:10px;opacity:0.8">' + escapeHtml(raw.slice(0,120)) + '…</small>';
+        if (status) status.innerHTML = 'JSON parse error: ' + escapeHtml(parseErr.message) + '<br><small style="font-size:var(--fs-2xs);opacity:0.8">' + escapeHtml(raw.slice(0,120)) + '…</small>';
         throw new Error('JSON parse error: ' + parseErr.message);
       }
     }
@@ -319,7 +319,7 @@ function vzaFlashUndoRedo(text) {
   let el = document.getElementById('vza-undo-toast');
   if (!el) {
     el = document.createElement('div'); el.id = 'vza-undo-toast';
-    el.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(15,15,15,0.82);color:#fff;padding:6px 20px;border-radius:20px;font-size:12px;font-weight:600;pointer-events:none;z-index:9999;opacity:0;transition:opacity 0.18s;';
+    el.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--surface-raised);color:var(--text);border:1px solid var(--border-strong);padding:6px 20px;border-radius:var(--radius-full);font-size:var(--fs-xs);font-weight:var(--weight-medium);pointer-events:none;z-index:9999;opacity:0;transition:opacity var(--duration-fast);';
     document.body.appendChild(el);
   }
   el.textContent = text;
@@ -854,7 +854,7 @@ function vzaFindInInventory(id) {
   if (!drop) return;
   drop.innerHTML = '';
   if (!matches.length) {
-    drop.innerHTML = '<div style="padding:8px 11px;font-size:12px;color:var(--stone);">No inventory matches found.</div>';
+    drop.innerHTML = '<div style="padding:8px 11px;font-size:var(--fs-xs);color:var(--text-3);">No inventory matches found.</div>';
     drop.style.display = '';
     return;
   }
