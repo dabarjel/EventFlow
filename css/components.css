@@ -198,7 +198,7 @@
 
   /* Let the proposal section fill the page */
   body { background: #fff !important; margin: 0; }
-  .main-content { margin-left: 0 !important; padding: 0 !important; }
+  .main, .content { margin-left: 0 !important; padding: 0 !important; }
   #section-proposal-doc { display: block !important; padding: 0 !important; }
   #proposal-doc-preview { display: block !important; }
 
@@ -216,6 +216,8 @@
   /* Never split an item row across a page */
   tr, .prop-doc-item { page-break-inside: avoid; }
   thead { display: table-header-group; }
+  /* Keep an area heading with its first item */
+  .prop-doc-area { page-break-after: avoid; break-after: avoid; }
 
   /* Page setup */
   @page { size: letter; margin: 0.45in 0.55in; }

@@ -209,7 +209,7 @@ function renderProposalDoc() {
   areaOrderDoc.forEach(area => {
     // Area separator — white bg, thin top rule, gold label in small caps
     if (area) {
-      lineItemRows += `<tr class="prop-doc-item"><td colspan="5" style="padding:16px 12px 4px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9C6B1F;border-top:2px solid #E4DFD3;">${escapeHtml(area)}</td></tr>`;
+      lineItemRows += `<tr class="prop-doc-item prop-doc-area"><td colspan="5" style="padding:16px 12px 4px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9C6B1F;border-top:2px solid #E4DFD3;">${escapeHtml(area)}</td></tr>`;
     }
     areaMapDoc[area].forEach(item => {
       const totalStr = item.total > 0 ? fmt(item.total) : '—';
@@ -332,7 +332,7 @@ function renderProposalDoc() {
       ✏️ <strong>Click any field to edit inline.</strong> Red fields are missing — fill them in or go back to Edit Details.
     </div>
 
-    <div style="padding:28px 36px;">
+    <div style="padding:28px 36px 0;">
 
       <!-- THEME + SCHEDULE -->
       ${theme || scheduleRows ? `<div style="display:flex;gap:20px;margin-bottom:24px;">
@@ -396,6 +396,11 @@ function renderProposalDoc() {
           <strong>The balance must be paid in full by ${balanceDueStr}.</strong> Any changes must be finalized by ${balanceDueStr}. All rental items must be finalized by ${balanceDueStr} and returned in good condition. Any missing or damaged pieces will be charged to the client accordingly. Deposits are not refundable.<br><br>${isDC ? '<strong>Washington, DC events:</strong> Sales tax of 6% applies to the combined subtotal and shipping total per DC tax regulations.<br><br>' : ''}<span style="color:#B3261E;font-weight:600;">PLEASE NOTE ALL CREDIT AND DEBIT CARD TRANSACTIONS INCUR A 3% PROCESSING FEE.</span>
         </div>
       </div>
+    </div>
+
+    <!-- Signatures + footer print as one unit so the footer never lands alone on a page -->
+    <div style="page-break-inside:avoid;break-inside:avoid;">
+      <div style="padding:0 36px 28px;">
 
       <!-- SIGNATURES -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;margin-bottom:32px;page-break-inside:avoid;">
@@ -417,6 +422,7 @@ function renderProposalDoc() {
     <div style="border-top:1px solid #E4DFD3;padding:10px 36px;display:flex;justify-content:space-between;align-items:center;">
       <div style="font-size:9px;color:#9C9686;">Da Vinci's Florist, LLC &nbsp;·&nbsp; davinciflorist.com</div>
       <div style="font-size:9px;color:#9C6B1F;letter-spacing:1px;text-transform:uppercase;font-weight:600;">Thank You</div>
+    </div>
     </div>
 
   </div>`;
@@ -487,6 +493,9 @@ async function generatePDF() {
 
     /* Never orphan the totals or terms block */
     #printable-proposal > div > div:last-child > div { page-break-inside: avoid; }
+
+    /* Keep an area heading with its first item */
+    .prop-doc-area { page-break-after: avoid; break-after: avoid; }
 
     @page {
       size: letter portrait;
