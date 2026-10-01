@@ -1,0 +1,76 @@
+/* App shell: sidebar, login overlay, main column, topbar, page sections. */
+
+/* SIDEBAR — quiet, light app shell per design-system spec */
+.sidebar {
+  width: 220px; min-height: 100vh; background: var(--warm-white); color: var(--charcoal);
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100;
+  padding: 0; border-right: 1px solid var(--border);
+}
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-name { font-family: var(--font-serif); font-weight: 600; font-size: 21px; color: var(--sage); letter-spacing: -0.3px; }
+.logo-sub { font-size: 10px; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 16px 10px; overflow-y: auto; }
+.nav-section { padding: 5px 10px 7px; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--stone-light); font-weight: 600; margin-top: 20px; border-top: 1px solid var(--border); }
+.nav-section-first { margin-top: 4px; border-top: none; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  cursor: pointer; font-size: 13px; color: var(--stone);
+  transition: background 0.14s, color 0.14s; border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+}
+.nav-item:hover { color: var(--charcoal); background: var(--champagne); }
+.nav-item.active { color: var(--sage); background: var(--sage-light); font-weight: 600; }
+.nav-icon { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; opacity: 0.75; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-item:hover .nav-icon { opacity: 1; }
+.sidebar-user {
+  padding: 14px 20px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.user-name { font-size: 12.5px; color: var(--charcoal); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-role { font-size: 10px; color: var(--stone); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.auth-signout-btn {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: var(--radius-sm); border: 1px solid var(--border-mid);
+  background: var(--warm-white); color: var(--stone); cursor: pointer; font-size: 13px; line-height: 1;
+  display: flex; align-items: center; justify-content: center; transition: background 0.14s, color 0.14s;
+}
+.auth-signout-btn:hover { background: var(--sage-light); color: var(--sage-dark); }
+
+.auth-overlay {
+  position: fixed; inset: 0; z-index: 999; background: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+}
+.auth-box {
+  width: 320px; max-width: 90vw; padding: 32px 28px; background: var(--warm-white);
+  border: 1px solid var(--border-mid); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  text-align: center;
+}
+.auth-logo { font-family: var(--font-serif); font-weight: 600; font-size: 24px; color: var(--sage); }
+.auth-sub { font-size: 12px; color: var(--stone); margin-bottom: 22px; }
+.auth-status { font-size: 12.5px; color: var(--stone); margin-bottom: 14px; }
+#auth-form input {
+  display: block; width: 100%; box-sizing: border-box; padding: 9px 12px; margin-bottom: 10px;
+  border: 1px solid var(--border-mid); border-radius: var(--radius-sm); font-size: 13px;
+  font-family: var(--font-sans); color: var(--charcoal); background: var(--cream); outline: none;
+}
+.auth-error { font-size: 12px; color: #B3261E; margin-top: 10px; min-height: 14px; }
+
+/* MAIN */
+.main { margin-left: 220px; flex: 1; min-height: 100vh; }
+.topbar {
+  background: var(--warm-white); border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 58px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-family: var(--font-serif); font-weight: 600; font-size: 20px; color: var(--charcoal); }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.content { padding: 28px; }
+
+/* PAGE SECTIONS */
+.section { display: none; }
+.section.active { display: block; }
