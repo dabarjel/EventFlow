@@ -52,6 +52,29 @@
   --btn-h: 40px;
 }
 
+/* ── Direction C: Atelier ── B's personality in the details, on a light frame */
+[data-dir="c"] {
+  --green: #1F3A2E; --green-600: #2C4F3F; --green-900: #16291F;
+  --ivory: #F4F1EA; --line: #E3DED3; --line-2: #958C7A; --sage-wash: #E8EEE8;
+  --gold: #A57C2E; --brass-text: #7A5A1C; --brass-hover: #6A4E18;
+  --page: #F4F1EA; --surface: #FFFFFF; --surface-2: #E8EEE8;
+  --r-sm: 8px; --r-md: 10px; --r-lg: 14px;
+  --card-border: 1px solid #E3DED3;
+  --card-shadow: 0 1px 2px rgba(31,58,46,.05), 0 2px 8px rgba(31,58,46,.04);
+  --card-shadow-hover: 0 2px 4px rgba(31,58,46,.07), 0 8px 20px rgba(31,58,46,.08);
+  --title-weight: 600; --title-size: 30px; --title-track: -0.01em;
+  --card-title-font: var(--sans); --card-title-size: 15px; --card-title-weight: 600;
+  --btn-h: 40px;
+}
+[data-dir="c"][data-side="green"] {
+  --nav-bg: #1F3A2E; --nav-ink: #C8D3C9; --nav-ink-strong: #F4F1EA; --nav-active-bg: #2C4F3F;
+  --nav-active-ink: #FFFFFF; --nav-marker: #D9B26F; --nav-line: rgba(244,241,234,.12); --nav-group: #B7C4B9;
+}
+[data-dir="c"][data-side="sage"] {
+  --nav-bg: #E8EEE8; --nav-ink: #2F4A3C; --nav-ink-strong: #1F3A2E; --nav-active-bg: #FFFFFF;
+  --nav-active-ink: #1F3A2E; --nav-marker: #A57C2E; --nav-line: #D6DED7; --nav-group: #556A5E;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
 body { font-family: var(--sans); font-size: 15px; line-height: 1.55; color: var(--ink); background: var(--ivory); }
@@ -74,6 +97,9 @@ svg.i { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentCo
 }
 .switch button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--ivory); }
 .switch .hint { font-size: 13px; color: var(--muted); margin-left: auto; }
+.side-switch { display: flex; align-items: center; gap: 6px; padding-left: 12px; margin-left: 4px; border-left: 1px solid var(--line-2); font-size: 13px; color: var(--muted); }
+.side-switch[hidden] { display: none; }
+.switch .side-switch button { height: 32px; padding: 0 12px; font-size: 13px; }
 
 main { background: var(--page); }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
@@ -317,6 +343,30 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
 }
 .phone .shell-wrap { width: 387px; border-radius: 28px; border-width: 6px; border-color: var(--ink); }
 
+/* ── Direction C details ───────────────────────────────────────────────────── */
+[data-dir="c"] .btn-accent { background: var(--brass-text); }
+[data-dir="c"] .btn-accent:hover:not(:disabled) { background: var(--brass-hover); }
+[data-dir="c"] .btn-secondary:hover:not(:disabled) { background: var(--sage-wash); border-color: var(--green); }
+[data-dir="c"] .inv-img { border-bottom: 0; background: var(--sage-wash); }
+[data-dir="c"] .inv-img img { object-fit: cover; padding: 0; }
+[data-dir="c"] .inv-img.empty { background: var(--sage-wash); }
+[data-dir="c"] .avatar { background: var(--sage-wash); color: var(--green); }
+[data-dir="c"][data-side="sage"] .side .avatar { background: var(--white); }
+[data-dir="c"] .shell-wrap { border-color: #CFC8B8; }
+[data-dir="c"][data-side="sage"] .nav a[aria-current="page"] { box-shadow: 0 1px 2px rgba(31,58,46,.10); }
+[data-dir="c"] .summary { background: #FBF9F4; border: 1px solid var(--gold); }
+[data-dir="c"] .sum-totals { background: var(--ivory); }
+[data-dir="c"] .grand span:last-child { color: var(--brass-text); font-size: 36px; }
+@container shell (max-width: 640px) {
+  [data-dir="c"] .mobile-top { background: var(--surface); border-bottom-color: var(--line); }
+  [data-dir="c"] .mobile-top b, [data-dir="c"] .icon-btn { color: var(--green); }
+  [data-dir="c"] .tabbar { background: var(--surface); border-top-color: var(--line); }
+  [data-dir="c"] .tabbar a { color: #556A5E; }
+  [data-dir="c"] .tabbar a[aria-current="page"] { color: var(--green); }
+  [data-dir="c"] .tabbar a[aria-current="page"] svg { background: var(--sage-wash); border-radius: 999px; width: 52px; height: 28px; padding: 3px 15px; }
+  [data-dir="c"] .tabbar :focus-visible, [data-dir="c"] .mobile-top :focus-visible { outline-color: var(--green); }
+}
+
 /* ── Shared fixes ──────────────────────────────────────────────────────────── */
 .fixes { display: grid; gap: 10px; font-size: 14px; max-width: 760px; }
 .fix { display: grid; grid-template-columns: 28px 28px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 14px; background: var(--white); border: 1px solid var(--line); border-radius: 8px; }
@@ -339,6 +389,8 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
   .guide-head h1 { font-size: 28px; }
   .switch { padding: 10px 16px; }
   .switch .hint { display: none; }
+  .switch-bar { position: static; }
+  .side-switch { border-left: 0; padding-left: 0; margin-left: 0; }
   .wrap { padding: 24px 16px 64px; }
   .form { grid-template-columns: 1fr; }
   .type-row { grid-template-columns: 1fr; gap: 4px; }
@@ -373,30 +425,36 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
 
 <header class="guide-head">
   <h1>EventFlow style guide</h1>
-  <p>Two directions for the redesign. Both keep the brand: botanical green, brass, ivory, Playfair Display and Inter. They differ in how much of the frame the brand takes up and where the emphasis goes. Pick one, and Phase 2 turns it into <code>css/tokens.css</code>.</p>
+  <p>Three directions for the redesign. All keep the brand: botanical green, brass, ivory, Playfair Display and Inter. They differ in how much of the frame the brand takes up and where the emphasis goes. C sits between A and B. Pick one, and Phase 2 turns it into <code>css/tokens.css</code>.</p>
 </header>
 
 <div class="switch-bar">
   <div class="switch" role="group" aria-label="Choose a direction">
     <button type="button" data-set="a" aria-pressed="true">A: Ledger</button>
     <button type="button" data-set="b" aria-pressed="false">B: Conservatory</button>
+    <button type="button" data-set="c" aria-pressed="false">C: Atelier</button>
+    <div class="side-switch" role="group" aria-label="Sidebar for direction C" hidden>
+      <span>Sidebar</span>
+      <button type="button" data-side="green" aria-pressed="true">Dark green</button>
+      <button type="button" data-side="sage" aria-pressed="false">Light sage</button>
+    </div>
     <span class="hint">Same components, restyled. Switch to compare at the same scroll position.</span>
   </div>
 </div>
 
-<main id="guide" data-dir="a">
+<main id="guide" data-dir="a" data-side="green">
 <div class="wrap">
 
   <section class="concept" aria-labelledby="concept-title">
     <div>
-      <h2 id="concept-title" data-a="Ledger" data-b="Conservatory">Ledger</h2>
+      <h2 id="concept-title" data-a="Ledger" data-b="Conservatory" data-c="Atelier">Ledger</h2>
       <p data-a="A calm, paper-like workspace. An ivory page with white working surfaces, and thin warm rules instead of shadows. Green is the ink for navigation and main actions. Brass appears only where money or selection is involved. Playfair is kept for page titles and totals, so a proposal's grand total reads like the bottom line of a florist's ledger."
-         data-b="The brand fills the frame. A deep green sidebar holds an ivory workspace, photos lead the inventory, and cards sit on soft green-tinted shadows. Playfair carries titles and card headings for a more editorial feel. The proposal summary is a dark green card, so it already looks like the document the client will receive.">A calm, paper-like workspace. An ivory page with white working surfaces, and thin warm rules instead of shadows. Green is the ink for navigation and main actions. Brass appears only where money or selection is involved. Playfair is kept for page titles and totals, so a proposal's grand total reads like the bottom line of a florist's ledger.</p>
+         data-b="The brand fills the frame. A deep green sidebar holds an ivory workspace, photos lead the inventory, and cards sit on soft green-tinted shadows. Playfair carries titles and card headings for a more editorial feel. The proposal summary is a dark green card, so it already looks like the document the client will receive." data-c="Conservatory's character on a lighter frame. A warm ivory workspace holds white cards with soft borders and a hint of shadow. Dark green is kept for the sidebar, primary buttons and whatever is selected, so it always means where you are or what to do next. The personality lives in the details: Playfair on titles and money, brass on totals, photo-led inventory, and light sage behind table headers and empty states.">A calm, paper-like workspace. An ivory page with white working surfaces, and thin warm rules instead of shadows. Green is the ink for navigation and main actions. Brass appears only where money or selection is involved. Playfair is kept for page titles and totals, so a proposal's grand total reads like the bottom line of a florist's ledger.</p>
     </div>
     <dl>
-      <div><dt>Where it's bold</dt><dd data-a="The proposal total, set large in Playfair over a brass rule." data-b="The green shell and the dark proposal summary card.">The proposal total, set large in Playfair over a brass rule.</dd></div>
-      <div><dt>Good for</dt><dd data-a="Long working sessions in dense tables. It stays quiet on a phone." data-b="A strong first impression at a demo. It feels like the florist's brand, not a generic dashboard.">Long working sessions in dense tables. It stays quiet on a phone.</dd></div>
-      <div><dt>Trade-off</dt><dd data-a="Less memorable at first glance. It relies on typography and spacing to look premium." data-b="Heavier on screen. Brass text on green needs the lighter brass tint to stay readable.">Less memorable at first glance. It relies on typography and spacing to look premium.</dd></div>
+      <div><dt>Where it's bold</dt><dd data-a="The proposal total, set large in Playfair over a brass rule." data-b="The green shell and the dark proposal summary card." data-c="The brass-bordered proposal summary and its Playfair total.">The proposal total, set large in Playfair over a brass rule.</dd></div>
+      <div><dt>Good for</dt><dd data-a="Long working sessions in dense tables. It stays quiet on a phone." data-b="A strong first impression at a demo. It feels like the florist's brand, not a generic dashboard." data-c="Everyday use and the demo. It looks like the florist's brand without dark blocks in the workspace.">Long working sessions in dense tables. It stays quiet on a phone.</dd></div>
+      <div><dt>Trade-off</dt><dd data-a="Less memorable at first glance. It relies on typography and spacing to look premium." data-b="Heavier on screen. Brass text on green needs the lighter brass tint to stay readable." data-c="More rules to follow. The brass fill (#A57C2E) is only for lines, borders and markers, because text on it fails AA.">Less memorable at first glance. It relies on typography and spacing to look premium.</dd></div>
     </dl>
   </section>
 
@@ -440,9 +498,9 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
     </header>
     <div class="demo">
       <div class="type-row"><small>Display 40</small><div class="t-display tnum">$9,768.96</div></div>
-      <div class="type-row"><small data-a="Page title 28" data-b="Page title 32">Page title 28</small><div class="t-title">Thompson–Reyes wedding</div></div>
-      <div class="type-row"><small data-a="Section 19" data-b="Section 21">Section 19</small><div class="t-section">Ceremony</div></div>
-      <div class="type-row"><small data-a="Card title 15" data-b="Card title 17">Card title 15</small><div class="t-card">White chuppah with floral accents</div></div>
+      <div class="type-row"><small data-a="Page title 28" data-b="Page title 32" data-c="Page title 30">Page title 28</small><div class="t-title">Thompson–Reyes wedding</div></div>
+      <div class="type-row"><small data-a="Section 19" data-b="Section 21" data-c="Section 19">Section 19</small><div class="t-section">Ceremony</div></div>
+      <div class="type-row"><small data-a="Card title 15" data-b="Card title 17" data-c="Card title 15">Card title 15</small><div class="t-card">White chuppah with floral accents</div></div>
       <div class="type-row"><small>Body 15</small><p class="t-body">Ceremony arch moves to the reception after cocktail hour. Candles must be enclosed, per venue rules.</p></div>
       <div class="type-row"><small>Label 12.5</small><div class="t-label">Event date</div></div>
       <div class="type-row"><small>Small 13</small><div class="t-small">Saved 2 minutes ago</div></div>
@@ -595,7 +653,7 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
   <section class="block" aria-labelledby="h-fix">
     <header>
       <h3 id="h-fix">Shared fixes</h3>
-      <p>Applies to both directions. Some of today's colors fail WCAG AA (4.5:1 for small text), so Phase 2 tokens will use these instead.</p>
+      <p>Applies to every direction. Some of today's colors fail WCAG AA (4.5:1 for small text), so Phase 2 tokens will use these instead.</p>
     </header>
     <div class="demo">
       <div class="fixes">
@@ -604,7 +662,9 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
         <div class="fix"><span class="chip" style="background:#2F7D5A"></span><span class="chip" style="background:#28704F"></span><div><b>Approved badge text</b> <span>#2F7D5A is 4.35:1. Use #28704F (5.19:1).</span></div></div>
         <div class="fix"><span class="chip" style="background:#9C6B1F"></span><span class="chip" style="background:#86591A"></span><div><b>Brass text on ivory</b> <span>#9C6B1F is 4.33:1 on #FAF7F2. Use brass text on white only, or #86591A on ivory (5.68:1).</span></div></div>
         <div class="fix"><span class="chip" style="background:#9C9686"></span><span class="chip" style="background:#6B6455"></span><div><b>Placeholder-grey text</b> <span>#9C9686 is 2.95:1 on white. Keep it for decoration only. Readable text uses #6B6455.</span></div></div>
-        <div class="fix"><span class="chip" style="background:#9C6B1F"></span><span class="chip" style="background:#D9B26F"></span><div><b>Brass on dark green</b> <span>#9C6B1F is too dark there. Use #D9B26F (5.99:1), which is direction B only.</span></div></div>
+        <div class="fix"><span class="chip" style="background:#9C6B1F"></span><span class="chip" style="background:#D9B26F"></span><div><b>Brass on dark green</b> <span>#9C6B1F is too dark there. Use #D9B26F (5.99:1) on dark green.</span></div></div>
+        <div class="fix"><span class="chip" style="background:#D3CBB8"></span><span class="chip" style="background:#958C7A"></span><div><b>Input borders</b> <span>#D3CBB8 is 1.61:1 on white, under the 3:1 a field edge needs. Use #958C7A (3.33:1). C already does. A and B would adopt it too.</span></div></div>
+        <div class="fix"><span class="chip" style="background:#A57C2E"></span><span class="chip" style="background:#7A5A1C"></span><div><b>Text on brass (C)</b> <span>White on #A57C2E is 3.80:1. Brass buttons use #7A5A1C (6.35:1). #A57C2E stays for rules, borders and markers, which need 3:1.</span></div></div>
       </div>
     </div>
   </section>
@@ -635,7 +695,7 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
       <div class="mobile-top"><b>EventFlow</b><button class="icon-btn" type="button" aria-label="Open menu"><svg class="i" aria-hidden="true"><use href="#i-menu"/></svg></button></div>
       <div class="topbar">
         <h5>My proposals</h5>
-        <label class="search"><span class="sr-only">Search proposals</span><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input class="input" placeholder="Search proposals"></label>
+        <label class="search"><span class="sr-only">Search proposals</span><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input class="input" placeholder="Search"></label>
         <button class="btn btn-primary" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>New proposal</button>
       </div>
       <div class="app-body">
@@ -678,13 +738,24 @@ const COLORS = {
   ],
 };
 
+COLORS.c = [
+  ['Warm ivory', '#F4F1EA', 'Workspace background', 54],
+  ['White', '#FFFFFF', 'Cards, tables and inputs', 28],
+  ['Light sage', '#E8EEE8', 'Table headers, image wells, empty states, sage sidebar', 7],
+  ['Charcoal', '#2A2822', 'Text', 5],
+  ['Botanical green', '#1F3A2E', 'Sidebar, primary buttons, active states', 4],
+  ['Brass', '#A57C2E', 'Rules, borders and markers. No text on it', 1],
+  ['Brass text', '#7A5A1C', 'Totals, brass buttons, key highlights', 1],
+];
+
 const guide = document.getElementById('guide');
 const tpl = document.getElementById('shell-tpl');
 document.querySelectorAll('[data-shell]').forEach(el => el.appendChild(tpl.content.cloneNode(true)));
 
 function render(dir) {
   guide.dataset.dir = dir;
-  document.querySelectorAll('.switch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.set === dir)));
+  document.querySelectorAll('.switch button[data-set]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.set === dir)));
+  document.querySelector('.side-switch').hidden = dir !== 'c';
   document.querySelectorAll('[data-a]').forEach(el => { el.textContent = el.dataset[dir]; });
   const ratio = document.querySelector('[data-ratio]');
   const sw = document.querySelector('[data-swatches]');
@@ -703,10 +774,20 @@ function render(dir) {
   });
   try { localStorage.setItem('efStyleDir', dir); } catch (e) {}
 }
-document.querySelectorAll('.switch button').forEach(b => b.addEventListener('click', () => render(b.dataset.set)));
+document.querySelectorAll('.switch button[data-set]').forEach(b => b.addEventListener('click', () => render(b.dataset.set)));
+function setSide(side) {
+  guide.dataset.side = side;
+  document.querySelectorAll('.side-switch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === side)));
+  try { localStorage.setItem('efStyleSide', side); } catch (e) {}
+}
+document.querySelectorAll('.side-switch button').forEach(b => b.addEventListener('click', () => setSide(b.dataset.side)));
+let side = 'green';
+try { const v = localStorage.getItem('efStyleSide'); if (v === 'green' || v === 'sage') side = v; } catch (e) {}
+const qs = new URLSearchParams(location.search).get('side'); if (qs === 'green' || qs === 'sage') side = qs;
+setSide(side);
 let start = 'a';
-try { const s = localStorage.getItem('efStyleDir'); if (s === 'a' || s === 'b') start = s; } catch (e) {}
-const q = new URLSearchParams(location.search).get('dir'); if (q === 'a' || q === 'b') start = q;
+try { const s = localStorage.getItem('efStyleDir'); if (['a', 'b', 'c'].includes(s)) start = s; } catch (e) {}
+const q = new URLSearchParams(location.search).get('dir'); if (['a', 'b', 'c'].includes(q)) start = q;
 render(start);
 </script>
 </body>
