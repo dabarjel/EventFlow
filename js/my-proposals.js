@@ -153,7 +153,7 @@ async function mpDelete(key) {
   if (!sb) return;
   const { error } = await sb.from('proposals').delete().eq('id', key); // cascades to proposal_payments
   if (error) { showToast('Could not delete proposal: ' + error.message, 'toast-error'); return; }
-  if (window._propEditingKey === key) window._propEditingKey = null;
+  if (window._propEditingKey === key) { window._propEditingKey = null; _savedProp = null; }
   renderMyProposals();
 }
 

@@ -14,6 +14,10 @@ let propItemIdCounter = 0;
 // already holds its line items: populated once by propLoadProposal()/
 // propNewBlank(), kept in sync by propLogPayment()/propDeletePayment().
 let _propCurrentPayments = [];
+// The currently-open saved proposal record (from getSavedProposals()), same
+// lifecycle as _propCurrentPayments. renderProposalDoc() reads its mockupImage
+// synchronously, so it can't await a fetch of its own.
+let _savedProp = null;
 
 // ── BUILD INVENTORY GRID ──────────────────────────────────────────────────────
 // ── PROP INVENTORY DATA STORE ────────────────────────────────────────────────
@@ -1065,6 +1069,7 @@ async function propLoadProposal(key) {
   const p = typeof key === 'number' ? all[key] : all.find(x => x.key === key);
   if (!p) return;
   window._propEditingKey = p.key; // track which proposal we're editing
+  _savedProp = p;
   _propCurrentPayments = p.payments || []; // repopulate the builder's payment-ledger cache for this proposal
   await _propRefreshHasLinkedSession(p.key); // ditto for the session-link cache, before propRender() reads it
   const setVal = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
@@ -1101,6 +1106,7 @@ async function propLoadProposal(key) {
 function propNewBlank() {
   if (proposalItems.length > 0 && !confirm('Start a new blank proposal? The current ' + proposalItems.length + ' item' + (proposalItems.length !== 1 ? 's' : '') + ' will be cleared.')) return;
   window._propEditingKey = null;
+  _savedProp = null;
   window._vizProposalMockup = null;  // clear any attached mockup
   proposalItems = [];
   propItemIdCounter = 0;
