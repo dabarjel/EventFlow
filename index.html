@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en" data-accent="gold">
+<html lang="en" data-accent="gold" data-page="dashboard">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +14,28 @@
 <link rel="stylesheet" href="css/visualizer.css">
 </head>
 <body>
+<!-- ICONS:START: Lucide v1.49.0 (ISC, lucide.dev). Regenerate, don't hand-edit. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-calendar-days" viewBox="0 0 24 24"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></symbol>
+  <symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+  <symbol id="i-file-pen-line" viewBox="0 0 24 24"><path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/><path d="M14.487 7.858A1 1 0 0 1 14 7V2"/><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/><path d="M8 18h1"/></symbol>
+  <symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M9 15h6"/><path d="M12 18v-6"/></symbol>
+  <symbol id="i-files" viewBox="0 0 24 24"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></symbol>
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-kanban" viewBox="0 0 24 24"><path d="M5 3v14"/><path d="M12 3v8"/><path d="M19 3v18"/></symbol>
+  <symbol id="i-layout-dashboard" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></symbol>
+  <symbol id="i-panel-left-close" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></symbol>
+  <symbol id="i-panel-left-open" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+</svg>
+<!-- ICONS:END -->
 
 <!-- AUTH GATE — visible by default; hidden by _authInit() once a session is confirmed -->
 <div class="auth-overlay" id="auth-overlay">
@@ -36,70 +58,46 @@
   </div>
 </div>
 
-<!-- SIDEBAR -->
-<nav class="sidebar">
+<!-- SIDEBAR: icon rail on desktop (expands on hover/focus, pin with the toggle), drawer on phones -->
+<nav class="sidebar" id="app-sidebar" aria-label="Main navigation">
   <div class="sidebar-logo">
-    <div class="logo-name">EventFlow</div>
-    <div class="logo-sub">Event & Wedding Studio</div>
+    <span class="logo-mark" aria-hidden="true">E</span>
+    <div class="logo-text"><div class="logo-name">EventFlow</div><div class="logo-sub">DaVinci's Florist</div></div>
   </div>
   <div class="sidebar-nav">
-    <div class="nav-section nav-section-first">Overview</div>
-    <div class="nav-item active" onclick="navigate('dashboard')">
-      <span class="nav-icon">◉</span> Dashboard
-    </div>
-
-    <div class="nav-section">Operations</div>
-    <div class="nav-item" onclick="propNewBlank()">
-      <span class="nav-icon">✦</span> New Proposal
-    </div>
-    <div class="nav-item" onclick="navigate('my-proposals')">
-      <span class="nav-icon">☰</span> My Proposals
-    </div>
-    <div class="nav-item" onclick="navigate('visualizer')">
-      <span class="nav-icon">◎</span> Venue Visualizer
-    </div>
-    <div class="nav-item" onclick="navigate('inventory')">
-      <span class="nav-icon">◫</span> Inventory
-    </div>
-
-    <div class="nav-section">Business</div>
-    <div class="nav-item" onclick="navigate('clients')">
-      <span class="nav-icon">◈</span> Clients & CRM
-    </div>
-    <div class="nav-item" onclick="navigate('pipeline')">
-      <span class="nav-icon">⬡</span> Event Pipeline
-    </div>
-    <div class="nav-item" onclick="navigate('availability')">
-      <span class="nav-icon">◷</span> Availability
-    </div>
-    <div class="nav-item" onclick="navigate('invoices')">
-      <span class="nav-icon">◇</span> Invoices & Payments
-    </div>
-    <div class="nav-item" onclick="navigate('contracts')">
-      <span class="nav-icon">◻</span> Contracts
-    </div>
+    <button type="button" class="nav-item active" onclick="navigate('dashboard')"><svg class="nav-icon" aria-hidden="true"><use href="#i-layout-dashboard"/></svg><span class="nav-label">Dashboard</span></button>
+    <div class="nav-divider" role="separator"></div>
+    <button type="button" class="nav-item" onclick="propNewBlank()"><svg class="nav-icon" aria-hidden="true"><use href="#i-file-plus"/></svg><span class="nav-label">New proposal</span></button>
+    <button type="button" class="nav-item" onclick="navigate('my-proposals')"><svg class="nav-icon" aria-hidden="true"><use href="#i-files"/></svg><span class="nav-label">My proposals</span></button>
+    <button type="button" class="nav-item" onclick="navigate('visualizer')"><svg class="nav-icon" aria-hidden="true"><use href="#i-camera"/></svg><span class="nav-label">Venue visualizer</span></button>
+    <button type="button" class="nav-item" onclick="navigate('inventory')"><svg class="nav-icon" aria-hidden="true"><use href="#i-package"/></svg><span class="nav-label">Inventory</span></button>
+    <div class="nav-divider" role="separator"></div>
+    <button type="button" class="nav-item" onclick="navigate('clients')"><svg class="nav-icon" aria-hidden="true"><use href="#i-users"/></svg><span class="nav-label">Clients</span></button>
+    <button type="button" class="nav-item" onclick="navigate('pipeline')"><svg class="nav-icon" aria-hidden="true"><use href="#i-kanban"/></svg><span class="nav-label">Event pipeline</span></button>
+    <button type="button" class="nav-item" onclick="navigate('availability')"><svg class="nav-icon" aria-hidden="true"><use href="#i-calendar-days"/></svg><span class="nav-label">Availability</span></button>
+    <button type="button" class="nav-item" onclick="navigate('invoices')"><svg class="nav-icon" aria-hidden="true"><use href="#i-receipt"/></svg><span class="nav-label">Invoices</span></button>
+    <button type="button" class="nav-item" onclick="navigate('contracts')"><svg class="nav-icon" aria-hidden="true"><use href="#i-file-pen-line"/></svg><span class="nav-label">Contracts</span></button>
   </div>
+  <button type="button" class="rail-toggle" onclick="shellToggleRail()" aria-pressed="false"><svg class="nav-icon" aria-hidden="true"><use href="#i-panel-left-open"/></svg><span class="nav-label">Keep sidebar open</span></button>
   <div class="sidebar-user">
     <div class="user-avatar" id="auth-user-avatar">–</div>
-    <div style="flex:1;min-width:0;">
+    <div class="user-meta">
       <div class="user-name" id="auth-user-name">—</div>
       <div class="user-role" id="auth-user-email">—</div>
     </div>
-    <button class="auth-signout-btn" onclick="_authSignOut()" title="Sign out">⏻</button>
+    <button class="auth-signout-btn" onclick="_authSignOut()" title="Sign out" aria-label="Sign out"><svg class="nav-icon" aria-hidden="true"><use href="#i-log-out"/></svg></button>
   </div>
 </nav>
 
 <!-- MAIN -->
 <main class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="page-title">Dashboard</div>
+  <header class="topbar">
+    <button type="button" class="icon-btn topbar-menu" onclick="shellOpenNav()" aria-label="Open menu" aria-controls="app-sidebar" aria-expanded="false"><svg class="nav-icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+    <h1 class="topbar-title" id="page-title">Dashboard</h1>
     <div class="topbar-actions">
-      <button class="btn" onclick="navigate('clients')" title="Open Clients & CRM">◈ Clients</button>
-      <button class="btn" onclick="openModal('new-event')" title="Add a new event to the pipeline">+ New Event</button>
-      <button class="btn btn-primary" onclick="propNewBlank()" title="Start a new blank proposal">+ New Proposal</button>
+      <button class="btn topbar-new" onclick="propNewBlank()" title="Start a new blank proposal"><svg class="nav-icon" aria-hidden="true"><use href="#i-plus"/></svg>New proposal</button>
     </div>
-  </div>
-
+  </header>
   <div class="content">
 
     <!-- DASHBOARD -->
@@ -1167,6 +1165,17 @@
     </div>
 </main>
 
+<!-- PHONE: drawer scrim, bottom tabs, floating new-proposal button (hidden above 640px) -->
+<div class="nav-scrim" onclick="shellCloseNav()"></div>
+<nav class="tabbar" aria-label="Quick navigation">
+  <button type="button" class="tab-item active" onclick="navigate('dashboard')"><svg class="nav-icon" aria-hidden="true"><use href="#i-house"/></svg><span>Home</span></button>
+  <button type="button" class="tab-item" onclick="navigate('my-proposals')"><svg class="nav-icon" aria-hidden="true"><use href="#i-files"/></svg><span>Proposals</span></button>
+  <button type="button" class="tab-item" onclick="navigate('inventory')"><svg class="nav-icon" aria-hidden="true"><use href="#i-package"/></svg><span>Inventory</span></button>
+  <button type="button" class="tab-item" onclick="navigate('clients')"><svg class="nav-icon" aria-hidden="true"><use href="#i-users"/></svg><span>Clients</span></button>
+  <button type="button" class="tab-item tab-more" onclick="shellOpenNav()" aria-label="More pages" aria-controls="app-sidebar"><svg class="nav-icon" aria-hidden="true"><use href="#i-ellipsis"/></svg><span>More</span></button>
+</nav>
+<button type="button" class="btn btn-primary fab" onclick="propNewBlank()"><svg class="nav-icon" aria-hidden="true"><use href="#i-plus"/></svg>New proposal</button>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -1199,6 +1208,7 @@
 <script src="js/visualizer-crop-library.js"></script>
 <script src="js/visualizer-side-by-side.js"></script>
 <script src="js/visualizer-sessions.js"></script>
+<script src="js/shell.js"></script>
 <script src="js/main.js"></script>
   <script src="data/inventory.js"></script>
 

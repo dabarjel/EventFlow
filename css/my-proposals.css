@@ -6,7 +6,7 @@
 .mp-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px 20px; margin-bottom:var(--space-3); transition:box-shadow var(--duration-fast); }
 .mp-card:hover { box-shadow:var(--shadow-none); }
 .mp-card-top { display:flex; align-items:flex-start; gap:14px; }
-.mp-avatar { width:42px; height:42px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:var(--fs-md); font-weight:var(--weight-medium); color:var(--accent-on); flex-shrink:0; }
+.mp-avatar { width:42px; height:42px; border-radius:50%; background:var(--surface-raised); display:flex; align-items:center; justify-content:center; font-size:var(--fs-md); font-weight:var(--weight-medium); color:var(--on-solid); flex-shrink:0; }
 .mp-info { flex:1; min-width:0; }
 .mp-client { font-size:var(--fs-md); font-weight:var(--weight-medium); color:var(--text); }
 .mp-meta { font-size:var(--fs-xs); color:var(--text-3); margin-top:3px; }

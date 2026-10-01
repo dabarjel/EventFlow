@@ -1,7 +1,10 @@
 // Clients & CRM screen.
 
 // ── CRM — Client Data (seed + dynamic from proposals) ────────────────────────
-const _CRM_AVATAR_COLORS = ['var(--accent-text)','#185FA5','#854F0B','#5B21B6','#0F6E56','#C0392B','#8B6A72','#B8955A'];
+// Avatar fills: each carries white initials at 6:1 or better on the dark UI.
+const _CRM_AVATAR_COLORS = ['#3F6B54','#2F5F8A','#7A5A1C','#5B4B9A','#8A3B35','#5E5E5E'];
+// Colors saved by older versions: a removed CSS variable, and a gold that fails contrast with white.
+const _CRM_LEGACY_COLORS = { 'var(--sage)': '#3F6B54', '#B8955A': '#7A5A1C' };
 
 // The five demo clients that used to seed a fresh crmClients_v1 key were
 // always decorative/fake (CRM was never a named focus page during the design
@@ -13,7 +16,7 @@ async function getCRMClients() {
   if (error) { showToast('Could not load clients: ' + error.message, 'toast-error'); return []; }
   return (data || []).map(c => ({
     id: c.id, name: c.name, email: c.email, phone: c.phone, initials: c.initials,
-    color: c.color, type: c.type, dateStr: c.event_date, value: c.value,
+    color: _CRM_LEGACY_COLORS[c.color] || c.color || _CRM_AVATAR_COLORS[0], type: c.type, dateStr: c.event_date, value: c.value,
     status: c.status, source: c.source, createdAt: new Date(c.created_at).getTime()
   }));
 }

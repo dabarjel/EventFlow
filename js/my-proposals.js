@@ -25,7 +25,7 @@ async function renderMyProposals() {
 
   const fmtMoney = n => '$' + Number(n||0).toLocaleString('en-US', {minimumFractionDigits:2});
   const initials = name => (name||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  const avatarColors = ['var(--accent-text)','var(--accent-border)','var(--accent-text)','var(--danger-border)','var(--status-sent-fg)','#6B4A63'];
+  const avatarColors = ['#3F6B54','#2F5F8A','#7A5A1C','#5B4B9A','#8A3B35','#5E5E5E'];
 
   container.innerHTML = '';
   all.forEach((p, i) => {

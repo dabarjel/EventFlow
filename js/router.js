@@ -46,17 +46,19 @@ function navigate(page) {
   if (page === 'contracts')    { setTimeout(_contractsRestoreTemplate, 50); }
   if (page === 'pipeline')     { setTimeout(_pipelineRefreshCounts, 50); }
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .tab-item').forEach(n => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
   const sec = document.getElementById('section-' + page);
   if (sec) sec.classList.add('active');
   document.getElementById('page-title').textContent = pages[page] || page;
-  document.querySelectorAll('.nav-item').forEach(n => {
+  document.documentElement.dataset.page = page;
+  document.querySelectorAll('.nav-item, .tab-item').forEach(n => {
     const oc = n.getAttribute('onclick') || '';
     const dataPage = n.dataset.page || '';
     const matches = oc.includes("'" + page + "'")
       || dataPage === page
       || (page === 'proposals' && (oc.includes('propNewBlank') || oc.includes("navigate('proposals')")));
-    if (matches) n.classList.add('active');
+    if (matches) { n.classList.add('active'); n.setAttribute('aria-current', 'page'); }
   });
+  shellCloseNav();
   if (page === 'availability') renderCalendar();
 }
