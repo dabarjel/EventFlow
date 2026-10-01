@@ -44,7 +44,7 @@ function navigate(page) {
   if (page === 'dashboard')    { setTimeout(renderDashboard, 50); }
   if (page === 'visualizer')   { setTimeout(vizInit, 80); }
   if (page === 'contracts')    { setTimeout(_contractsRestoreTemplate, 50); }
-  if (page === 'pipeline')     { setTimeout(_pipelineRefreshCounts, 50); }
+  if (page === 'pipeline')     { setTimeout(renderPipeline, 50); }
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item, .tab-item').forEach(n => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
   const sec = document.getElementById('section-' + page);

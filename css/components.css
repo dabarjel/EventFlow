@@ -428,3 +428,14 @@
   .inventory-grid { grid-template-columns: repeat(2, 1fr); }
   .crm-layout { grid-template-columns: 1fr; }
 }
+
+/* Dashboard: honest empty states and the proposals-by-status card */
+.dash-empty { padding: var(--space-4); color: var(--text-3); font-size: var(--fs-sm); text-align: center; }
+.dash-status-list { display: flex; flex-direction: column; gap: 2px; }
+.dash-status-row {
+  display: flex; align-items: center; justify-content: space-between; width: 100%; padding: var(--space-2) var(--space-1);
+  border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text); font: inherit; cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.dash-status-row:hover { background: var(--surface-hover); }
+.dash-status-count { font-size: var(--fs-lg); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; }

@@ -104,24 +104,24 @@
     <div id="section-dashboard" class="section active">
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Active Events</div>
-          <div class="stat-value">24</div>
-          <div class="stat-change stat-up">↑ 4 from last month</div>
+          <div class="stat-label">Upcoming events</div>
+          <div class="stat-value" id="stat-events">—</div>
+          <div class="stat-change" id="stat-events-sub">Loading…</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Monthly Revenue</div>
-          <div class="stat-value" id="stat-revenue">$48,200</div>
-          <div class="stat-change stat-up">↑ 12% vs last month</div>
+          <div class="stat-label">Proposal value</div>
+          <div class="stat-value" id="stat-revenue">—</div>
+          <div class="stat-change" id="stat-revenue-sub">Loading…</div>
         </div>
         <div class="stat-card" style="cursor:pointer;" onclick="navigate('my-proposals')" title="Go to My Proposals">
           <div class="stat-label">Open Proposals</div>
           <div class="stat-value" id="stat-proposals">—</div>
-          <div class="stat-change stat-down" id="stat-proposals-sub">Loading…</div>
+          <div class="stat-change" id="stat-proposals-sub">Loading…</div>
         </div>
         <div class="stat-card" style="cursor:pointer;" onclick="navigate('inventory')" title="Go to Inventory">
           <div class="stat-label">Inventory Items</div>
           <div class="stat-value" id="stat-inventory">—</div>
-          <div class="stat-change stat-up" id="stat-inventory-sub">Loading…</div>
+          <div class="stat-change" id="stat-inventory-sub">Loading…</div>
         </div>
       </div>
       <div class="dashboard-grid">
@@ -131,86 +131,13 @@
             <button class="btn" style="font-size:var(--fs-2xs);padding:4px 10px;" onclick="navigate('pipeline')">View Pipeline →</button>
           </div>
           <div class="event-list" id="dash-upcoming-events">
-            <div class="event-row" onclick="navigate('pipeline')">
-              <div class="event-date"><div class="event-date-num">14</div><div class="event-date-mon">Jun</div></div>
-              <div class="event-info">
-                <div class="event-name">Thompson–Reyes Wedding</div>
-                <div class="event-sub">Rosewood Manor · 220 guests · Full décor package</div>
-              </div>
-              <span class="badge badge-active">Active</span>
-            </div>
-            <div class="event-row" onclick="navigate('pipeline')">
-              <div class="event-date"><div class="event-date-num">18</div><div class="event-date-mon">Jun</div></div>
-              <div class="event-info">
-                <div class="event-name">Azure Tech Summit Gala</div>
-                <div class="event-sub">Grand Ballroom · 400 guests · Tables & Linens</div>
-              </div>
-              <span class="badge badge-contract">Contract</span>
-            </div>
-            <div class="event-row" onclick="navigate('pipeline')">
-              <div class="event-date"><div class="event-date-num">22</div><div class="event-date-mon">Jun</div></div>
-              <div class="event-info">
-                <div class="event-name">Hargrove Anniversary Party</div>
-                <div class="event-sub">Private Estate · 80 guests · Floral & Lighting</div>
-              </div>
-              <span class="badge badge-proposal">Proposal</span>
-            </div>
-            <div class="event-row" onclick="navigate('pipeline')">
-              <div class="event-date"><div class="event-date-num">29</div><div class="event-date-mon">Jun</div></div>
-              <div class="event-info">
-                <div class="event-name">Chen–Williams Wedding</div>
-                <div class="event-sub">Vineyard Estate · 150 guests · Arch + Seating</div>
-              </div>
-              <span class="badge badge-inquiry">Inquiry</span>
-            </div>
-            <div class="event-row" onclick="navigate('pipeline')">
-              <div class="event-date"><div class="event-date-num">5</div><div class="event-date-mon">Jul</div></div>
-              <div class="event-info">
-                <div class="event-name">Morrison Corporate Dinner</div>
-                <div class="event-sub">The Grand Hotel · 60 guests · Fine dining setup</div>
-              </div>
-              <span class="badge badge-active">Active</span>
-            </div>
+            <div class="dash-empty" id="dash-upcoming-empty">Loading events…</div>
           </div>
         </div>
         <div>
-          <div class="card" style="margin-bottom:16px;">
-            <div class="card-title">Revenue This Quarter</div>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              <div>
-                <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--text-3);margin-bottom:4px;"><span>April</span><span>$14,200</span></div>
-                <div style="height:8px;background:var(--border-strong);border-radius:var(--radius-xs);overflow:hidden;"><div style="width:59%;height:100%;background:var(--accent);border-radius:var(--radius-xs);"></div></div>
-              </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--text-3);margin-bottom:4px;"><span>May</span><span>$18,900</span></div>
-                <div style="height:8px;background:var(--border-strong);border-radius:var(--radius-xs);overflow:hidden;"><div style="width:79%;height:100%;background:var(--accent);border-radius:var(--radius-xs);"></div></div>
-              </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--text-3);margin-bottom:4px;"><span>June (proj.)</span><span>$24,000</span></div>
-                <div style="height:8px;background:var(--border-strong);border-radius:var(--radius-xs);overflow:hidden;"><div style="width:100%;height:100%;background:var(--accent);border-radius:var(--radius-xs);opacity:0.8;"></div></div>
-              </div>
-            </div>
-          </div>
           <div class="card">
-            <div class="card-title">Tasks Due Soon</div>
-            <div style="display:flex;flex-direction:column;gap:8px;" id="task-list">
-              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
-                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
-                <span>Send final invoice — Thompson–Reyes</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
-                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
-                <span>Confirm delivery time — Azure Summit</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
-                <input type="checkbox" class="task-cb" checked style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
-                <span style="text-decoration:line-through;color:var(--text-3);">Sign contract — Hargrove</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
-                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
-                <span>Follow up proposal — Chen–Williams</span>
-              </div>
-            </div>
+            <div class="card-title">Proposals by status</div>
+            <div class="dash-status-list" id="dash-status-list"><div class="dash-empty">Loading…</div></div>
           </div>
         </div>
       </div>
@@ -229,78 +156,23 @@
       <div class="pipeline-cols">
         <div class="pipeline-col ph-inquiry">
           <div class="pipeline-header"><span>Inquiry</span><span></span></div>
-          <div class="pipeline-body">
-            <div class="pipeline-card" data-type="Wedding" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Chen–Williams Wedding</div>
-              <div class="pipeline-card-meta">Jun 29 · Vineyard Estate · 150 guests</div>
-              <div class="pipeline-card-value">~$8,400</div>
-            </div>
-            <div class="pipeline-card" data-type="Social" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Park Birthday Gala</div>
-              <div class="pipeline-card-meta">Jul 12 · Private home · 50 guests</div>
-              <div class="pipeline-card-value">~$2,100</div>
-            </div>
-          </div>
+          <div class="pipeline-body"></div>
         </div>
         <div class="pipeline-col ph-proposal">
           <div class="pipeline-header"><span>Proposal</span><span></span></div>
-          <div class="pipeline-body">
-            <div class="pipeline-card" data-type="Social" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Hargrove Anniversary</div>
-              <div class="pipeline-card-meta">Jun 22 · Private Estate · 80 guests</div>
-              <div class="pipeline-card-value">$6,200</div>
-            </div>
-            <div class="pipeline-card" data-type="Social" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Skyline Rooftop Party</div>
-              <div class="pipeline-card-meta">Jul 4 · Hotel Rooftop · 120 guests</div>
-              <div class="pipeline-card-value">$5,800</div>
-            </div>
-            <div class="pipeline-card" data-type="Social" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Santos Quinceañera</div>
-              <div class="pipeline-card-meta">Aug 3 · Community Center · 200 guests</div>
-              <div class="pipeline-card-value">$7,100</div>
-            </div>
-          </div>
+          <div class="pipeline-body"></div>
         </div>
         <div class="pipeline-col ph-contract">
           <div class="pipeline-header"><span>Contract Signed</span><span></span></div>
-          <div class="pipeline-body">
-            <div class="pipeline-card" data-type="Corporate" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Azure Tech Summit Gala</div>
-              <div class="pipeline-card-meta">Jun 18 · Grand Ballroom · 400 guests</div>
-              <div class="pipeline-card-value">$14,600</div>
-            </div>
-            <div class="pipeline-card" data-type="Corporate" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Morrison Corporate Dinner</div>
-              <div class="pipeline-card-meta">Jul 5 · The Grand Hotel · 60 guests</div>
-              <div class="pipeline-card-value">$3,900</div>
-            </div>
-          </div>
+          <div class="pipeline-body"></div>
         </div>
         <div class="pipeline-col ph-active">
           <div class="pipeline-header"><span>Active / Prep</span><span></span></div>
-          <div class="pipeline-body">
-            <div class="pipeline-card" data-type="Wedding" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Thompson–Reyes Wedding</div>
-              <div class="pipeline-card-meta">Jun 14 · Rosewood Manor · 220 guests</div>
-              <div class="pipeline-card-value">$22,400</div>
-            </div>
-          </div>
+          <div class="pipeline-body"></div>
         </div>
         <div class="pipeline-col ph-complete">
           <div class="pipeline-header"><span>Complete</span><span></span></div>
-          <div class="pipeline-body">
-            <div class="pipeline-card" data-type="Wedding" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Nakamura Wedding</div>
-              <div class="pipeline-card-meta">May 28 · Garden Venue</div>
-              <div class="pipeline-card-value">$18,200</div>
-            </div>
-            <div class="pipeline-card" data-type="Corporate" onclick="openEventDetail(this)">
-              <div class="pipeline-card-name">Brighton Gala</div>
-              <div class="pipeline-card-meta">May 12 · Convention Ctr</div>
-              <div class="pipeline-card-value">$11,400</div>
-            </div>
-          </div>
+          <div class="pipeline-body"></div>
         </div>
       </div>
     </div>
