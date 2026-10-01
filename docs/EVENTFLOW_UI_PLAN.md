@@ -24,6 +24,22 @@ Keep the existing brand from design-system/eventflow/MASTER.md: deep botanical g
 2. List the biggest UI problems: hardcoded colors and sizes, inconsistent spacing, cramped tables, weak hierarchy, missing loading/empty/error states, broken mobile layouts.
 3. Give me a short summary and wait.
 
+**Status: done.** Findings are in `docs/UI_AUDIT.md`.
+
+## Phase 0.5: Organize the repo (no visual or behavior changes)
+Commit after each step, then stop so I can test.
+
+a. Split index.html. CSS goes into `css/`: base.css, layout.css, components.css, plus one file per screen that had its own style block. JS goes into `js/`: Supabase client, auth, router, shared utils (including escapeHtml), then one file per screen. Use plain `<script src>` tags in the order the code runs now, never `type="module"`, because inline onclick handlers need globals. Leave the print/proposal/invoice CSS strings where they are.
+b. Clean up the root. Move eventflow_items.json and inventory.js into `data/`. Remove eventflow_v19.backup from the repo. Put the plan, audit, and review files in `docs/`. Restore CNAME with eventflow.davinciflorist.com.
+c. Images: if Supabase stores image paths, leave `media floral/` and `media rentals/` alone. Otherwise rename them to `assets/media/floral` and `assets/media/rentals`, update every path, and check each source_file against a real file with exact case.
+d. Create CLAUDE.md with the project rules.
+e. Write a README.md for recruiters, with screenshot placeholders.
+
+**Status: done, except for the CNAME, which is on hold.**
+- a. Done. Kick-off calls (`_authInit`, `renderCalendar`, `renderDashboard`, `_pipelineRefreshCounts`) and the document listeners now live in `js/main.js`, which loads last. The invite/recovery URL hash is captured in `js/supabase-client.js` before `createClient()`.
+- b. Done, with two exceptions. The backup was never in the repo: it's gitignored and was never committed, so it's not public. The local copy was left in place. The CNAME was not restored because `eventflow.davinciflorist.com` has no DNS record yet, and merging a CNAME would redirect the live site to a dead domain.
+- c. No change. Supabase stores image paths (`proposals.items[].imgSrc`), so the media folders stay put. All 775 catalog image references match real files with exact case.
+
 ## Phase 1: Pick a direction
 1. Create `styleguide.html` with 2 visual directions, both using the brand above. Show for each: color usage, type scale, buttons, inputs, a table row, an inventory card, a proposal summary card, and the nav.
 2. Stop so I can pick one.
@@ -44,6 +60,8 @@ Redesign in this order (most visible at the fair first):
 7. Payments and Venue Visualizer (light touch, consistency only)
 
 Add loading, empty, and error states wherever they're missing. Commit after each screen.
+
+Replace the fake dashboard and pipeline numbers (Active Events, revenue trend, "from last month" deltas, the static pipeline cards and seed upcoming events) with real Supabase data. Where a query would be complex, show an honest empty state instead.
 
 ## Phase 4: Polish and check
 1. Run a UX heuristics review and an accessibility pass (contrast, focus styles, aria labels, keyboard nav). Fix high-severity items only.
