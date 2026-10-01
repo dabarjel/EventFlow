@@ -40,22 +40,23 @@
 <!-- AUTH GATE — visible by default; hidden by _authInit() once a session is confirmed -->
 <div class="auth-overlay" id="auth-overlay">
   <div class="auth-box">
-    <div class="auth-logo">EventFlow</div>
-    <div class="auth-sub">Event & Wedding Studio</div>
+    <div class="auth-brand"><span class="logo-mark" aria-hidden="true">E</span><span class="auth-logo">EventFlow</span></div>
+    <div class="auth-sub">DaVinci's Florist</div>
     <div class="auth-status" id="auth-status">Checking session…</div>
     <div id="auth-form" style="display:none;">
-      <input type="email" id="auth-email" placeholder="Email" autocomplete="username">
-      <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')_authSignIn()">
-      <button class="btn btn-primary" style="width:100%;box-sizing:border-box;" onclick="_authSignIn()">Sign In</button>
+      <input type="email" id="auth-email" placeholder="Email" aria-label="Email" autocomplete="username">
+      <input type="password" id="auth-password" placeholder="Password" aria-label="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')_authSignIn()">
+      <button class="btn btn-primary auth-submit" onclick="_authSignIn()">Sign in</button>
       <div class="auth-error" id="auth-error"></div>
     </div>
     <div id="auth-setpass-form" style="display:none;">
-      <input type="password" id="auth-newpass"  placeholder="New password" autocomplete="new-password" onkeydown="if(event.key==='Enter')_authSetPassword()">
-      <input type="password" id="auth-newpass2" placeholder="Confirm password" autocomplete="new-password" onkeydown="if(event.key==='Enter')_authSetPassword()">
-      <button class="btn btn-primary" style="width:100%;box-sizing:border-box;" onclick="_authSetPassword()">Set Password & Sign In</button>
+      <input type="password" id="auth-newpass"  placeholder="New password" aria-label="New password" autocomplete="new-password" onkeydown="if(event.key==='Enter')_authSetPassword()">
+      <input type="password" id="auth-newpass2" placeholder="Confirm password" aria-label="Confirm password" autocomplete="new-password" onkeydown="if(event.key==='Enter')_authSetPassword()">
+      <button class="btn btn-primary auth-submit" onclick="_authSetPassword()">Set password and sign in</button>
       <div class="auth-error" id="auth-setpass-error"></div>
     </div>
   </div>
+  <a class="auth-credit" href="https://github.com/dabarjel" target="_blank" rel="noopener">Built by Daniel Abarjel · UMD Information Science</a>
 </div>
 
 <!-- SIDEBAR: icon rail on desktop (expands on hover/focus, pin with the toggle), drawer on phones -->

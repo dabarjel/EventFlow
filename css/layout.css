@@ -132,22 +132,27 @@ html[data-page="proposals"] .topbar-new, html[data-page="proposal-doc"] .topbar-
 /* ── Login overlay ── */
 .auth-overlay {
   position: fixed; inset: 0; z-index: 999; background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-5); padding: var(--space-4);
 }
 .auth-box {
-  width: 320px; max-width: 90vw; padding: 32px 28px; background: var(--surface);
-  border: 1px solid var(--border-strong); border-radius: var(--radius-md); box-shadow: none;
-  text-align: center;
+  width: 340px; max-width: 100%; padding: var(--space-8) var(--space-6) var(--space-6);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;
 }
-.auth-logo { font-family: var(--font-heading); font-weight: var(--weight-medium); font-size: var(--fs-2xl); color: var(--accent-text); }
-.auth-sub { font-size: var(--fs-xs); color: var(--text-3); margin-bottom: 22px; }
-.auth-status { font-size: var(--fs-xs); color: var(--text-3); margin-bottom: 14px; }
-#auth-form input {
-  display: block; width: 100%; box-sizing: border-box; padding: 9px 12px; margin-bottom: 10px;
-  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: var(--fs-sm);
-  font-family: var(--font-sans); color: var(--text); background: var(--bg); outline: none;
+.auth-brand { display: flex; align-items: center; justify-content: center; gap: var(--space-3); }
+.auth-logo { font-size: var(--fs-xl); font-weight: var(--weight-medium); color: var(--text); letter-spacing: -0.01em; }
+.auth-sub { font-size: var(--fs-sm); color: var(--text-3); margin: var(--space-1) 0 var(--space-6); }
+.auth-status { font-size: var(--fs-sm); color: var(--text-2); margin-bottom: var(--space-4); }
+#auth-form input, #auth-setpass-form input {
+  display: block; width: 100%; height: var(--control-h-touch); padding: 0 var(--space-3); margin-bottom: var(--space-3);
+  border: 1px solid var(--border-input); border-radius: var(--radius-sm); background: var(--bg);
+  color: var(--text); font: inherit; font-size: var(--fs-md); outline: none;
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
-.auth-error { font-size: var(--fs-xs); color: var(--danger-text); margin-top: 10px; min-height: 14px; }
+#auth-form input:focus, #auth-setpass-form input:focus { border-color: var(--accent-text); box-shadow: var(--ring); }
+.auth-submit { width: 100%; height: var(--control-h-touch); margin-top: var(--space-1); }
+.auth-error { font-size: var(--fs-sm); color: var(--danger-text); margin-top: var(--space-3); min-height: 18px; }
+.auth-credit { font-size: var(--fs-xs); color: var(--text-3); text-decoration: none; }
+.auth-credit:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── Phone: page layouts that must stack instead of scrolling sideways ── */
 @media (max-width: 639px) {
