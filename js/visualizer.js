@@ -242,7 +242,7 @@ function vizUpdateProposalChips() {
   const container = document.getElementById('viz-proposal-chips');
   if (!container) return;
   if (!proposalItems || !proposalItems.length) {
-    container.innerHTML = '<span style="font-size:11px;color:var(--stone-light);font-style:italic;">No proposal items yet — build a proposal first.</span>';
+    container.innerHTML = '<span style="font-size:var(--fs-2xs);color:var(--text-3);font-style:italic;">No proposal items yet — build a proposal first.</span>';
     return;
   }
   // Chip label goes into a data-attribute (read back via .dataset, which the
@@ -569,7 +569,7 @@ function vizRenderCalloutList() {
   const list = document.getElementById('viz-callout-list');
   if (!list) return;
   if (!vizState.callouts.length) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--stone-light);font-style:italic;padding:8px 0;">Click the mockup to add callout markers.</div>';
+    list.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--text-3);font-style:italic;padding:8px 0;">Click the mockup to add callout markers.</div>';
     return;
   }
   const invItems = [...document.querySelectorAll('#inv-grid .inv-card')].map(c => ({
@@ -583,15 +583,15 @@ function vizRenderCalloutList() {
       <div>
         <div class="viz-callout-label">
           <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.color};margin-right:5px;vertical-align:middle;"></span>
-          <input type="text" value="${escapeHtml(c.label)}" style="border:none;background:transparent;font-size:12.5px;font-weight:600;font-family:var(--font-sans);outline:none;color:var(--charcoal);width:100%;" onchange="vizUpdateCallout(${c.id},'label',this.value)">
+          <input type="text" value="${escapeHtml(c.label)}" style="border:none;background:transparent;font-size:var(--fs-xs);font-weight:var(--weight-medium);font-family:var(--font-sans);outline:none;color:var(--text);width:100%;" onchange="vizUpdateCallout(${c.id},'label',this.value)">
         </div>
-        <select style="font-size:11px;color:var(--stone);border:none;background:transparent;margin-top:2px;font-family:var(--font-sans);outline:none;max-width:170px;" onchange="vizLinkInventory(${c.id},this.value)">
+        <select style="font-size:var(--fs-2xs);color:var(--text-3);border:none;background:transparent;margin-top:2px;font-family:var(--font-sans);outline:none;max-width:170px;" onchange="vizLinkInventory(${c.id},this.value)">
           <option value="">— link inventory item —</option>${invOptions}
         </select>
       </div>
-      <input type="text" value="${escapeHtml(c.price)}" placeholder="$" style="width:56px;padding:3px 6px;border:1px solid var(--border-mid);border-radius:5px;font-size:12px;font-family:var(--font-sans);text-align:right;outline:none;" onchange="vizUpdateCallout(${c.id},'price',this.value)">
-      <button onclick="vizRenderCallouts()" style="padding:3px 7px;border:1px solid var(--sage);border-radius:5px;background:var(--sage-light);color:var(--sage-dark);cursor:pointer;font-size:12px;" title="Refresh preview">↺</button>
-      <button onclick="vizDeleteCallout(${c.id})" style="padding:3px 7px;border:1px solid #B3261E;border-radius:5px;background:#fff;color:#B3261E;cursor:pointer;font-size:12px;" title="Remove">✕</button>
+      <input type="text" value="${escapeHtml(c.price)}" placeholder="$" style="width:56px;padding:3px 6px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);text-align:right;outline:none;" onchange="vizUpdateCallout(${c.id},'price',this.value)">
+      <button onclick="vizRenderCallouts()" style="padding:3px 7px;border:1px solid var(--accent-text);border-radius:var(--radius-sm);background:var(--surface-active);color:var(--text);cursor:pointer;font-size:var(--fs-xs);" title="Refresh preview">↺</button>
+      <button onclick="vizDeleteCallout(${c.id})" style="padding:3px 7px;border:1px solid #B3261E;border-radius:var(--radius-sm);background:var(--surface);color:var(--danger-text);cursor:pointer;font-size:var(--fs-xs);" title="Remove">✕</button>
     </div>`;
   }).join('');
 }

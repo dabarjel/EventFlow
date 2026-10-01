@@ -16,7 +16,7 @@ function openEventDetail(cardEl) {
     const m = document.getElementById('ed-meta');    if (m) m.textContent = meta;
     const v = document.getElementById('ed-value');   if (v) v.textContent = value;
     const b = document.getElementById('ed-badge');
-    if (b) { b.className = 'badge ' + badgeClass; b.style.cssText = 'font-size:12px;padding:5px 12px;'; b.textContent = headerText.trim() || 'Event'; }
+    if (b) { b.className = 'badge ' + badgeClass; b.style.cssText = 'font-size:var(--fs-xs);padding:5px 12px;'; b.textContent = headerText.trim() || 'Event'; }
   }, 10);
 }
 

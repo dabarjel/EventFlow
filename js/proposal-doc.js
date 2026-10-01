@@ -12,13 +12,13 @@ function addCustomLineItem() {
   const id = ++customItemCounter;
   const div = document.createElement('div');
   div.id = 'cli-' + id;
-  div.style.cssText = 'display:grid;grid-template-columns:2fr 3fr 60px 90px auto;gap:8px;align-items:center;margin-bottom:8px;padding:10px;background:var(--cream);border-radius:var(--radius-sm);border:1px solid var(--border);';
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 3fr 60px 90px auto;gap:8px;align-items:center;margin-bottom:8px;padding:10px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);';
   div.innerHTML = `
-    <input placeholder="Section (e.g. Adult Area)" id="cli-sec-${id}" style="padding:6px 8px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);">
-    <input placeholder="Description" id="cli-desc-${id}" style="padding:6px 8px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);">
-    <input placeholder="Qty" type="number" id="cli-qty-${id}" style="padding:6px 8px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);">
-    <input placeholder="Unit $" type="number" id="cli-price-${id}" style="padding:6px 8px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);">
-    <button onclick="removeCustomItem(${id})" style="padding:4px 10px;border:1px solid #B3261E;border-radius:6px;background:#fff;color:#B3261E;cursor:pointer;font-size:12px;">✕</button>`;
+    <input placeholder="Section (e.g. Adult Area)" id="cli-sec-${id}" style="padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);">
+    <input placeholder="Description" id="cli-desc-${id}" style="padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);">
+    <input placeholder="Qty" type="number" id="cli-qty-${id}" style="padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);">
+    <input placeholder="Unit $" type="number" id="cli-price-${id}" style="padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);">
+    <button onclick="removeCustomItem(${id})" style="padding:4px 10px;border:1px solid #B3261E;border-radius:var(--radius-sm);background:var(--surface);color:var(--danger-text);cursor:pointer;font-size:var(--fs-xs);">✕</button>`;
   document.getElementById('custom-line-items').appendChild(div);
   customLineItems.push(id);
 }

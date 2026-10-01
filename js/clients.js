@@ -1,7 +1,7 @@
 // Clients & CRM screen.
 
 // ── CRM — Client Data (seed + dynamic from proposals) ────────────────────────
-const _CRM_AVATAR_COLORS = ['var(--sage)','#185FA5','#854F0B','#5B21B6','#0F6E56','#C0392B','#8B6A72','#B8955A'];
+const _CRM_AVATAR_COLORS = ['var(--accent-text)','#185FA5','#854F0B','#5B21B6','#0F6E56','#C0392B','#8B6A72','#B8955A'];
 
 // The five demo clients that used to seed a fresh crmClients_v1 key were
 // always decorative/fake (CRM was never a named focus page during the design
@@ -107,7 +107,7 @@ async function renderCRMTable(filterType, searchQuery) {
     inquiry:'<span class="badge badge-inquiry">Inquiry</span>',
     draft:'<span class="badge badge-inquiry">Draft</span>',
     sent:'<span class="badge badge-proposal">Sent</span>',
-    approved:'<span class="badge badge-active">Approved</span>',
+    approved:'<span class="badge badge-approved">Approved</span>',
     complete:'<span class="badge badge-complete">Complete</span>',
   };
 
@@ -122,9 +122,9 @@ async function renderCRMTable(filterType, searchQuery) {
   if (!filtered.length) {
     const isFiltered = !!(q || (ft && ft !== 'all'));
     if (isFiltered) {
-      tbody.innerHTML = '<tr><td colspan="5" style="padding:32px;text-align:center;color:var(--stone);"><div style="font-size:22px;margin-bottom:8px;opacity:.35;">◈</div><div style="font-weight:600;color:var(--charcoal);margin-bottom:6px;">No clients match that search</div><div style="font-size:12.5px;margin-bottom:14px;">Try a different name, email, or clear the filter.</div><button class="btn" onclick="document.querySelector(\'#section-clients .search-box input\').value=\'\';document.querySelectorAll(\'#section-clients .filter-chip\').forEach((c,i)=>c.classList.toggle(\'active\',i===0));filterClients(\'\',\'\')">Clear Filter</button></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:32px;text-align:center;color:var(--text-3);"><div style="font-size:var(--fs-xl);margin-bottom:8px;opacity:.35;">◈</div><div style="font-weight:var(--weight-medium);color:var(--text);margin-bottom:6px;">No clients match that search</div><div style="font-size:var(--fs-xs);margin-bottom:14px;">Try a different name, email, or clear the filter.</div><button class="btn" onclick="document.querySelector(\'#section-clients .search-box input\').value=\'\';document.querySelectorAll(\'#section-clients .filter-chip\').forEach((c,i)=>c.classList.toggle(\'active\',i===0));filterClients(\'\',\'\')">Clear Filter</button></td></tr>';
     } else {
-      tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--stone);"><div style="font-size:28px;margin-bottom:10px;opacity:.3;">◈</div><div style="font-weight:600;font-size:15px;color:var(--charcoal);margin-bottom:8px;">No clients yet</div><div style="font-size:13px;margin-bottom:16px;line-height:1.6;">Clients are added automatically when you save a proposal,<br>or you can add one manually.</div><button class="btn btn-primary" onclick="openModal(\'new-client\')">+ Add Client</button></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--text-3);"><div style="font-size:var(--fs-2xl);margin-bottom:10px;opacity:.3;">◈</div><div style="font-weight:var(--weight-medium);font-size:var(--fs-md);color:var(--text);margin-bottom:8px;">No clients yet</div><div style="font-size:var(--fs-sm);margin-bottom:16px;line-height:1.6;">Clients are added automatically when you save a proposal,<br>or you can add one manually.</div><button class="btn btn-primary" onclick="openModal(\'new-client\')">+ Add Client</button></td></tr>';
     }
     return;
   }
@@ -139,14 +139,14 @@ async function renderCRMTable(filterType, searchQuery) {
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="client-avatar" style="background:${c.color};">${_esc(c.initials)}</div>
           <div>
-            <div style="font-weight:600;">${_esc(c.name)}</div>
-            <div style="font-size:11px;color:var(--stone);">${_esc(c.email)}</div>
+            <div style="font-weight:var(--weight-medium);">${_esc(c.name)}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--text-3);">${_esc(c.email)}</div>
           </div>
         </div>
       </td>
       <td>${_esc(c.type)}</td>
       <td>${fmtDate(c.dateStr)}</td>
-      <td style="font-weight:600;">${fmt(c.value)}</td>
+      <td style="font-weight:var(--weight-medium);">${fmt(c.value)}</td>
       <td>${statusBadge[c.status] || '<span class="badge badge-inquiry">Inquiry</span>'}</td>
     </tr>`).join('');
 }
@@ -163,16 +163,16 @@ async function showCRMClient(id) {
 
   const linkedHtml = linked.length ? `
     <div style="margin-top:18px;">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin-bottom:8px;">Linked Proposals (${linked.length})</div>
+      <div style="font-size:var(--fs-2xs);font-weight:var(--weight-medium);text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:8px;">Linked Proposals (${linked.length})</div>
       ${linked.map(p => `
-        <div onclick="propLoadProposal('${p.key}')" style="display:flex;justify-content:space-between;align-items:center;padding:9px 11px;background:var(--cream);border-radius:6px;border:1px solid var(--border);cursor:pointer;margin-bottom:5px;transition:border-color 0.12s;" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div onclick="propLoadProposal('${p.key}')" style="display:flex;justify-content:space-between;align-items:center;padding:9px 11px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;margin-bottom:5px;transition:border-color var(--duration-fast);" onmouseover="this.style.borderColor='var(--accent-text)'" onmouseout="this.style.borderColor='var(--border)'">
           <div>
-            <div style="font-size:12.5px;font-weight:600;">${_esc(p.clientName)}</div>
-            <div style="font-size:11px;color:var(--stone);">${fmtDate((p.fields||{}).date)} · ${(p.items||[]).length} items</div>
+            <div style="font-size:var(--fs-xs);font-weight:var(--weight-medium);">${_esc(p.clientName)}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--text-3);">${fmtDate((p.fields||{}).date)} · ${(p.items||[]).length} items</div>
           </div>
           <div style="text-align:right;">
-            <div style="font-size:13px;font-weight:700;color:var(--sage-dark);">${fmt(p.total)}</div>
-            <div style="font-size:10px;color:var(--stone);">${p.status||'draft'}</div>
+            <div style="font-size:var(--fs-sm);font-weight:var(--weight-medium);color:var(--text);">${fmt(p.total)}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--text-3);">${p.status||'draft'}</div>
           </div>
         </div>`).join('')}
     </div>` : '';
@@ -190,12 +190,12 @@ async function showCRMClient(id) {
         <div class="detail-row"><span class="detail-label">Phone</span><span>${_esc(c.phone)||'—'}</span></div>
         <div class="detail-row"><span class="detail-label">Event Type</span><span>${_esc(c.type)}</span></div>
         <div class="detail-row"><span class="detail-label">Event Date</span><span>${fmtDate(c.dateStr)}</span></div>
-        <div class="detail-row"><span class="detail-label">Total Value</span><span style="font-weight:700;color:var(--sage-dark);">${fmt(c.value)}</span></div>
+        <div class="detail-row"><span class="detail-label">Total Value</span><span style="font-weight:var(--weight-medium);color:var(--text);">${fmt(c.value)}</span></div>
       </div>
       ${linkedHtml}
       <div style="display:flex;gap:8px;margin-top:18px;">
-        <button class="btn" style="flex:1;font-size:12px;" onclick="propNewBlank();navigate('proposals')">+ New Proposal</button>
-        <button class="btn btn-primary" style="flex:1;font-size:12px;" onclick="viewClientInvoices('${_esc(c.id)}')">View Invoices</button>
+        <button class="btn" style="flex:1;font-size:var(--fs-xs);" onclick="propNewBlank();navigate('proposals')">+ New Proposal</button>
+        <button class="btn btn-primary" style="flex:1;font-size:var(--fs-xs);" onclick="viewClientInvoices('${_esc(c.id)}')">View Invoices</button>
       </div>
     </div>`;
 }

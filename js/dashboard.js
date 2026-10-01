@@ -5,7 +5,7 @@ function toggleTask(cb) {
   const span = cb.nextElementSibling;
   if (!span) return;
   span.style.textDecoration = cb.checked ? 'line-through' : '';
-  span.style.color          = cb.checked ? 'var(--stone)'  : '';
+  span.style.color          = cb.checked ? 'var(--text-4)'  : '';
 }
 // applyInvEdits() called after inventory.js loads
 
@@ -40,7 +40,7 @@ async function renderDashboard() {
 
   if (!upcoming.length) return;
   const _esc = escapeHtml;
-  const statusBadge = {draft:'badge-inquiry',sent:'badge-proposal',approved:'badge-active',complete:'badge-complete'};
+  const statusBadge = {draft:'badge-inquiry',sent:'badge-proposal',approved:'badge-approved',complete:'badge-complete'};
   upcoming.forEach(p => {
     const d   = new Date(p.fields.date + 'T00:00:00');
     const day = d.getDate();

@@ -1,51 +1,10 @@
-/* Design tokens (brand palette, shadows, radii, fonts) + reset. See design-system/eventflow/MASTER.md. */
+/* Reset and document defaults. All values come from css/tokens.css (see design-system/eventflow/MASTER.md). */
 
-:root {
-  /* ── Quiet Botanical Luxury — design-system/eventflow/MASTER.md ── */
-
-  /* Primary brand colour — deep botanical green */
-  --sage:       #1F3D2B;   /* primary — AAA accessible (11.9:1 on white)    */
-  --sage-light: #E8EFE9;   /* soft green wash — tints, hover states         */
-  --sage-dark:  #16301F;   /* deep emphasis green — headings, prices        */
-
-  /* Warm neutral surfaces */
-  --cream:       #FAF7F2;  /* page background — warm ivory                  */
-  --warm-white:  #FFFFFF;  /* cards / panels — pure white                   */
-  --champagne:   #F0ECE3;  /* tinted panels, section fills (muted)          */
-  --champagne-dark: #9C6B1F; /* brass gold accent — CTAs, headings, icons   */
-
-  /* Error / alert */
-  --blush:     #FBEAE9;    /* very light error tint                         */
-  --blush-mid: #B3261E;    /* error red                                     */
-
-  /* Text hierarchy */
-  --charcoal:     #2A2822; /* warm charcoal — strong headings, foreground   */
-  --charcoal-mid: #4A453D; /* body text                                     */
-  --stone:        #6B6455; /* secondary/muted text, labels                  */
-  --stone-light:  #9C9686; /* placeholders, disabled, very subtle           */
-
-  /* Borders & elevation */
-  --border:     #E4DFD3;
-  --border-mid: #D3CBB8;
-  --shadow-sm:  0 1px 2px rgba(31,61,43,0.06);
-  --shadow-md:  0 4px 10px rgba(31,61,43,0.08);
-  --shadow-lg:  0 12px 24px rgba(31,61,43,0.12);
-  --shadow-xl:  0 24px 48px rgba(31,61,43,0.16);
-
-  /* Structure */
-  --radius:    10px;
-  --radius-sm:  6px;
-  --radius-lg: 16px;
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans:  'Inter', system-ui, sans-serif;
-
-  /* Status / semantic — bookings & proposals (design-system table) */
-  --status-draft-fg: #8A8374;      --status-draft-bg: #F0ECE3;
-  --status-sent-fg:  #3B6E91;      --status-sent-bg:  #E8F0F5;
-  --status-viewed-fg:#A6742D;      --status-viewed-bg:#F5EEDD;
-  --status-confirmed-fg:#2F7D5A;   --status-confirmed-bg:#E6F2EC;
-  --status-declined-fg:#B3261E;    --status-declined-bg:#FBEAE9;
-  --status-completed-fg:#1F3D2B;   --status-completed-bg:#E9EFEA;
-}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); background: var(--cream); color: var(--charcoal); min-height: 100vh; display: flex; }
+body {
+  font-family: var(--font-sans); font-size: var(--fs-md); line-height: var(--leading-normal);
+  background: var(--bg); color: var(--text); min-height: 100vh; display: flex;
+  -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums;
+}
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+::selection { background: var(--accent-tint); }

@@ -77,7 +77,7 @@ async function renderCalendar() {
       el.title = dayEvents.map(e => e.name).join(' · ');
       el.onclick = () => {
         document.querySelectorAll('.cal-day').forEach(x => x.style.outline = '');
-        el.style.outline = '2px solid var(--sage-dark)';
+        el.style.outline = '2px solid var(--accent-border)';
         _showDayEvents(dayEvents, d, monthNames[calMonth]);
       };
       dayEvents.forEach(ev => monthEvents.push({d, dateStr, ...ev}));
@@ -96,7 +96,7 @@ function _renderBookingsSidebar(events, monthName) {
   if (!list) return;
   if (title) title.textContent = 'Events in ' + monthName + ' ' + calYear;
   if (!events.length) {
-    list.innerHTML = '<div class="cal-empty-state"><div style="font-size:28px;margin-bottom:8px;opacity:.35;">📅</div><div>No events scheduled this month.</div><button class="btn btn-primary" style="margin-top:12px;font-size:12px;" onclick="propNewBlank();navigate(\'proposals\')">+ Build a Proposal</button></div>';
+    list.innerHTML = '<div class="cal-empty-state"><div style="font-size:var(--fs-2xl);margin-bottom:8px;opacity:.35;">📅</div><div>No events scheduled this month.</div><button class="btn btn-primary" style="margin-top:12px;font-size:var(--fs-xs);" onclick="propNewBlank();navigate(\'proposals\')">+ Build a Proposal</button></div>';
     return;
   }
   const statusBadge = {
@@ -106,7 +106,7 @@ function _renderBookingsSidebar(events, monthName) {
     inquiry:  '<span class="badge badge-inquiry">Inquiry</span>',
     draft:    '<span class="badge badge-inquiry">Draft</span>',
     sent:     '<span class="badge badge-proposal">Sent</span>',
-    approved: '<span class="badge badge-active">Approved</span>',
+    approved: '<span class="badge badge-approved">Approved</span>',
     complete: '<span class="badge badge-complete">Complete</span>',
   };
   // Deduplicate by name+date
@@ -132,7 +132,7 @@ function _renderBookingsSidebar(events, monthName) {
 function _showDayEvents(events, day, monthName) {
   const rows = events.map(ev => {
     const clickable = ev.key ? ` onclick="propLoadProposal('${ev.key}');closeModal();" style="cursor:pointer;"` : '';
-    return `<div style="padding:10px 0;border-bottom:1px solid var(--border);"${clickable}><div style="font-size:14px;font-weight:600;">${escapeHtml(ev.name)}</div><div style="font-size:12px;color:var(--stone);margin-top:2px;">${escapeHtml(ev.type)}</div></div>`;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border);"${clickable}><div style="font-size:var(--fs-md);font-weight:var(--weight-medium);">${escapeHtml(ev.name)}</div><div style="font-size:var(--fs-xs);color:var(--text-3);margin-top:2px;">${escapeHtml(ev.type)}</div></div>`;
   }).join('');
   document.getElementById('modal-content').innerHTML =
     `<div class="modal-title">${monthName} ${day}</div>${rows}<div class="modal-actions"><button class="btn" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="navigate('my-proposals');closeModal()">View Proposals →</button></div>`;

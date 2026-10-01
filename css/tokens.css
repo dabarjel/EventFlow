@@ -1,0 +1,180 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   EventFlow design tokens: Direction D "Studio". Single source of truth.
+   Rules and rationale: design-system/eventflow/MASTER.md.
+
+   - App screens are dark. Client-facing documents (proposal sheet, invoice
+     preview, print/PDF) stay light: see the "Document theme" block at the end.
+   - One accent color, chosen with data-accent on <html>: "gold" (default) or
+     "green". Use it only for primary buttons, the active nav icon and key status.
+   - Contrast notes are WCAG ratios against --surface (#1B1B1B) unless stated.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Surfaces: layered near-black, separated by 1px borders, no shadows ── */
+  --bg:                  #141414;  /* page, sidebar, input wells */
+  --surface:             #1B1B1B;  /* cards, tables, panels, modals */
+  --surface-raised:      #232323;  /* table headers, totals, secondary buttons */
+  --surface-raised-hover:#2A2A2A;
+  --surface-hover:       #1F1F1F;  /* faint hover on nav rows and list rows */
+  --surface-active:      #262626;  /* selected nav row, pressed state */
+  --overlay:             rgba(0, 0, 0, .6);   /* modal and drawer scrim */
+  --photo-well:          #F2F2F2;  /* catalog photos are shot on white */
+
+  /* ── Borders ── */
+  --border:              #2E2E2E;  /* default 1px divider between layers */
+  --border-strong:       #3A3A3A;  /* buttons, chips, emphasized edges */
+  --border-input:        #6B6B6B;  /* form field edges: 3.23:1 on surface, 3.46:1 on bg */
+
+  /* ── Text ── */
+  --text:                #EDEDED;  /* 13.4:1 */
+  --text-2:              #A3A3A3;  /* secondary: 6.2:1 on raised */
+  --text-3:              #8F8F8F;  /* muted labels, metadata: 4.86:1 on raised */
+  --text-4:              #6E6E6E;  /* decoration and disabled only (3.38:1), never body text */
+
+  /* ── Accent (set by data-accent; gold is the default) ── */
+  --accent:              #CDAE73;  /* fill: primary buttons */
+  --accent-hover:        #D8BD88;
+  --accent-on:           #17130A;  /* text on the fill: 8.73:1 */
+  --accent-text:         #CDAE73;  /* accent as text or icon on dark: 8.12:1 */
+  --accent-border:       #B8995E;
+  --accent-tint:         rgba(205, 174, 115, .14);
+
+  /* ── Semantic ── */
+  --danger:              #B3261E;  /* solid fill, white text 6.54:1 */
+  --danger-text:         #F1A39C;  /* 8.58:1 */
+  --danger-bg:           #2A1716;
+  --danger-border:       #E5655C;  /* invalid field edge: 5.21:1 */
+  --danger-border-subtle:#5A2A26;
+  --success:             #276B4C;  /* solid fill, white text 6.38:1 */
+  --success-text:        #86D1A6;
+  --success-bg:          #16301F;
+  --info:                #2F6290;  /* solid fill, white text 6.42:1 */
+  --info-text:           #93BDEB;
+  --info-bg:             #172636;
+  --warning-text:        #E3C17E;
+  --warning-bg:          #30271A;
+  --on-solid:            #FFFFFF;  /* text on danger/success/info fills and on photos */
+
+  /* ── Proposal status: the four states the app stores ── */
+  --status-draft-fg:     #B5B5B5;  --status-draft-bg:     #2A2A2A;  /* 7.0:1 */
+  --status-sent-fg:      #93BDEB;  --status-sent-bg:      #172636;  /* 7.8:1 */
+  --status-approved-fg:  #C3B2F2;  --status-approved-bg:  #272040;  /* 8.0:1 */
+  --status-complete-fg:  #86D1A6;  --status-complete-bg:  #16301F;  /* 7.9:1 */
+  /* Pipeline and booking states that aren't proposal statuses */
+  --status-pending-fg:   #E3C17E;  --status-pending-bg:   #30271A;  /* contract out, partial day */
+  --status-declined-fg:  #F1A39C;  --status-declined-bg:  #2A1716;
+
+  /* ── Focus ── */
+  --focus-ring:          #EDEDED;
+  --ring:                0 0 0 1px var(--accent-text);   /* focused field edge */
+
+  /* ── Type ── */
+  --font-sans:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;  /* small uppercase labels only */
+  --font-display: 'Playfair Display', Georgia, serif;  /* client documents only, never app screens */
+  --font-heading: var(--font-sans);  /* headings: sans on app screens, Playfair inside documents */
+
+  --fs-2xs: 11px;   /* mono labels */
+  --fs-xs:  12px;   /* captions, badges, metadata */
+  --fs-sm:  13px;   /* dense UI: tables, buttons, nav */
+  --fs-md:  14px;   /* base UI text */
+  --fs-lg:  16px;   /* card and section titles */
+  --fs-xl:  20px;   /* page titles */
+  --fs-2xl: 24px;   /* stat values */
+  --fs-3xl: 30px;   /* display numbers */
+
+  --weight-regular: 400;
+  --weight-medium:  500;   /* the only other weight: no 600/700 on app screens */
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --tracking-label: .06em; /* mono uppercase labels */
+
+  /* ── Spacing (4px grid) ── */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-10: 40px;
+  --space-12: 48px; --space-16: 64px;
+
+  /* ── Radii ── */
+  --radius-xs:   4px;    /* tags, tiny controls */
+  --radius-sm:   6px;    /* buttons, inputs, badges, nav rows */
+  --radius-md:   8px;    /* cards, panels, tables */
+  --radius-lg:   12px;   /* modals, drawers, the document sheet */
+  --radius-full: 999px;  /* avatars, dots */
+
+  /* ── Elevation: borders do the work; shadows only for floating layers ── */
+  --shadow-none:    none;
+  --shadow-overlay: 0 8px 24px rgba(0, 0, 0, .45);  /* menus, popovers, modals, drawers */
+
+  /* ── Motion: hover/press feedback and drawers only ── */
+  --duration-fast: 150ms;
+  --ease-standard: cubic-bezier(.2, 0, 0, 1);
+
+  /* ── Layout ── */
+  --rail-collapsed: 52px;
+  --rail-expanded:  220px;
+  --control-h:      30px;   /* buttons and inputs */
+  --control-h-sm:   28px;
+  --control-h-touch:36px;   /* mobile FAB and touch-first controls */
+}
+
+/* Accent: botanical green */
+:root[data-accent="green"] {
+  --accent:        #3F7A5A;  /* white text 5.07:1 */
+  --accent-hover:  #478663;
+  --accent-on:     #FFFFFF;
+  --accent-text:   #7DB896;  /* 7.52:1 */
+  --accent-border: #4F8C6A;
+  --accent-tint:   rgba(125, 184, 150, .14);
+}
+
+/* Reduced motion: no transitions or animations */
+@media (prefers-reduced-motion: reduce) {
+  :root { --duration-fast: 0ms; }
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Document theme: client-facing documents stay light, with Playfair and brass.
+   Applied to the proposal sheet, invoice preview and contract template. Their own markup mostly
+   uses literal colors (the PDF/print windows don't load this file); this block
+   keeps anything inside them that does use tokens on the light palette. ── */
+:root {
+  --doc-paper:      #FAF7F2;
+  --doc-bg:         #FFFFFF;
+  --doc-ink:        #2A2822;  /* 14.7:1 on white */
+  --doc-ink-2:      #4A453D;
+  --doc-muted:      #6B6455;  /* 5.87:1 on white */
+  --doc-border:     #E4DFD3;
+  --doc-green:      #1F3D2B;
+  --doc-brass:      #9C6B1F;  /* rules and totals on white: 4.63:1 */
+  --doc-brass-text: #86591A;  /* brass text on ivory: 5.68:1 */
+}
+#printable-proposal, #invoice-preview, #contract-template-text, .doc-theme {
+  color-scheme: light;
+  --bg: var(--doc-paper);
+  --surface: var(--doc-bg);
+  --surface-raised: #F0ECE3;
+  --surface-raised-hover: #E9E4D8;
+  --surface-hover: #F6F3EC;
+  --surface-active: #EFEADF;
+  --border: var(--doc-border);
+  --border-strong: #D3CBB8;
+  --border-input: #958C7A;
+  --text: var(--doc-ink);
+  --text-2: var(--doc-ink-2);
+  --text-3: var(--doc-muted);
+  --text-4: #9C9686;
+  --accent-text: var(--doc-brass-text);
+  --danger-text: #B3261E;
+  --success-text: #28704F;
+  --font-heading: var(--font-display);
+  color: var(--doc-ink);
+  /* documents keep their original typesetting, not the app body defaults */
+  font-size: 16px; line-height: normal; font-variant-numeric: normal;
+}

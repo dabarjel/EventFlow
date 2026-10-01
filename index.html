@@ -1,10 +1,11 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-accent="gold">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventFlow — Event Rental & Wedding Management</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
@@ -129,7 +130,7 @@
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
             <div class="card-title" style="margin-bottom:0;">Upcoming Events</div>
-            <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="navigate('pipeline')">View Pipeline →</button>
+            <button class="btn" style="font-size:var(--fs-2xs);padding:4px 10px;" onclick="navigate('pipeline')">View Pipeline →</button>
           </div>
           <div class="event-list" id="dash-upcoming-events">
             <div class="event-row" onclick="navigate('pipeline')">
@@ -179,36 +180,36 @@
             <div class="card-title">Revenue This Quarter</div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--stone);margin-bottom:4px;"><span>April</span><span>$14,200</span></div>
-                <div style="height:8px;background:var(--stone-light);border-radius:4px;overflow:hidden;"><div style="width:59%;height:100%;background:var(--sage);border-radius:4px;"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--text-3);margin-bottom:4px;"><span>April</span><span>$14,200</span></div>
+                <div style="height:8px;background:var(--border-strong);border-radius:var(--radius-xs);overflow:hidden;"><div style="width:59%;height:100%;background:var(--accent);border-radius:var(--radius-xs);"></div></div>
               </div>
               <div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--stone);margin-bottom:4px;"><span>May</span><span>$18,900</span></div>
-                <div style="height:8px;background:var(--stone-light);border-radius:4px;overflow:hidden;"><div style="width:79%;height:100%;background:var(--sage);border-radius:4px;"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--text-3);margin-bottom:4px;"><span>May</span><span>$18,900</span></div>
+                <div style="height:8px;background:var(--border-strong);border-radius:var(--radius-xs);overflow:hidden;"><div style="width:79%;height:100%;background:var(--accent);border-radius:var(--radius-xs);"></div></div>
               </div>
               <div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--stone);margin-bottom:4px;"><span>June (proj.)</span><span>$24,000</span></div>
-                <div style="height:8px;background:var(--stone-light);border-radius:4px;overflow:hidden;"><div style="width:100%;height:100%;background:var(--champagne-dark);border-radius:4px;opacity:0.8;"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--text-3);margin-bottom:4px;"><span>June (proj.)</span><span>$24,000</span></div>
+                <div style="height:8px;background:var(--border-strong);border-radius:var(--radius-xs);overflow:hidden;"><div style="width:100%;height:100%;background:var(--accent);border-radius:var(--radius-xs);opacity:0.8;"></div></div>
               </div>
             </div>
           </div>
           <div class="card">
             <div class="card-title">Tasks Due Soon</div>
             <div style="display:flex;flex-direction:column;gap:8px;" id="task-list">
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
-                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--sage);cursor:pointer;" onchange="toggleTask(this)">
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
+                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
                 <span>Send final invoice — Thompson–Reyes</span>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
-                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--sage);cursor:pointer;" onchange="toggleTask(this)">
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
+                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
                 <span>Confirm delivery time — Azure Summit</span>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
-                <input type="checkbox" class="task-cb" checked style="width:14px;height:14px;accent-color:var(--sage);cursor:pointer;" onchange="toggleTask(this)">
-                <span style="text-decoration:line-through;color:var(--stone);">Sign contract — Hargrove</span>
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
+                <input type="checkbox" class="task-cb" checked style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
+                <span style="text-decoration:line-through;color:var(--text-3);">Sign contract — Hargrove</span>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
-                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--sage);cursor:pointer;" onchange="toggleTask(this)">
+              <div style="display:flex;align-items:center;gap:10px;font-size:var(--fs-sm);">
+                <input type="checkbox" class="task-cb" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" onchange="toggleTask(this)">
                 <span>Follow up proposal — Chen–Williams</span>
               </div>
             </div>
@@ -221,7 +222,7 @@
     <div id="section-pipeline" class="section">
       <div class="filter-bar">
         <div class="search-box"><span>⌕</span><input placeholder="Search events…" id="pipeline-search" oninput="filterPipeline(this.value)"></div>
-        <select onchange="filterPipelineType(this.value)" style="padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:13px;background:#fff;color:var(--charcoal);outline:none;">
+        <select onchange="filterPipelineType(this.value)" style="padding:8px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:var(--fs-sm);background:var(--bg);color:var(--text);outline:none;">
           <option value="">All Types</option><option>Wedding</option><option>Corporate</option><option>Social</option>
         </select>
         <button class="btn btn-primary" onclick="openModal('new-event')">+ New Event</button>
@@ -310,8 +311,8 @@
     <div id="section-my-proposals" class="section">
 
       <div class="mp-toolbar">
-        <div class="mp-search"><span style="color:var(--stone);">⌕</span><input id="mp-search-input" placeholder="Search proposals…" oninput="renderMyProposals()"></div>
-        <select id="mp-status-filter" onchange="renderMyProposals()" style="padding:8px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:13px;background:#fff;color:var(--charcoal);outline:none;">
+        <div class="mp-search"><span style="color:var(--text-3);">⌕</span><input id="mp-search-input" placeholder="Search proposals…" oninput="renderMyProposals()"></div>
+        <select id="mp-status-filter" onchange="renderMyProposals()" style="padding:8px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:var(--fs-sm);background:var(--bg);color:var(--text);outline:none;">
           <option value="">All Statuses</option>
           <option value="draft">Draft</option>
           <option value="sent">Sent to Client</option>
@@ -323,9 +324,9 @@
 
       <div id="mp-list">
         <div class="mp-empty" style="padding:80px 20px;">
-          <div style="font-size:48px;margin-bottom:16px;">📋</div>
-          <div style="font-size:16px;font-weight:600;color:var(--charcoal);margin-bottom:8px;">No proposals yet</div>
-          <div style="font-size:13px;color:var(--stone);line-height:1.7;margin-bottom:20px;">Build a proposal in the <strong>Proposal Builder</strong>,<br>then click <strong>💾 Save</strong> to see it here.</div>
+          <div style="font-size:var(--fs-3xl);margin-bottom:16px;">📋</div>
+          <div style="font-size:var(--fs-lg);font-weight:var(--weight-medium);color:var(--text);margin-bottom:8px;">No proposals yet</div>
+          <div style="font-size:var(--fs-sm);color:var(--text-3);line-height:1.7;margin-bottom:20px;">Build a proposal in the <strong>Proposal Builder</strong>,<br>then click <strong>💾 Save</strong> to see it here.</div>
           <button class="btn btn-primary" onclick="navigate('proposals')">+ Build a Proposal</button>
         </div>
       </div>
@@ -335,13 +336,13 @@
     <div id="section-proposals" class="section">
 
       <div class="filter-bar" style="margin-bottom:16px;">
-        <div style="font-size:14px;font-weight:600;color:var(--charcoal);flex:1;">Proposal Builder <span id="prop-editing-label" style="font-size:12px;font-weight:400;color:var(--stone);margin-left:8px;"></span><span id="prop-autosave-status" style="font-size:11px;font-weight:400;color:var(--stone-light);margin-left:8px;"></span><a id="prop-session-link" href="#" onclick="event.preventDefault();vzaSessionFromProposal()" style="display:none;font-size:11px;color:var(--sage-dark);text-decoration:underline;text-underline-offset:2px;margin-left:10px;font-weight:400;">View Visualizer Session →</a></div>
+        <div style="font-size:var(--fs-md);font-weight:var(--weight-medium);color:var(--text);flex:1;">Proposal Builder <span id="prop-editing-label" style="font-size:var(--fs-xs);font-weight:var(--weight-regular);color:var(--text-3);margin-left:8px;"></span><span id="prop-autosave-status" style="font-size:var(--fs-2xs);font-weight:var(--weight-regular);color:var(--text-3);margin-left:8px;"></span><a id="prop-session-link" href="#" onclick="event.preventDefault();vzaSessionFromProposal()" style="display:none;font-size:var(--fs-2xs);color:var(--text);text-decoration:underline;text-underline-offset:2px;margin-left:10px;font-weight:var(--weight-regular);">View Visualizer Session →</a></div>
         <button class="btn" onclick="navigate('my-proposals')" title="Browse all saved proposals">📋 My Proposals</button>
         <button class="btn" onclick="propShowSaved()" title="Load a saved proposal into the builder">📂 Load</button>
         <button class="btn" onclick="propNewBlank()" title="Start a new blank proposal (clears current items)">+ New</button>
         <button class="btn" onclick="vizOpenFromProposal()" title="Generate an AI venue mockup for this proposal">◎ Visualizer</button>
-        <button class="btn" onclick="propClearAll()" title="Remove all items from current proposal" style="color:var(--blush-mid);border-color:rgba(192,57,43,0.3);">🗑 Clear</button>
-        <button class="btn" onclick="propSyncToDoc();navigate('proposal-doc');setTimeout(renderProposalDoc,50);" id="prop-preview-btn" title="Preview and print the proposal document">👁 Preview <span id="prop-preview-count" style="background:var(--sage);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;display:none;"></span></button>
+        <button class="btn" onclick="propClearAll()" title="Remove all items from current proposal" style="color:var(--danger-text);border-color:var(--danger-border-subtle);">🗑 Clear</button>
+        <button class="btn" onclick="propSyncToDoc();navigate('proposal-doc');setTimeout(renderProposalDoc,50);" id="prop-preview-btn" title="Preview and print the proposal document">👁 Preview <span id="prop-preview-count" style="background:var(--accent);color:var(--accent-on);border-radius:var(--radius-md);padding:1px 7px;font-size:var(--fs-2xs);margin-left:4px;display:none;"></span></button>
         <button class="btn btn-primary" onclick="propSave()" title="Save proposal (Ctrl+S)" style="min-width:88px;">💾 Save</button>
       </div>
 
@@ -351,20 +352,20 @@
         <div class="prop-inv-panel">
           <div class="prop-inv-header">
             <div style="display:flex;align-items:center;gap:8px;">
-              <div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border-mid);border-radius:var(--radius-sm);padding:6px 10px;">
-                <span style="color:var(--stone);">⌕</span>
-                <input id="prop-search" placeholder="Search all inventory…" oninput="propCurrentPage=1;propFilter()" style="border:none;outline:none;background:transparent;font-family:var(--font-sans);font-size:13px;width:100%;">
+              <div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:6px 10px;">
+                <span style="color:var(--text-3);">⌕</span>
+                <input id="prop-search" placeholder="Search all inventory…" oninput="propCurrentPage=1;propFilter()" style="border:none;outline:none;background:transparent;font-family:var(--font-sans);font-size:var(--fs-sm);width:100%;">
               </div>
-              <span style="font-size:11px;color:var(--stone);white-space:nowrap;" id="prop-count-label">Loading…</span>
+              <span style="font-size:var(--fs-2xs);color:var(--text-3);white-space:nowrap;" id="prop-count-label">Loading…</span>
               <!-- Size toggle -->
-              <button id="prop-size-toggle" title="Toggle image size" onclick="propToggleSize()" style="padding:5px 9px;border:1px solid var(--border-mid);border-radius:6px;background:var(--warm-white);cursor:pointer;font-size:14px;line-height:1;">⊞</button>
+              <button id="prop-size-toggle" title="Toggle image size" onclick="propToggleSize()" style="padding:5px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:var(--fs-md);line-height:1;">⊞</button>
             </div>
             <!-- Pagination -->
             <div id="prop-pagination" style="display:none;align-items:center;gap:8px;justify-content:space-between;">
-              <span style="font-size:12px;color:var(--stone);" id="prop-page-info"></span>
+              <span style="font-size:var(--fs-xs);color:var(--text-3);" id="prop-page-info"></span>
               <div style="display:flex;gap:4px;">
-                <button onclick="propChangePage(-1)" id="prop-prev-btn" style="padding:4px 10px;border:1px solid var(--border-mid);border-radius:6px;background:var(--warm-white);cursor:pointer;font-size:12px;font-family:var(--font-sans);">← Prev</button>
-                <button onclick="propChangePage(1)"  id="prop-next-btn" style="padding:4px 10px;border:1px solid var(--border-mid);border-radius:6px;background:var(--warm-white);cursor:pointer;font-size:12px;font-family:var(--font-sans);">Next →</button>
+                <button onclick="propChangePage(-1)" id="prop-prev-btn" style="padding:4px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:var(--fs-xs);font-family:var(--font-sans);">← Prev</button>
+                <button onclick="propChangePage(1)"  id="prop-next-btn" style="padding:4px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:var(--fs-xs);font-family:var(--font-sans);">Next →</button>
               </div>
             </div>
             <div class="prop-chips-row" id="prop-chips">
@@ -381,11 +382,11 @@
               <span class="prop-cat-chip" onclick="propSetCat('Specialty',this)" data-cat="Specialty">Specialty</span>
               <span class="prop-cat-chip" onclick="propSetCat('Dance Floor',this)" data-cat="Dance Floor">Dance Floor</span>
               <span class="prop-cat-chip" onclick="propSetCat('Photo Booth',this)" data-cat="Photo Booth">Photo Booth</span>
-              <span class="prop-cat-chip" onclick="propSetCat('__custom__',this)" data-cat="__custom__" id="chip-custom" style="background:var(--champagne);color:var(--champagne-dark);border-color:var(--champagne-dark);">📎 Custom</span>
+              <span class="prop-cat-chip" onclick="propSetCat('__custom__',this)" data-cat="__custom__" id="chip-custom" style="background:var(--surface-raised);color:var(--accent-text);border-color:var(--accent-border);">📎 Custom</span>
             </div>
             <!-- Custom item upload bar -->
             <div id="prop-custom-bar" style="display:none;padding:10px 0 2px;border-top:1px solid var(--border);margin-top:4px;">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--stone);font-weight:600;margin-bottom:8px;">Upload custom item for this proposal</div>
+              <div style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);font-weight:var(--weight-medium);margin-bottom:8px;">Upload custom item for this proposal</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
                 <div class="prop-field"><label>Name</label><input id="ci-name" placeholder="e.g. Custom LED Bar"></div>
                 <div class="prop-field"><label>Price</label><input id="ci-price" placeholder="e.g. $850"></div>
@@ -405,21 +406,21 @@
               </div>
               <div class="prop-field" style="margin-bottom:6px;"><label>Description (optional)</label><input id="ci-desc" placeholder="e.g. 8ft white LED bar with shelving"></div>
               <div style="display:flex;align-items:center;gap:8px;">
-                <label id="ci-img-label" style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px dashed var(--border-mid);border-radius:var(--radius-sm);cursor:pointer;font-size:12px;color:var(--stone);transition:all 0.15s;" onmouseenter="this.style.borderColor='var(--sage)'" onmouseleave="this.style.borderColor='var(--border-mid)'">
-                  <span id="ci-img-icon" style="font-size:18px;">📷</span>
+                <label id="ci-img-label" style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px dashed var(--border-strong);border-radius:var(--radius-sm);cursor:pointer;font-size:var(--fs-xs);color:var(--text-3);transition:all var(--duration-fast);" onmouseenter="this.style.borderColor='var(--accent-text)'" onmouseleave="this.style.borderColor='var(--border-strong)'">
+                  <span id="ci-img-icon" style="font-size:var(--fs-xl);">📷</span>
                   <span id="ci-img-text">Click to upload image (optional)</span>
                   <input type="file" id="ci-img-input" accept="image/*" style="display:none;" onchange="ciHandleImg(this)">
                 </label>
                 <button class="btn btn-primary" onclick="ciAddItem()" style="white-space:nowrap;padding:8px 14px;">+ Add to Proposal</button>
               </div>
               <div id="ci-img-preview" style="display:none;margin-top:8px;position:relative;width:72px;height:72px;">
-                <img id="ci-img-preview-img" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
-                <button onclick="ciClearImg()" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:var(--blush-mid);color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
+                <img id="ci-img-preview-img" style="width:72px;height:72px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);">
+                <button onclick="ciClearImg()" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:var(--danger);color:var(--on-solid);cursor:pointer;font-size:var(--fs-2xs);display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
               </div>
             </div>
           </div>
           <div class="prop-inv-grid" id="prop-inv-grid">
-            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--stone);font-size:13px;">Loading inventory…</div>
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3);font-size:var(--fs-sm);">Loading inventory…</div>
           </div>
         </div>
 
@@ -428,7 +429,7 @@
 
           <!-- Client info — full event details -->
           <div class="prop-client-panel" style="overflow-y:auto;max-height:320px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin-bottom:10px;font-weight:600;">Client &amp; Event Details</div>
+            <div style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:10px;font-weight:var(--weight-medium);">Client &amp; Event Details</div>
 
             <div class="prop-form-row cols2">
               <div class="prop-field"><label>Client Name</label><input id="prop-client" placeholder="e.g. Nikki Herson"></div>
@@ -458,59 +459,59 @@
             </div>
 
             <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 6px;">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--stone);font-weight:600;">Schedule</div>
-              <button type="button" onclick="propAddScheduleRow()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border-mid);border-radius:6px;background:var(--cream);cursor:pointer;font-family:var(--font-sans);">+ Add Phase</button>
+              <div style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);font-weight:var(--weight-medium);">Schedule</div>
+              <button type="button" onclick="propAddScheduleRow()" style="font-size:var(--fs-2xs);padding:3px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--bg);cursor:pointer;font-family:var(--font-sans);">+ Add Phase</button>
             </div>
             <div id="prop-schedule-rows"></div>
 
             <div class="prop-form-row" style="margin-top:8px;">
-              <div class="prop-field"><label>Notes / Special Requests</label><textarea id="prop-notes" rows="2" style="width:100%;padding:5px 8px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);resize:none;box-sizing:border-box;" placeholder="e.g. No roses, pink florals only, monogram on backdrop…"></textarea></div>
+              <div class="prop-field"><label>Notes / Special Requests</label><textarea id="prop-notes" rows="2" style="width:100%;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);resize:none;box-sizing:border-box;" placeholder="e.g. No roses, pink florals only, monogram on backdrop…"></textarea></div>
             </div>
           </div>
 
           <!-- Drop canvas -->
           <div class="prop-canvas-box" id="prop-canvas-box">
             <div class="prop-canvas-header">
-              <span style="font-size:13px;font-weight:600;">Proposal Items</span>
-              <span style="font-size:11px;color:var(--stone);" id="prop-item-count">0 items</span>
+              <span style="font-size:var(--fs-sm);font-weight:var(--weight-medium);">Proposal Items</span>
+              <span style="font-size:var(--fs-2xs);color:var(--text-3);" id="prop-item-count">0 items</span>
             </div>
-            <div style="font-size:10.5px;color:var(--stone);padding:5px 10px 6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="font-size:var(--fs-2xs);color:var(--text-3);padding:5px 10px 6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <span>✎ <strong>Name</strong> — click to rename for this proposal</span>
-              <span style="color:var(--border-mid);">·</span>
+              <span style="color:var(--text-3);">·</span>
               <span>📝 <strong>Description</strong> — add context or location</span>
-              <span style="color:var(--border-mid);">·</span>
+              <span style="color:var(--text-3);">·</span>
               <span>🏷 <strong>Area</strong> — groups items in the printed doc</span>
-              <span style="color:var(--border-mid);">·</span>
+              <span style="color:var(--text-3);">·</span>
               <span title="Type directly into the quantity box to enter large numbers fast — e.g. 100 chairs">🔢 <strong>Qty</strong> — type or use − +</span>
-              <span style="margin-left:auto;font-size:9.5px;color:var(--stone-light);" title="Press Ctrl+S to save"><kbd style="background:var(--champagne);border:1px solid var(--border-mid);border-radius:3px;padding:1px 4px;font-size:9px;">Ctrl+S</kbd> to save</span>
+              <span style="margin-left:auto;font-size:var(--fs-2xs);color:var(--text-3);" title="Press Ctrl+S to save"><kbd style="background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:var(--radius-xs);padding:1px 4px;font-size:var(--fs-2xs);">Ctrl+S</kbd> to save</span>
             </div>
             <div class="prop-items-list" id="prop-items-list">
               <div class="prop-empty" id="prop-empty-msg" style="padding:48px 20px;">
-                <div style="font-size:36px;margin-bottom:12px;">✦</div>
-                <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:var(--charcoal);">Start building your proposal</div>
-                <div style="font-size:12px;color:var(--stone);line-height:1.7;">← Select a category, then click <strong>+</strong> on any item<br>or drag items directly here</div>
+                <div style="font-size:var(--fs-3xl);margin-bottom:12px;">✦</div>
+                <div style="font-weight:var(--weight-medium);font-size:var(--fs-md);margin-bottom:6px;color:var(--text);">Start building your proposal</div>
+                <div style="font-size:var(--fs-xs);color:var(--text-3);line-height:1.7;">← Select a category, then click <strong>+</strong> on any item<br>or drag items directly here</div>
               </div>
             </div>
             <div class="prop-totals" id="prop-totals" style="display:none;">
               <!-- Rates row -->
               <div style="display:flex;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
                 <div style="flex:1;">
-                  <label style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);display:block;margin-bottom:3px;">Shipping %</label>
+                  <label style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:1px;color:var(--text-3);display:block;margin-bottom:3px;">Shipping %</label>
                   <div style="display:flex;align-items:center;gap:4px;">
-                    <input id="prop-ship-rate" type="number" min="0" max="100" step="0.5" value="20" oninput="propUpdateTotals()" style="width:60px;padding:4px 6px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);color:var(--charcoal);background:#fff;outline:none;">
-                    <span style="font-size:12px;color:var(--stone);">%</span>
+                    <input id="prop-ship-rate" type="number" min="0" max="100" step="0.5" value="20" oninput="propUpdateTotals()" style="width:60px;padding:4px 6px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);color:var(--text);background:var(--bg);outline:none;">
+                    <span style="font-size:var(--fs-xs);color:var(--text-3);">%</span>
                   </div>
                 </div>
                 <div style="flex:1;">
-                  <label style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);display:block;margin-bottom:3px;">Tax %</label>
+                  <label style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:1px;color:var(--text-3);display:block;margin-bottom:3px;">Tax %</label>
                   <div style="display:flex;align-items:center;gap:4px;">
-                    <input id="prop-tax-rate" type="number" min="0" max="20" step="0.25" value="6" oninput="propUpdateTotals()" style="width:60px;padding:4px 6px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);color:var(--charcoal);background:#fff;outline:none;">
-                    <span style="font-size:12px;color:var(--stone);">%</span>
+                    <input id="prop-tax-rate" type="number" min="0" max="20" step="0.25" value="6" oninput="propUpdateTotals()" style="width:60px;padding:4px 6px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);color:var(--text);background:var(--bg);outline:none;">
+                    <span style="font-size:var(--fs-xs);color:var(--text-3);">%</span>
                   </div>
                 </div>
                 <div style="flex:1;">
-                  <label style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);display:block;margin-bottom:3px;">Deposit Req.</label>
-                  <input id="prop-deposit" type="number" min="0" step="100" value="1000" oninput="propUpdateTotals()" style="width:72px;padding:4px 6px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);color:var(--charcoal);background:#fff;outline:none;">
+                  <label style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:1px;color:var(--text-3);display:block;margin-bottom:3px;">Deposit Req.</label>
+                  <input id="prop-deposit" type="number" min="0" step="100" value="1000" oninput="propUpdateTotals()" style="width:72px;padding:4px 6px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);color:var(--text);background:var(--bg);outline:none;">
                 </div>
               </div>
 
@@ -522,32 +523,32 @@
 
               <!-- Payment ledger — live from saved proposal -->
               <div id="prop-payment-section" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin-bottom:6px;font-weight:600;">Payments Received</div>
+                <div style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:6px;font-weight:var(--weight-medium);">Payments Received</div>
                 <div id="prop-payment-log" style="display:flex;flex-direction:column;gap:3px;margin-bottom:8px;"></div>
                 <!-- Quick add payment row -->
-                <div id="prop-payment-add" style="display:none;flex-direction:column;gap:6px;padding:8px;background:var(--cream);border-radius:6px;border:1px solid var(--border);">
+                <div id="prop-payment-add" style="display:none;flex-direction:column;gap:6px;padding:8px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
                   <div style="display:flex;gap:6px;">
                     <input type="number" id="prop-pay-amt" placeholder="Amount $" min="0" step="50"
-                      style="flex:1;padding:5px 8px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);outline:none;">
+                      style="flex:1;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);outline:none;">
                     <input type="text" id="prop-pay-note" placeholder="Note (e.g. Zelle deposit)"
-                      style="flex:2;padding:5px 8px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);outline:none;">
+                      style="flex:2;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);outline:none;">
                   </div>
                   <div style="display:flex;gap:6px;">
-                    <button class="btn btn-primary" style="flex:1;font-size:11px;" onclick="propLogPayment()">✓ Log Payment</button>
-                    <button class="btn" style="font-size:11px;" onclick="document.getElementById('prop-payment-add').style.display='none'">Cancel</button>
+                    <button class="btn btn-primary" style="flex:1;font-size:var(--fs-2xs);" onclick="propLogPayment()">✓ Log Payment</button>
+                    <button class="btn" style="font-size:var(--fs-2xs);" onclick="document.getElementById('prop-payment-add').style.display='none'">Cancel</button>
                   </div>
                 </div>
-                <button class="btn" style="width:100%;font-size:11px;margin-bottom:8px;" id="prop-add-pay-btn"
+                <button class="btn" style="width:100%;font-size:var(--fs-2xs);margin-bottom:8px;" id="prop-add-pay-btn"
                   onclick="propShowPaymentAdd()">+ Log a Payment</button>
 
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);">
-                  <span style="font-size:13px;font-weight:600;color:var(--charcoal);">Balance Due</span>
-                  <span id="prop-balance" style="font-size:16px;font-weight:700;color:#B3261E;">$0.00</span>
+                  <span style="font-size:var(--fs-sm);font-weight:var(--weight-medium);color:var(--text);">Balance Due</span>
+                  <span id="prop-balance" style="font-size:var(--fs-lg);font-weight:var(--weight-medium);color:var(--danger-text);">$0.00</span>
                 </div>
               </div>
 
               <div style="margin-top:10px;">
-                <button class="btn btn-primary" style="width:100%;font-size:12px;" onclick="propSyncToDoc();navigate('proposal-doc');setTimeout(renderProposalDoc,50);">📄 Preview &amp; Print Proposal</button>
+                <button class="btn btn-primary" style="width:100%;font-size:var(--fs-xs);" onclick="propSyncToDoc();navigate('proposal-doc');setTimeout(renderProposalDoc,50);">📄 Preview &amp; Print Proposal</button>
               </div>
             </div>
           </div>
@@ -559,8 +560,8 @@
     <!-- PROPOSAL DOCUMENT -->
     <div id="section-proposal-doc" class="section">
       <div class="filter-bar">
-        <div style="font-size:14px;font-weight:500;color:var(--charcoal);flex:1;">Proposal Document</div>
-        <span id="prop-doc-save-indicator" style="font-size:11px;color:var(--sage-dark);opacity:0;transition:opacity 0.4s;"></span>
+        <div style="font-size:var(--fs-md);font-weight:500;color:var(--text);flex:1;">Proposal Document</div>
+        <span id="prop-doc-save-indicator" style="font-size:var(--fs-2xs);color:var(--text);opacity:0;transition:opacity var(--duration-fast);"></span>
         <button class="btn" onclick="navigate('proposals')">← Back to Builder</button>
         <button class="btn btn-primary" id="prop-doc-save-btn" onclick="propDocSave()">💾 Save</button>
         <button class="btn" onclick="window.print()">🖨️ Print</button>
@@ -594,8 +595,8 @@
           <div class="form-grid-2">
             <div class="client-field"><label>Pick-Up Date / Time</label><input id="pd-pickup" placeholder="e.g. Oct 11 · 10:00 AM"></div>
           </div>
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin:8px 0 4px;">Schedule</div>
-          <div style="font-size:12px;color:var(--stone);padding:4px 0 8px;font-style:italic;">Schedule is set in the Proposal Builder → Schedule section.</div>
+          <div style="font-size:var(--fs-2xs);font-weight:var(--weight-medium);text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin:8px 0 4px;">Schedule</div>
+          <div style="font-size:var(--fs-xs);color:var(--text-3);padding:4px 0 8px;font-style:italic;">Schedule is set in the Proposal Builder → Schedule section.</div>
           <div class="client-field"><label>Special Notes / Color Palette</label><textarea id="pd-notes" rows="2" placeholder="e.g. Pinks hanging, light blue + yellow centerpieces, no roses…"></textarea></div>
           <div style="margin-top:4px;">
             <div class="client-field"><label>Mood Board Images (paste URLs, one per line)</label><textarea id="pd-moodboard" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;(leave blank to use proposal item photos)"></textarea></div>
@@ -608,9 +609,9 @@
 
         <!-- CUSTOM ITEMS INPUT -->
         <div class="card" style="margin-bottom:18px;" id="custom-items-card">
-          <div class="card-title">Line Items <span style="font-weight:400;color:var(--stone);font-size:11px;">(from Proposal Builder + custom items below)</span></div>
+          <div class="card-title">Line Items <span style="font-weight:var(--weight-regular);color:var(--text-3);font-size:var(--fs-2xs);">(from Proposal Builder + custom items below)</span></div>
           <div id="custom-line-items"></div>
-          <div style="font-size:12px;color:var(--stone);margin-top:8px;">Items from your Proposal Builder are included automatically. Add custom items here.</div>
+          <div style="font-size:var(--fs-xs);color:var(--text-3);margin-top:8px;">Items from your Proposal Builder are included automatically. Add custom items here.</div>
         </div>
 
         <!-- RENDERED DOCUMENT PREVIEW -->
@@ -643,10 +644,10 @@
                 <span class="filter-chip" onclick="filterCat(this,'Floral Arrangements')">Floral</span>
                 <button class="btn btn-primary" onclick="openModal('add-item')">+ Add Item</button>
                 <button class="btn" id="inv-edit-toggle" onclick="toggleInvEditMode(this)" style="margin-left:4px;">✏️ Edit Items</button>
-                <button class="btn btn-danger" onclick="resetAllInvEdits()" title="Reset all custom names/prices back to original" style="font-size:12px;">↺ Reset Edits</button>
+                <button class="btn btn-danger" onclick="resetAllInvEdits()" title="Reset all custom names/prices back to original" style="font-size:var(--fs-xs);">↺ Reset Edits</button>
       </div>
-      <div style="font-size:11px;color:var(--stone);margin-bottom:14px;padding:8px 12px;background:var(--champagne);border-radius:var(--radius-sm);border:1px solid var(--border);">
-        📋 <strong>Da Vinci's Florist Rental Catalog</strong> · 719 items · RENTALS.xlsx + Floral Arrangement Samples · MP = Market Price, call (301) 588-8900 &nbsp;·&nbsp; <span id="inv-edit-hint" style="color:var(--champagne-dark);">Click <strong>✏️ Edit Items</strong> to rename or reprice any item — changes are saved automatically.</span>
+      <div style="font-size:var(--fs-2xs);color:var(--text-3);margin-bottom:14px;padding:8px 12px;background:var(--surface-raised);border-radius:var(--radius-sm);border:1px solid var(--border);">
+        📋 <strong>Da Vinci's Florist Rental Catalog</strong> · 719 items · RENTALS.xlsx + Floral Arrangement Samples · MP = Market Price, call (301) 588-8900 &nbsp;·&nbsp; <span id="inv-edit-hint" style="color:var(--accent-text);">Click <strong>✏️ Edit Items</strong> to rename or reprice any item — changes are saved automatically.</span>
       </div>
       <div class="inventory-grid" id="inv-grid">
         <!-- Inventory loaded from inventory.js -->
@@ -669,15 +670,15 @@
             <div class="cal-day-label">Sat</div>
           </div>
           <div class="avail-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--sage);border-radius:50%;"></div> Today</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--sage-light);border:2px solid var(--sage);border-radius:50%;"></div> Has event</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--warm-white);border:1px solid var(--border-mid);border-radius:50%;"></div> Available</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent);border-radius:50%;"></div> Today</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--surface-active);border:2px solid var(--accent-text);border-radius:50%;"></div> Has event</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--surface);border:1px solid var(--border-strong);border-radius:50%;"></div> Available</div>
           </div>
         </div>
         <div class="upcoming-bookings">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
             <div class="card-title" style="margin-bottom:0;" id="cal-bookings-title">Bookings This Month</div>
-            <button class="btn" style="font-size:11px;padding:4px 10px;" onclick="navigate('my-proposals')">All Proposals →</button>
+            <button class="btn" style="font-size:var(--fs-2xs);padding:4px 10px;" onclick="navigate('my-proposals')">All Proposals →</button>
           </div>
           <div id="cal-booking-list"></div>
         </div>
@@ -703,15 +704,15 @@
               </tr>
             </thead>
             <tbody id="crm-table-body">
-              <tr><td colspan="5" style="padding:20px;text-align:center;color:var(--stone);font-style:italic;">Loading clients…</td></tr>
+              <tr><td colspan="5" style="padding:20px;text-align:center;color:var(--text-3);font-style:italic;">Loading clients…</td></tr>
             </tbody>
           </table>
         </div>
         <div id="client-detail-panel">
-          <div style="background:var(--warm-white);border:1px solid var(--border);border-radius:var(--radius);padding:36px 20px;text-align:center;color:var(--stone);">
-            <div style="font-size:40px;margin-bottom:14px;opacity:0.4;">◈</div>
-            <div style="font-size:14px;font-weight:600;color:var(--charcoal);margin-bottom:6px;">Select a client</div>
-            <div style="font-size:12.5px;color:var(--stone);line-height:1.7;">Click any row to view their<br>contact details, history, and proposals.</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:36px 20px;text-align:center;color:var(--text-3);">
+            <div style="font-size:var(--fs-3xl);margin-bottom:14px;opacity:0.4;">◈</div>
+            <div style="font-size:var(--fs-md);font-weight:var(--weight-medium);color:var(--text);margin-bottom:6px;">Select a client</div>
+            <div style="font-size:var(--fs-xs);color:var(--text-3);line-height:1.7;">Click any row to view their<br>contact details, history, and proposals.</div>
           </div>
         </div>
       </div>
@@ -767,8 +768,8 @@
       </div>
       <div class="card" style="max-width:700px;">
         <div class="card-title">Contract Template</div>
-        <div id="contract-template-text" style="background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;font-size:13px;color:var(--charcoal);line-height:1.8;outline:none;" spellcheck="true">
-          <div style="font-family:var(--font-serif);font-size:18px;margin-bottom:12px;">Event Rental Agreement</div>
+        <div id="contract-template-text" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;font-size:var(--fs-sm);color:var(--text);line-height:1.8;outline:none;" spellcheck="true">
+          <div style="font-family:var(--font-heading);font-size:var(--fs-xl);margin-bottom:12px;">Event Rental Agreement</div>
           <p>This agreement is made between <strong>Da Vinci's Florist, LLC</strong> ("Company") and <strong>[CLIENT NAME]</strong> ("Client") for the event scheduled on <strong>[EVENT DATE]</strong> at <strong>[VENUE]</strong>.</p>
           <p style="margin-top:10px;"><strong>Rental Items:</strong> As itemized in the attached proposal and inventory list.</p>
           <p style="margin-top:10px;"><strong>Payment:</strong> A non-refundable deposit of 50% is due upon signing. The remaining balance is due 30 days prior to the event.</p>
@@ -835,18 +836,18 @@
         <div class="invoice-header">
           <div>
             <div class="invoice-logo">Da Vinci's Florist, LLC</div>
-            <div style="font-size:12px;color:var(--stone);margin-top:6px;">2756 Garfield Ave<br>Silver Spring, MD 20910<br>devika@davinciflorist.com</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:6px;">2756 Garfield Ave<br>Silver Spring, MD 20910<br>devika@davinciflorist.com</div>
           </div>
           <div style="text-align:right;">
             <div class="invoice-title">Invoice</div>
             <div class="invoice-num">#INV-2025-042</div>
-            <div style="margin-top:10px;font-size:12px;color:var(--stone);">Issued: June 1, 2025<br>Due: June 15, 2025</div>
+            <div style="margin-top:10px;font-size:12px;color:var(--text-3);">Issued: June 1, 2025<br>Due: June 15, 2025</div>
             <div style="margin-top:10px;"><span class="payment-status status-pending">Pending</span></div>
           </div>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:24px;">
-          <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin-bottom:6px;">Bill To</div><div style="font-weight:500;">Azure Tech Corp</div><div style="color:var(--stone);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="355043505b414675544f4047501b565a58">[email&#160;protected]</a><br>400 Innovation Blvd, SF, CA 94103</div></div>
-          <div style="text-align:right;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--stone);margin-bottom:6px;">Event Details</div><div>Azure Tech Summit Gala</div><div style="color:var(--stone);">Jun 18, 2025 · Grand Ballroom</div></div>
+          <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:6px;">Bill To</div><div style="font-weight:500;">Azure Tech Corp</div><div style="color:var(--text-3);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="355043505b414675544f4047501b565a58">[email&#160;protected]</a><br>400 Innovation Blvd, SF, CA 94103</div></div>
+          <div style="text-align:right;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:6px;">Event Details</div><div>Azure Tech Summit Gala</div><div style="color:var(--text-3);">Jun 18, 2025 · Grand Ballroom</div></div>
         </div>
         <table class="invoice-table">
           <thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
@@ -867,7 +868,7 @@
           <div class="invoice-grand"><span>Balance Due</span><span>$8,903.40</span></div>
         </div>
         <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-          <div style="font-size:12px;color:var(--stone);">Payment via bank transfer, check, or credit card.<br>Thank you for choosing Da Vinci's Florist, LLC.</div>
+          <div style="font-size:12px;color:var(--text-3);">Payment via bank transfer, check, or credit card.<br>Thank you for choosing Da Vinci's Florist, LLC.</div>
           <div style="display:flex;gap:10px;">
             <button class="btn" onclick="printInvoicePreview()">🖨️ Print</button>
             <button class="btn btn-primary" onclick="showToast('📧 Email functionality coming in a future update','toast-info')">Send Invoice</button>
@@ -883,9 +884,9 @@
 
       <!-- Toolbar -->
       <div class="filter-bar" style="margin-bottom:20px;">
-        <div style="font-size:14px;font-weight:700;color:var(--charcoal);flex:1;">✦ Venue Visualizer
-          <span id="viz-stage-indicator" style="font-size:12px;font-weight:400;color:var(--stone);margin-left:8px;"></span>
-          <span id="viz-saved-indicator" style="font-size:11px;font-weight:400;color:var(--stone);margin-left:10px;opacity:0;transition:opacity 0.4s;"></span>
+        <div style="font-size:var(--fs-md);font-weight:var(--weight-medium);color:var(--text);flex:1;">✦ Venue Visualizer
+          <span id="viz-stage-indicator" style="font-size:var(--fs-xs);font-weight:var(--weight-regular);color:var(--text-3);margin-left:8px;"></span>
+          <span id="viz-saved-indicator" style="font-size:var(--fs-2xs);font-weight:var(--weight-regular);color:var(--text-3);margin-left:10px;opacity:0;transition:opacity var(--duration-fast);"></span>
         </div>
         <button class="btn" id="viz-split-btn" onclick="vizToggleSplit()" title="Side-by-side: photo analysis left, proposal right">⧟ Split</button>
         <button class="btn" onclick="vzaSessionSavePrompt()" title="Save this visualizer session with a name">💾 Save Session</button>
@@ -898,8 +899,8 @@
       <div id="viz-stage-entry" class="viz-stage active">
         <div style="max-width:780px;margin:0 auto;padding:24px 0;">
           <div style="text-align:center;margin-bottom:28px;">
-            <div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">What would you like to do?</div>
-            <div style="font-size:13px;color:var(--stone);">Choose a workflow to get started</div>
+            <div style="font-size:var(--fs-xl);font-weight:var(--weight-medium);color:var(--text);margin-bottom:6px;">What would you like to do?</div>
+            <div style="font-size:var(--fs-sm);color:var(--text-3);">Choose a workflow to get started</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
             <div class="viz-mode-card" onclick="vizGoToInput()">
@@ -934,24 +935,24 @@
                    ondrop="vizHandleDrop(event)">
                 <input type="file" id="viz-file-input" accept="image/*" onchange="vizHandleFile(this.files[0])">
                 <div id="viz-upload-placeholder">
-                  <div style="font-size:32px;opacity:0.5;">🏛</div>
-                  <div style="font-weight:600;font-size:13px;color:var(--charcoal);">Upload a venue photo</div>
-                  <div style="font-size:11.5px;color:var(--stone);">Ballroom, garden, tent, loft — any space</div>
-                  <div style="font-size:11px;color:var(--stone-light);margin-top:4px;">Click or drag & drop · JPG, PNG, WEBP</div>
+                  <div style="font-size:var(--fs-3xl);opacity:0.5;">🏛</div>
+                  <div style="font-weight:var(--weight-medium);font-size:var(--fs-sm);color:var(--text);">Upload a venue photo</div>
+                  <div style="font-size:var(--fs-xs);color:var(--text-3);">Ballroom, garden, tent, loft — any space</div>
+                  <div style="font-size:var(--fs-2xs);color:var(--text-3);margin-top:4px;">Click or drag & drop · JPG, PNG, WEBP</div>
                 </div>
                 <img id="viz-venue-thumb" class="viz-thumb" style="display:none;">
               </div>
-              <div style="text-align:center;margin:8px 0;font-size:11px;color:var(--stone-light);">— or —</div>
-              <div style="font-size:11px;font-weight:600;color:var(--stone);margin-bottom:6px;">Describe the venue instead</div>
+              <div style="text-align:center;margin:8px 0;font-size:var(--fs-2xs);color:var(--text-3);">— or —</div>
+              <div style="font-size:var(--fs-2xs);font-weight:var(--weight-medium);color:var(--text-3);margin-bottom:6px;">Describe the venue instead</div>
               <input id="viz-venue-desc" type="text" placeholder="e.g. Grand ballroom, 80ft long, crystal chandeliers…"
-                style="width:100%;padding:7px 10px;border:1px solid var(--border-mid);border-radius:6px;font-size:12px;font-family:var(--font-sans);outline:none;box-sizing:border-box;"
+                style="width:100%;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);outline:none;box-sizing:border-box;"
                 oninput="vizUpdateGenerateBtn()">
             </div>
 
             <!-- Description + proposal chips -->
             <div class="viz-card" style="flex:1;">
               <div class="viz-section-label">Step 2 — Event Design</div>
-              <div style="font-size:12px;color:var(--stone);margin-bottom:8px;">Describe what you want added. Click items from your proposal to include them:</div>
+              <div style="font-size:var(--fs-xs);color:var(--text-3);margin-bottom:8px;">Describe what you want added. Click items from your proposal to include them:</div>
               <div class="viz-chips-row" id="viz-proposal-chips" style="margin-bottom:10px;"></div>
               <textarea id="viz-design-input" class="viz-textarea" placeholder="e.g. Add 10 round tables with ivory linens, a black lounge area near the front, white draping on the back wall, a dance floor in the center surrounded by floral centerpieces…" oninput="vizUpdateGenerateBtn()"></textarea>
             </div>
@@ -967,9 +968,9 @@
           <div class="viz-right">
             <div class="viz-card" style="flex:1;display:flex;align-items:center;justify-content:center;">
               <div class="viz-empty-canvas">
-                <div style="font-size:64px;opacity:0.15;">✦</div>
-                <div style="font-weight:600;font-size:15px;color:var(--charcoal);">Your mockup will appear here</div>
-                <div style="font-size:13px;color:var(--stone);max-width:300px;line-height:1.6;">Upload a venue photo or describe the space, write your design vision, then click Generate.</div>
+                <div style="font-size:var(--fs-3xl);opacity:0.15;">✦</div>
+                <div style="font-weight:var(--weight-medium);font-size:var(--fs-md);color:var(--text);">Your mockup will appear here</div>
+                <div style="font-size:var(--fs-sm);color:var(--text-3);max-width:300px;line-height:1.6;">Upload a venue photo or describe the space, write your design vision, then click Generate.</div>
               </div>
             </div>
           </div>
@@ -982,8 +983,8 @@
         <div class="viz-card" style="min-height:400px;display:flex;align-items:center;justify-content:center;">
           <div class="viz-loading">
             <div class="viz-spinner"></div>
-            <div style="font-size:15px;font-weight:600;color:var(--charcoal);" id="viz-progress-title">Generating your mockup…</div>
-            <div style="font-size:13px;color:var(--stone);text-align:center;max-width:340px;line-height:1.6;" id="viz-progress-sub">Sending venue photo to Claude for analysis…</div>
+            <div style="font-size:var(--fs-md);font-weight:var(--weight-medium);color:var(--text);" id="viz-progress-title">Generating your mockup…</div>
+            <div style="font-size:var(--fs-sm);color:var(--text-3);text-align:center;max-width:340px;line-height:1.6;" id="viz-progress-sub">Sending venue photo to Claude for analysis…</div>
           </div>
         </div>
       </div>
@@ -1009,7 +1010,7 @@
               <button class="btn" onclick="vizGoToInput()" style="flex:1;">← New Design</button>
               <button class="btn btn-primary" onclick="vizGoToAnnotate()" style="flex:1;">Annotate →</button>
             </div>
-            <button class="btn" style="width:100%;font-size:12px;" onclick="vizAddToProposalDirect()">Add Mockup to Proposal (no annotation)</button>
+            <button class="btn" style="width:100%;font-size:var(--fs-xs);" onclick="vizAddToProposalDirect()">Add Mockup to Proposal (no annotation)</button>
           </div>
 
           <!-- Right: mockup display -->
@@ -1021,7 +1022,7 @@
             </div>
             <div id="viz-dalle-prompt-card" class="viz-card" style="display:none;">
               <div class="viz-section-label">Claude's Scene Description (used for DALL-E)</div>
-              <div id="viz-dalle-prompt-text" style="font-size:11.5px;color:var(--stone);line-height:1.6;max-height:100px;overflow-y:auto;"></div>
+              <div id="viz-dalle-prompt-text" style="font-size:var(--fs-xs);color:var(--text-3);line-height:1.6;max-height:100px;overflow-y:auto;"></div>
             </div>
           </div>
 
@@ -1036,12 +1037,12 @@
           <div class="viz-left">
             <div class="viz-card">
               <div class="viz-section-label">Callout Annotations</div>
-              <div style="font-size:12px;color:var(--stone);margin-bottom:10px;">Click anywhere on the image to place a callout marker. Each callout can be labeled and linked to an inventory item.</div>
+              <div style="font-size:var(--fs-xs);color:var(--text-3);margin-bottom:10px;">Click anywhere on the image to place a callout marker. Each callout can be labeled and linked to an inventory item.</div>
               <div class="viz-callout-list" id="viz-callout-list">
-                <div style="font-size:12px;color:var(--stone-light);font-style:italic;padding:8px 0;">Click the mockup to add callout markers.</div>
+                <div style="font-size:var(--fs-xs);color:var(--text-3);font-style:italic;padding:8px 0;">Click the mockup to add callout markers.</div>
               </div>
             </div>
-                    <button class="btn" style="width:100%;font-size:12px;margin-bottom:8px;" onclick="vizIdentifyItems(this)">✦ Identify Items</button>
+                    <button class="btn" style="width:100%;font-size:var(--fs-xs);margin-bottom:8px;" onclick="vizIdentifyItems(this)">✦ Identify Items</button>
             <div class="viz-action-row">
               <button class="btn" onclick="vizGoToReview()" style="flex:1;">← Back</button>
               <button class="btn btn-primary" onclick="vizAddToProposal()" style="flex:1.5;">Add to Proposal →</button>
@@ -1076,23 +1077,23 @@
                  ondrop="event.preventDefault();vzaHandleFile(event.dataTransfer.files[0])">
               <input type="file" id="vza-file-input" accept="image/*" style="display:none;" onchange="vzaHandleFile(this.files[0])">
               <div id="vza-upload-ph" style="display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;">
-                <div style="font-size:28px;opacity:0.45;">📸</div>
-                <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Upload event photo</div>
-                <div style="font-size:11px;color:var(--stone);">Any event photo, mockup, or inspiration image</div>
+                <div style="font-size:var(--fs-2xl);opacity:0.45;">📸</div>
+                <div style="font-size:var(--fs-sm);font-weight:var(--weight-medium);color:var(--text);">Upload event photo</div>
+                <div style="font-size:var(--fs-2xs);color:var(--text-3);">Any event photo, mockup, or inspiration image</div>
               </div>
-              <img id="vza-thumb" style="display:none;max-height:100px;max-width:200px;border-radius:6px;object-fit:cover;" alt="">
+              <img id="vza-thumb" style="display:none;max-height:100px;max-width:200px;border-radius:var(--radius-sm);object-fit:cover;" alt="">
             </div>
             <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:10px;">
-              <button class="viz-btn-generate" id="vza-analyze-btn" onclick="vzaAnalyzePhoto()" disabled style="font-size:13px;padding:12px 20px;">✦ Identify Items</button>
-              <div style="font-size:11.5px;color:var(--stone);" id="vza-status">Upload a photo to begin.</div>
-              <button class="btn" onclick="vzaStartOver()" style="font-size:11px;color:var(--stone);padding:4px 10px;align-self:flex-start;">↺ New Image</button>
+              <button class="viz-btn-generate" id="vza-analyze-btn" onclick="vzaAnalyzePhoto()" disabled style="font-size:var(--fs-sm);padding:12px 20px;">✦ Identify Items</button>
+              <div style="font-size:var(--fs-xs);color:var(--text-3);" id="vza-status">Upload a photo to begin.</div>
+              <button class="btn" onclick="vzaStartOver()" style="font-size:var(--fs-2xs);color:var(--text-3);padding:4px 10px;align-self:flex-start;">↺ New Image</button>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
               <div style="display:flex;gap:8px;">
-                <button id="vza-match-all-btn" class="btn" onclick="vzaMatchAll()" style="display:none;white-space:nowrap;font-weight:600;font-size:12px;">Match All to Inventory</button>
-                <button id="vza-add-all-btn" class="btn btn-primary" onclick="vzaAddAll()" style="display:none;white-space:nowrap;font-weight:700;">Add All to Proposal</button>
+                <button id="vza-match-all-btn" class="btn" onclick="vzaMatchAll()" style="display:none;white-space:nowrap;font-weight:var(--weight-medium);font-size:var(--fs-xs);">Match All to Inventory</button>
+                <button id="vza-add-all-btn" class="btn btn-primary" onclick="vzaAddAll()" style="display:none;white-space:nowrap;font-weight:var(--weight-medium);">Add All to Proposal</button>
               </div>
-              <div id="vza-added-count" style="font-size:11px;color:var(--stone);text-align:right;"></div>
+              <div id="vza-added-count" style="font-size:var(--fs-2xs);color:var(--text-3);text-align:right;"></div>
             </div>
           </div>
         </div>
@@ -1100,46 +1101,46 @@
         <!-- Crop editor (shown after AI analysis, before confirming) -->
         <div id="vza-crop-editor-wrap" style="display:none;margin-top:16px;">
           <div class="viz-card" style="padding:14px;">
-            <div style="font-size:11px;color:var(--stone);margin-bottom:12px;">Drag boxes to reposition &nbsp;·&nbsp; Drag corners to resize &nbsp;·&nbsp; Double-click label to rename &nbsp;·&nbsp; Click × to remove</div>
+            <div style="font-size:var(--fs-2xs);color:var(--text-3);margin-bottom:12px;">Drag boxes to reposition &nbsp;·&nbsp; Drag corners to resize &nbsp;·&nbsp; Double-click label to rename &nbsp;·&nbsp; Click × to remove</div>
             <div style="display:flex;gap:16px;align-items:flex-start;">
               <!-- Image + crop box layer -->
               <div id="vza-crop-img-wrap" style="flex:1;min-width:0;position:relative;" onmousedown="vzaWrapMousedown(event)">
-                <img id="vza-crop-img" style="width:100%;display:block;border-radius:6px;pointer-events:none;user-select:none;" draggable="false">
+                <img id="vza-crop-img" style="width:100%;display:block;border-radius:var(--radius-sm);pointer-events:none;user-select:none;" draggable="false">
                 <!-- Crop box divs injected here by vzaRenderCropBoxes() -->
-                <div id="vza-crop-add-overlay" style="display:none;position:absolute;inset:0;z-index:30;border-radius:6px;"></div>
+                <div id="vza-crop-add-overlay" style="display:none;position:absolute;inset:0;z-index:30;border-radius:var(--radius-sm);"></div>
               </div>
               <!-- Sidebar -->
               <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;">
-                <div id="vza-crop-sb-empty" style="font-size:12px;color:var(--stone);line-height:1.6;">Click a box to select and edit it.</div>
+                <div id="vza-crop-sb-empty" style="font-size:var(--fs-xs);color:var(--text-3);line-height:1.6;">Click a box to select and edit it.</div>
                 <div id="vza-crop-sb-form">
-                  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--stone);">Selected Item</div>
+                  <div style="font-size:var(--fs-2xs);font-weight:var(--weight-medium);text-transform:uppercase;letter-spacing:0.6px;color:var(--text-3);">Selected Item</div>
                   <input id="vza-crop-sb-name" type="text" placeholder="Item name"
-                    style="padding:5px 8px;border:1px solid var(--border-mid);border-radius:5px;font-size:12px;font-family:var(--font-sans);outline:none;width:100%;box-sizing:border-box;"
+                    style="padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);outline:none;width:100%;box-sizing:border-box;"
                     oninput="vzaCropSbNameChange(this.value)">
                   <select id="vza-crop-sb-cat"
-                    style="padding:5px 8px;border:1px solid var(--border-mid);border-radius:5px;font-size:12px;font-family:var(--font-sans);outline:none;width:100%;box-sizing:border-box;background:var(--warm-white);"
+                    style="padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-size:var(--fs-xs);font-family:var(--font-sans);outline:none;width:100%;box-sizing:border-box;background:var(--surface);"
                     onchange="vzaCropSbCatChange(this.value)"></select>
-                  <button class="btn" onclick="vzaDeleteSelected()" style="font-size:11px;color:var(--blush-mid);border-color:rgba(179,38,30,0.4);padding:4px 10px;width:100%;">Remove Item</button>
+                  <button class="btn" onclick="vzaDeleteSelected()" style="font-size:var(--fs-2xs);color:var(--danger-text);border-color:var(--danger-border-subtle);padding:4px 10px;width:100%;">Remove Item</button>
                 </div>
                 <div style="border-top:1px solid var(--border);padding-top:10px;">
-                  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--stone);margin-bottom:6px;">Shortcuts</div>
-                  <div style="font-size:10.5px;color:var(--stone-light);line-height:1.9;">
-                    <kbd style="font-family:monospace;background:var(--champagne);padding:1px 5px;border-radius:3px;font-size:10px;">Del</kbd> remove<br>
-                    <kbd style="font-family:monospace;background:var(--champagne);padding:1px 5px;border-radius:3px;font-size:10px;">Esc</kbd> deselect<br>
-                    <kbd style="font-family:monospace;background:var(--champagne);padding:1px 5px;border-radius:3px;font-size:10px;">↩</kbd> confirm all
+                  <div style="font-size:var(--fs-2xs);font-weight:var(--weight-medium);text-transform:uppercase;letter-spacing:0.6px;color:var(--text-3);margin-bottom:6px;">Shortcuts</div>
+                  <div style="font-size:var(--fs-2xs);color:var(--text-3);line-height:1.9;">
+                    <kbd style="font-family:monospace;background:var(--surface-raised);padding:1px 5px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);">Del</kbd> remove<br>
+                    <kbd style="font-family:monospace;background:var(--surface-raised);padding:1px 5px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);">Esc</kbd> deselect<br>
+                    <kbd style="font-family:monospace;background:var(--surface-raised);padding:1px 5px;border-radius:var(--radius-xs);font-size:var(--fs-2xs);">↩</kbd> confirm all
                   </div>
                 </div>
               </div>
             </div>
             <!-- Bottom bar -->
             <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
-              <div style="display:flex;gap:2px;background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:3px;" title="Draw: click-drag on image to create new boxes. Select: click to select and move boxes.">
+              <div style="display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);padding:3px;" title="Draw: click-drag on image to create new boxes. Select: click to select and move boxes.">
                 <button id="vza-mode-draw" class="vza-mode-btn active" onclick="vzaSetMode('draw')">✏ Draw</button>
                 <button id="vza-mode-select" class="vza-mode-btn" onclick="vzaSetMode('select')">↔ Select</button>
               </div>
               <div style="flex:1;"></div>
-              <span id="vza-crop-count" style="font-size:11px;color:var(--stone);"></span>
-              <button class="btn btn-primary" onclick="vzaConfirmCrops()" style="font-weight:700;">Confirm Crops →</button>
+              <span id="vza-crop-count" style="font-size:var(--fs-2xs);color:var(--text-3);"></span>
+              <button class="btn btn-primary" onclick="vzaConfirmCrops()" style="font-weight:var(--weight-medium);">Confirm Crops →</button>
             </div>
           </div>
         </div>
@@ -1152,13 +1153,13 @@
         </div><!-- end #viz-split-left -->
         <div id="viz-split-divider" onmousedown="vzaSplitStartDrag(event)" title="Drag to resize panels"></div>
         <div id="viz-split-right" style="width:340px;">
-          <div style="font-size:12px;font-weight:700;color:var(--charcoal);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:var(--fs-xs);font-weight:var(--weight-medium);color:var(--text);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
             <span>Active Proposal</span>
-            <span id="viz-split-item-count" style="font-size:10px;font-weight:400;color:var(--stone);"></span>
+            <span id="viz-split-item-count" style="font-size:var(--fs-2xs);font-weight:var(--weight-regular);color:var(--text-3);"></span>
           </div>
           <div id="viz-split-prop-items"></div>
           <div id="viz-split-prop-total"></div>
-          <button class="btn" onclick="navigate('proposals')" style="width:100%;margin-top:10px;font-size:11px;">Open Full Proposal Builder →</button>
+          <button class="btn" onclick="navigate('proposals')" style="width:100%;margin-top:10px;font-size:var(--fs-2xs);">Open Full Proposal Builder →</button>
         </div>
 
       </div>
@@ -1206,7 +1207,7 @@
     <div class="viz-panel">
       <div class="viz-panel-header">
         <div class="viz-panel-title">Crop Library</div>
-        <div style="font-size:12px;color:var(--stone);">Cropped item photos saved from photo analysis</div>
+        <div style="font-size:var(--fs-xs);color:var(--text-3);">Cropped item photos saved from photo analysis</div>
         <button class="viz-panel-close" onclick="vzaLibClose()">×</button>
       </div>
       <div class="viz-panel-body">
@@ -1221,7 +1222,7 @@
       <div class="viz-panel-header">
         <div>
           <div class="viz-panel-title">Visualizer Sessions</div>
-          <div style="font-size:12px;color:var(--stone);">Saved visualizer states — click to restore</div>
+          <div style="font-size:var(--fs-xs);color:var(--text-3);">Saved visualizer states — click to restore</div>
         </div>
         <button class="viz-panel-close" onclick="vzaSessionClosePanel()">×</button>
       </div>
