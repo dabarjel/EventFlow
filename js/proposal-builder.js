@@ -918,7 +918,7 @@ async function propSave() {
     schedule: getScheduleData(),
     ship_rate: shipRate,
     tax_rate: taxRate,
-    deposit: parseFloat(gv('prop-deposit')) || 1000,
+    deposit: numOr(gv('prop-deposit'), 1000),
     items: proposalItems.map(i => ({id:i.id,name:i.name,cat:i.cat,price:i.price,sku:i.sku,qty:i.qty,notes:i.notes||'',area:i.area||'',imgSrc:i.imgSrc||'',isCustom:i.isCustom||false,isVenueItem:i.isVenueItem||false,fromAnalysis:i.fromAnalysis||false})),
     // Still a base64 data URL here, not a Storage URL — Venue Visualizer
     // (where window._vizProposalMockup comes from) doesn't move to Supabase
@@ -1087,9 +1087,9 @@ async function propLoadProposal(key) {
   setVal('prop-pickup',    f.pickup   || '');
   setVal('prop-notes',     f.notes    || '');
   setScheduleData(p.schedule || []);
-  setVal('prop-ship-rate', p.shipRate || '20');
-  setVal('prop-tax-rate',  p.taxRate  || '6');
-  setVal('prop-deposit',   p.deposit  || '1000');
+  setVal('prop-ship-rate', p.shipRate ?? '20');
+  setVal('prop-tax-rate',  p.taxRate  ?? '6');
+  setVal('prop-deposit',   p.deposit  ?? '1000');
   proposalItems = [];
   propItemIdCounter = 0;
   (p.items || []).forEach(item => {

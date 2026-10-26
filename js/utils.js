@@ -17,6 +17,15 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+// ── NUMBER WITH FALLBACK ──────────────────────────────────────────────────────
+// For rate/deposit fields where 0 is a real value: `parseFloat(v) || 20` turns
+// a 0% shipping rate into 20%. This only falls back when the field is blank or
+// not a number.
+function numOr(v, fallback) {
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 // ── SAVED PROPOSALS ACCESSOR ─────────────────────────────────────────────────
 // Returns proposals shaped like the old localStorage records (key, clientName,
 // fields, items, payments embedded) even though payments now live in their

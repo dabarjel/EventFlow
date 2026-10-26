@@ -128,9 +128,9 @@ function renderProposalDoc() {
   const subtotal = lineItems.reduce((a,b) => a + b.total, 0);
 
   // Pull live rates from proposal builder inputs
-  const _shipRate   = parseFloat((document.getElementById('prop-ship-rate') || {value:'20'}).value) || 20;
-  const _taxRate    = parseFloat((document.getElementById('prop-tax-rate')  || {value:'6'}).value)  || 6;
-  const _depositAmt = parseFloat((document.getElementById('prop-deposit')   || {value:'1000'}).value) || 0;
+  const _shipRate   = numOr((document.getElementById('prop-ship-rate') || {value:'20'}).value, 20);
+  const _taxRate    = numOr((document.getElementById('prop-tax-rate')  || {value:'6'}).value, 6);
+  const _depositAmt = numOr((document.getElementById('prop-deposit')   || {value:'1000'}).value, 0);
 
   const shipping = subtotal * (_shipRate / 100);
   const venueText = (document.getElementById('pd-venue').value || '').toUpperCase();
@@ -632,8 +632,8 @@ function propDocItemBlur(el) {
 function _propDocUpdateTotals() {
   const lineItems = getProposalLineItems();
   const subtotal = lineItems.reduce((a, b) => a + b.total, 0);
-  const _shipRate = parseFloat((document.getElementById('prop-ship-rate') || {value:'20'}).value) || 20;
-  const _taxRate  = parseFloat((document.getElementById('prop-tax-rate')  || {value:'6'}).value)  || 6;
+  const _shipRate = numOr((document.getElementById('prop-ship-rate') || {value:'20'}).value, 20);
+  const _taxRate  = numOr((document.getElementById('prop-tax-rate')  || {value:'6'}).value, 6);
   const shipping  = subtotal * (_shipRate / 100);
   const tax       = (subtotal + shipping) * (_taxRate / 100);
   const total     = subtotal + shipping + tax;
