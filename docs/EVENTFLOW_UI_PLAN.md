@@ -15,6 +15,7 @@ Use the frontend-design skill for all visual and layout decisions. Use the UX sk
 - Keep the shared escapeHtml() utility on every place user data gets rendered. No new innerHTML with unescaped data.
 - Keep the current stack. No framework or build step without asking me.
 - Commit at the end of each phase with a clear message. Stop after each phase and show me what changed before moving on.
+- After each finished step, add a status line to this plan under that step, with the commit hash.
 
 ## Brand
 Keep the existing brand from design-system/eventflow/MASTER.md: deep botanical green, brass gold, ivory, Playfair Display for headings, Inter for body. Modernize how it's used, don't replace it. No gradients.
@@ -46,7 +47,7 @@ e. Write a README.md for recruiters, with screenshot placeholders.
 
 **Status: done.** Four directions were built (A Ledger, B Conservatory, C Atelier, D Studio). **Chosen: D, Studio.** The decisions:
 - Dark app workspace inspired by Supabase's dashboard structure, on DaVinci's black and white.
-- One accent. Champagne gold is wired in as the default. Botanical green is a one-attribute switch (`data-accent` on `<html>`). The final pick is still to be confirmed.
+- One accent: champagne gold. **Final** (confirmed 2026-10-26). The botanical green switch (`data-accent` on `<html>`) stays in the code but isn't used.
 - Light grey photo wells.
 - One primary action per screen.
 - No Playfair on app screens.
@@ -97,6 +98,21 @@ Add loading, empty, and error states wherever they're missing. Commit after each
 
 Replace the fake dashboard and pipeline numbers (Active Events, revenue trend, "from last month" deltas, the static pipeline cards and seed upcoming events) with real Supabase data. Where a query would be complex, show an honest empty state instead.
 
+**Status: in progress.** The work through `329e70f` was merged to `main` in `3f2d4a5` (2026-10-01) and is live. The remaining screens are being built on the `phase-3-screens` branch.
+- **3a. App shell: done** (`c15bf27`).
+  - Desktop: 52px icon rail that expands on hover or focus and can be pinned open. Lucide icons, aria-current on the active item, and one New proposal button in the top bar.
+  - Phone: menu drawer, five-tab bottom bar and a 36px floating button.
+  - No page scrolls sideways at 375, 768 or 1440px.
+- **3b. Login: done** (`a009fcc`). Studio style, labeled 36px fields with focus rings, and a credit line. IDs and auth logic are unchanged.
+- **Dashboard and pipeline data: done** (`00c47c9`). All fake stats, seed rows, revenue bars, tasks and the 11 hardcoded pipeline cards are gone. Everything comes from the existing `getSavedProposals()` read, with no new queries. Empty accounts get empty states.
+- **Title, favicon and Open Graph tags: done** (`329e70f`). Page title, meta and OG description, theme-color, and an SVG favicon. This also fixed the `favicon.ico` 404.
+- **Housekeeping: done** (`98d946c`). Removed the leftover `main` worktree. `.claude/settings.local.json` is no longer tracked and is now in `.gitignore`.
+- **Still to do:**
+  - Screens: proposal builder, inventory catalog, CRM, then payments and Venue Visualizer.
+  - Loading, empty and error states.
+  - Swap the remaining Unicode icons for Lucide.
+  - Table conventions.
+
 ## Phase 4: Polish and check
 1. Run a UX heuristics review and an accessibility pass (contrast, focus styles, aria labels, keyboard nav). Fix high-severity items only.
 2. Check every screen at 375px, 768px, and 1440px wide.
@@ -105,4 +121,4 @@ Replace the fake dashboard and pipeline numbers (Active Events, revenue trend, "
 
 ## Phase 5: Demo prep
 1. Make sure the app looks good with realistic sample data loaded.
-2. Push the `ui-overhaul` branch and open a pull request. Don't merge it. I'll review and merge myself.
+2. Each screen gets its own branch, or its own commits on `phase-3-screens`. It's merged to `main` only after I've tested it.
