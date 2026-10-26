@@ -17,6 +17,8 @@ backed by Supabase (auth, inventory, CRM, proposals, payments, Venue Visualizer)
 - `media rentals/`, `media floral/`: catalog images. Saved proposals in Supabase store these paths
   (`proposals.items[].imgSrc`), so renaming the folders breaks existing proposals without a data migration.
 - `supabase/`: migrations and the `ai-proxy` Edge Function. `docs/`: plans, audits, reviews.
+- `scripts/build-icons.cjs`: rebuilds the Lucide sprite in `index.html`. Dev-only, so there's still no build step.
+  Add icon names there. Never hand-edit the sprite.
 - Design system: `design-system/eventflow/MASTER.md`. Check it before styling UI.
 
 ## Rules

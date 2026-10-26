@@ -19,6 +19,25 @@ let _propCurrentPayments = [];
 // synchronously, so it can't await a fetch of its own.
 let _savedProp = null;
 
+// ── CATEGORY ICONS ───────────────────────────────────────────────────────────
+// Lucide icon shown when a catalog item has no photo. Covers the builder's
+// chips plus older category names still found in saved inventory.
+const PROP_CAT_ICONS = {
+  'Chairs & Barstools':'armchair', 'Seating':'armchair',
+  'Lounge & Sofas':'sofa', 'Lounge Furniture':'sofa',
+  'Tables & Coffee Tables':'rectangle-horizontal', 'Tables':'rectangle-horizontal',
+  'Bars':'martini', 'Bars & Displays':'martini',
+  'Charger Plates':'utensils', 'Tableware':'utensils',
+  'Vases & Candelabras':'flame',
+  'Decor & Ceremony':'flower-2', 'Décor & Props':'flower-2',
+  'Staging & Draping':'drama', 'Flooring & Staging':'drama', 'Tents & Structures':'tent',
+  'Linens & Swatches':'layers', 'Linens & Draping':'layers',
+  'Floral Arrangements':'flower',
+  'Specialty':'sparkles', 'Lighting':'lightbulb', 'Other':'package',
+  'Photo Booth':'camera', 'Dance Floor':'music',
+};
+function propCatIcon(cat) { return PROP_CAT_ICONS[cat] || 'package'; }
+
 // ── BUILD INVENTORY GRID ──────────────────────────────────────────────────────
 // ── PROP INVENTORY DATA STORE ────────────────────────────────────────────────
 let _propInvData = [];   // [{name,cat,price,sku,imgSrc}] — built once from #inv-grid
@@ -48,21 +67,6 @@ function propBuildInventory() {
     });
   });
 
-  const _catEmoji = {
-    'Chairs & Barstools':'🪑','Seating':'🪑',
-    'Lounge & Sofas':'🛋️','Lounge Furniture':'🛋️',
-    'Tables & Coffee Tables':'🪵','Tables':'🪵',
-    'Bars':'🍸','Bars & Displays':'🍸',
-    'Charger Plates':'🍽️','Tableware':'🍽️',
-    'Vases & Candelabras':'🕯️',
-    'Decor & Ceremony':'🌸','Décor & Props':'🌸',
-    'Staging & Draping':'🎭','Flooring & Staging':'🎭','Tents & Structures':'⛺',
-    'Linens & Swatches':'🧵','Linens & Draping':'🧵',
-    'Floral Arrangements':'💐',
-    'Specialty':'✨','Lighting':'💡','Other':'📦',
-    'Photo Booth':'📸','Dance Floor':'💃',
-  };
-
   grid.innerHTML = '';
 
   // IntersectionObserver: swap in real image only when card enters viewport
@@ -86,7 +90,6 @@ function propBuildInventory() {
 
   _propInvData.forEach(item => {
     const { name, cat, price, sku, imgSrc } = item;
-    const emoji = _catEmoji[cat] || '📦';
 
     const div = document.createElement('div');
     div.className = 'prop-inv-card';
@@ -101,14 +104,14 @@ function propBuildInventory() {
     // Render placeholder immediately — no grey flash, no lazy loading race
     const safeName = escapeHtml(name);
     div.innerHTML = '<div class="prop-img-placeholder" style="width:100%;height:100px;background:linear-gradient(135deg,var(--surface-raised) 0%,var(--surface-active) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">'
-      + '<span style="font-size:var(--fs-xl);">' + emoji + '</span>'
+      + '<span style="color:var(--text-3);display:flex;">' + iconSvg(propCatIcon(cat), 'icon-lg') + '</span>'
       + '<span style="font-size:var(--fs-2xs);color:var(--text-3);text-align:center;padding:0 6px;line-height:1.3;max-height:28px;overflow:hidden;">' + safeName + '</span>'
       + '</div>'
       + '<div class="prop-inv-card-body">'
       + '<div class="prop-inv-card-name">' + safeName + '</div>'
       + '<div class="prop-inv-card-price">' + escapeHtml(price && price !== 'MP' ? price : 'Call') + '</div>'
       + '</div>'
-      + '<button class="prop-inv-card-add" type="button">+</button>';
+      + '<button class="prop-inv-card-add" type="button" aria-label="Add ' + safeName + ' to proposal">' + iconSvg('plus', 'icon-sm') + '</button>';
 
     if (imgSrc) imgObserver.observe(div);   // swap in real image when scrolled to
 
@@ -171,9 +174,10 @@ function propUpdateChipCounts() {
   document.querySelectorAll('#prop-chips .prop-cat-chip').forEach(chip => {
     const cat = chip.dataset.cat || chip.getAttribute('onclick').match(/'([^']+)'/)?.[1] || '';
     const n = counts[cat] || 0;
-    // strip old count badge
-    chip.textContent = chip.textContent.replace(/\s*\(\d+\)$/, '');
-    if (n) chip.textContent += ' (' + n + ')';
+    // Count lives in its own span so rewriting it never touches the chip's icon
+    let countEl = chip.querySelector('.chip-count');
+    if (!countEl) { countEl = document.createElement('span'); countEl.className = 'chip-count'; chip.appendChild(countEl); }
+    countEl.textContent = n ? ' (' + n + ')' : '';
   });
 }
 
@@ -187,7 +191,11 @@ function propToggleSize() {
   const grid = document.getElementById('prop-inv-grid');
   const btn  = document.getElementById('prop-size-toggle');
   if (grid) grid.classList.toggle('large-cards', propLargeCards);
-  if (btn)  btn.textContent = propLargeCards ? '⊟' : '⊞';
+  if (btn) {
+    btn.innerHTML = iconSvg(propLargeCards ? 'grid-3x3' : 'grid-2x2');
+    const label = propLargeCards ? 'Smaller images' : 'Larger images';
+    btn.title = label; btn.setAttribute('aria-label', label);
+  }
 }
 
 function propChangePage(delta) {
@@ -317,7 +325,7 @@ function ciHandleImg(input) {
     const text = document.getElementById('ci-img-text');
     if (previewImg) previewImg.src = ciImgBase64;
     if (preview) preview.style.display = '';
-    if (icon) icon.textContent = '✓';
+    if (icon) icon.innerHTML = iconSvg('check', 'icon-lg');
     if (text) text.textContent = file.name;
   }).catch(() => {
     if (typeof showToast === 'function') showToast('Could not process that image — try a different file', 'toast-error');
@@ -332,7 +340,7 @@ function ciClearImg() {
   const text = document.getElementById('ci-img-text');
   if (preview) preview.style.display = 'none';
   if (input) input.value = '';
-  if (icon) icon.textContent = '📷';
+  if (icon) icon.innerHTML = iconSvg('camera', 'icon-lg');
   if (text) text.textContent = 'Click to upload image (optional)';
 }
 
@@ -371,13 +379,7 @@ function ciAddItem() {
   propUpdateTotals();
 
   // Flash success feedback
-  const btn = document.querySelector('[onclick="ciAddItem()"]');
-  if (btn) {
-    const orig = btn.textContent;
-    btn.textContent = '✓ Added!';
-    btn.style.background = 'var(--accent-hover)';
-    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1400);
-  }
+  flashButton(document.querySelector('[onclick="ciAddItem()"]'), iconSvg('check') + 'Added', 1400);
 
   // Reset form for next item (keep category + area for rapid multi-item entry)
   document.getElementById('ci-name').value  = '';
@@ -465,7 +467,7 @@ function buildItemRow(item) {
     i.className = 'prop-item-img'; i.src = item.imgSrc; return i;
   })() : (() => {
     const d = document.createElement('div');
-    d.className = 'prop-item-img-placeholder'; d.textContent = item.isCustom ? '📎' : '📦'; return d;
+    d.className = 'prop-item-img-placeholder'; d.innerHTML = iconSvg(item.isCustom ? 'paperclip' : propCatIcon(item.cat), 'icon-lg'); return d;
   })();
   // Custom item badge overlay
   if (item.isCustom) {
@@ -514,11 +516,12 @@ function buildItemRow(item) {
   // Qty — typed input + +/- buttons for fast bulk entry
   const qtyWrap = document.createElement('div');
   qtyWrap.className = 'prop-qty-ctrl';
-  qtyWrap.title = 'Type a quantity or use − + buttons';
+  qtyWrap.title = 'Type a quantity or use the minus and plus buttons';
 
   const decBtn = document.createElement('button');
   decBtn.className = 'prop-qty-btn'; decBtn.type = 'button';
-  decBtn.dataset.action = 'dec'; decBtn.dataset.id = item.id; decBtn.textContent = '−';
+  decBtn.dataset.action = 'dec'; decBtn.dataset.id = item.id; decBtn.innerHTML = iconSvg('minus', 'icon-sm');
+  decBtn.setAttribute('aria-label', 'Decrease quantity');
 
   const qtyIn = document.createElement('input');
   qtyIn.type = 'number'; qtyIn.min = '1'; qtyIn.step = '1';
@@ -545,7 +548,8 @@ function buildItemRow(item) {
 
   const incBtn = document.createElement('button');
   incBtn.className = 'prop-qty-btn'; incBtn.type = 'button';
-  incBtn.dataset.action = 'inc'; incBtn.dataset.id = item.id; incBtn.textContent = '+';
+  incBtn.dataset.action = 'inc'; incBtn.dataset.id = item.id; incBtn.innerHTML = iconSvg('plus', 'icon-sm');
+  incBtn.setAttribute('aria-label', 'Increase quantity');
 
   qtyWrap.appendChild(decBtn);
   qtyWrap.appendChild(qtyIn);
@@ -559,7 +563,7 @@ function buildItemRow(item) {
   priceIn.type = 'text';
   priceIn.className = 'prop-item-price-input';
   priceIn.value = priceDisp || 'MP';
-  priceIn.title = 'Type a price · Enter or Tab → next item · Shift+Tab → previous · Esc → cancel';
+  priceIn.title = 'Type a price. Enter or Tab: next item. Shift+Tab: previous. Esc: cancel.';
 
   // Track the value before editing starts so Escape can restore it
   let _prePriceEdit = '';
@@ -625,8 +629,9 @@ function buildItemRow(item) {
   // Delete
   const del = document.createElement('button');
   del.className = 'prop-del-btn'; del.type = 'button';
-  del.dataset.action = 'del'; del.dataset.id = item.id; del.textContent = '✕';
+  del.dataset.action = 'del'; del.dataset.id = item.id; del.innerHTML = iconSvg('x');
   del.title = 'Remove from proposal';
+  del.setAttribute('aria-label', 'Remove ' + (item.name || 'item') + ' from proposal');
   rowA.appendChild(del);
 
   body.appendChild(rowA);
@@ -764,7 +769,8 @@ function propUpdateTotals() {
   // Balance — colour red if owing, green if paid
   const balEl = document.getElementById('prop-balance');
   if (balEl) {
-    balEl.textContent = isPaid ? '✓ Paid in Full' : fmt(balance);
+    if (isPaid) balEl.innerHTML = iconSvg('check') + ' Paid in full';
+    else balEl.textContent = fmt(balance);
     balEl.style.color = isPaid ? 'var(--success-text)' : 'var(--danger-text)';
   }
 
@@ -789,7 +795,7 @@ function propUpdateTotals() {
         <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--surface-active);border-radius:var(--radius-sm);font-size:var(--fs-xs);">
           <span style="color:var(--text);font-weight:var(--weight-medium);">${fmt(pay.amount)}</span>
           <span style="color:var(--text-3);flex:1;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(pay.note || 'Payment')} · ${escapeHtml(pay.date)}</span>
-          <button onclick="propDeletePayment('${pay.id}')" style="background:none;border:none;cursor:pointer;color:var(--danger-text);font-size:var(--fs-xs);padding:0;" title="Remove">✕</button>
+          <button onclick="propDeletePayment('${escapeHtml(pay.id)}')" style="background:none;border:none;cursor:pointer;color:var(--danger-text);padding:0;display:flex;" title="Remove payment" aria-label="Remove payment of ${fmt(pay.amount)}">${iconSvg('x')}</button>
         </div>`).join('');
     }
   }
@@ -943,8 +949,8 @@ async function propSave() {
 
   window._propEditingKey = proposalId;
   const btn = document.querySelector('[onclick="propSave()"]');
-  if (btn) { const orig = btn.textContent; btn.textContent = '✓ Saved!'; btn.disabled = true; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000); }
-  showToast('✓ Proposal saved — ' + clientName, 'toast-success');
+  if (btn) { btn.disabled = true; flashButton(btn, iconSvg('check') + 'Saved', 2000); setTimeout(() => { btn.disabled = false; }, 2000); }
+  showToast('Proposal saved — ' + clientName, 'toast-success');
   localStorage.removeItem(DRAFT_KEY);
   _propSetSaveStatus('· Saved ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
 }
@@ -1034,7 +1040,7 @@ function updateSummary() { propUpdateTotals(); }
 // ── LOAD SAVED PROPOSALS ─────────────────────────────────────────────────────
 async function propShowSaved() {
   const all = await getSavedProposals();
-  if (!all.length) { alert('No saved proposals yet. Build a proposal and click 💾 Save.'); return; }
+  if (!all.length) { alert('No saved proposals yet. Build a proposal and click Save.'); return; }
   const _esc = escapeHtml;
   const rows = all.map(p => {
     const f = p.fields || {};
@@ -1047,7 +1053,7 @@ async function propShowSaved() {
         <div style="font-size:var(--fs-2xs);color:var(--text-3);">${_esc(dateDisp)} · ${_esc(venueDisp)} · ${(p.items||[]).length} items · Saved ${_esc(p.savedAt||'')}</div>
       </div>
       <button class="btn btn-primary" style="font-size:var(--fs-xs);" onclick="propLoadProposal('${_esc(p.key)}');closeModal()">Load</button>
-      <button class="btn btn-danger" style="font-size:var(--fs-xs);" onclick="propDeleteSavedByKey('${_esc(p.key)}')">✕</button>
+      <button class="btn btn-danger" style="font-size:var(--fs-xs);" onclick="propDeleteSavedByKey('${_esc(p.key)}')" title="Delete proposal" aria-label="Delete proposal for ${_esc(p.clientName)}">${iconSvg('trash-2')}</button>
     </div>`;
   }).join('');
   document.getElementById('modal-content').innerHTML =
@@ -1188,8 +1194,10 @@ function renderScheduleRows() {
 
     const del = document.createElement('button');
     del.type = 'button';
-    del.textContent = '✕';
-    del.style.cssText = 'background:none;border:none;color:var(--text-3);cursor:pointer;font-size:var(--fs-md);padding:0;align-self:center;margin-top:14px;';
+    del.innerHTML = iconSvg('x');
+    del.setAttribute('aria-label', 'Remove phase');
+    del.title = 'Remove phase';
+    del.style.cssText = 'background:none;border:none;color:var(--text-3);cursor:pointer;padding:0;align-self:center;margin-top:14px;display:flex;';
     del.onclick = () => propRemoveScheduleRow(row.id);
     wrap.appendChild(del);
 

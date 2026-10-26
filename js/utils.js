@@ -17,6 +17,24 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+// ── ICONS ─────────────────────────────────────────────────────────────────────
+// Markup for a Lucide icon from the sprite in index.html (add new names in
+// scripts/build-icons.cjs). Decorative: the button or text next to it carries
+// the meaning, so icon-only buttons need their own aria-label.
+function iconSvg(name, cls) {
+  return '<svg class="icon' + (cls ? ' ' + cls : '') + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
+}
+
+// Briefly swaps a button's content (e.g. to "Saved") and restores it. Restores
+// innerHTML, not textContent, so the button's icon survives.
+function flashButton(btn, html, ms) {
+  if (!btn) return;
+  if (btn._flashTimer) clearTimeout(btn._flashTimer);
+  else btn._flashOrig = btn.innerHTML;
+  btn.innerHTML = html;
+  btn._flashTimer = setTimeout(() => { btn.innerHTML = btn._flashOrig; btn._flashTimer = null; }, ms || 1500);
+}
+
 // ── NUMBER WITH FALLBACK ──────────────────────────────────────────────────────
 // For rate/deposit fields where 0 is a real value: `parseFloat(v) || 20` turns
 // a 0% shipping rate into 20%. This only falls back when the field is blank or

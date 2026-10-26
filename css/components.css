@@ -12,6 +12,15 @@
 .btn-danger { background: var(--surface); color: var(--danger-text); border-color: var(--danger-border); }
 .btn-danger:hover { background: var(--danger-bg); }
 
+/* Lucide icons from the sprite in index.html: iconSvg('name') in JS */
+.icon {
+  width: var(--icon); height: var(--icon); flex-shrink: 0; fill: none; stroke: currentColor;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle;
+}
+.icon-sm { width: var(--icon-sm); height: var(--icon-sm); }
+.icon-lg { width: var(--icon-lg); height: var(--icon-lg); }
+.btn:has(> .icon) { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
+
 /* DASHBOARD */
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: 28px; }
 .stat-card {

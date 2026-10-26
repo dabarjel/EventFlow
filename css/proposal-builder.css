@@ -31,7 +31,7 @@
 /* Layout: 56px thumb | rest */
 .prop-item-row-main { display:flex; gap:10px; padding:10px 10px 8px; align-items:flex-start; }
 .prop-item-img { width:56px; height:56px; object-fit:cover; border-radius:var(--radius-sm); flex-shrink:0; background:var(--surface-raised); }
-.prop-item-img-placeholder { width:56px; height:56px; background:linear-gradient(135deg,var(--surface-raised) 0%,var(--surface-active) 100%); border-radius:var(--radius-sm); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:var(--fs-xl); }
+.prop-item-img-placeholder { width:56px; height:56px; background:linear-gradient(135deg,var(--surface-raised) 0%,var(--surface-active) 100%); border-radius:var(--radius-sm); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--text-3); }
 
 /* Right side of main row */
 .prop-item-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:5px; }
