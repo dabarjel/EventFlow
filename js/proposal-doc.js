@@ -392,7 +392,7 @@ function renderProposalDoc() {
       <div style="border-left:3px solid #9C6B1F;padding:14px 18px;margin-bottom:32px;page-break-inside:avoid;">
         <div style="font-size:8px;text-transform:uppercase;letter-spacing:2.5px;color:#9C6B1F;margin-bottom:10px;font-weight:700;">Terms &amp; Conditions</div>
         <div style="font-size:11px;color:#4A453D;line-height:1.8;">
-          <em>IF YOU WOULD LIKE TO SAVE THE DATE, PLEASE MAKE A NON-REFUNDABLE DEPOSIT OF ${_depositAmt > 0 ? fmt(_depositAmt) : "$1,000"}.</em><br><br>
+          ${_depositAmt > 0 ? `<em>IF YOU WOULD LIKE TO SAVE THE DATE, PLEASE MAKE A NON-REFUNDABLE DEPOSIT OF ${fmt(_depositAmt)}.</em><br><br>` : ''}
           <strong>The balance must be paid in full by ${balanceDueStr}.</strong> Any changes must be finalized by ${balanceDueStr}. All rental items must be finalized by ${balanceDueStr} and returned in good condition. Any missing or damaged pieces will be charged to the client accordingly. Deposits are not refundable.<br><br>${isDC ? '<strong>Washington, DC events:</strong> Sales tax of 6% applies to the combined subtotal and shipping total per DC tax regulations.<br><br>' : ''}<span style="color:#B3261E;font-weight:600;">PLEASE NOTE ALL CREDIT AND DEBIT CARD TRANSACTIONS INCUR A 3% PROCESSING FEE.</span>
         </div>
       </div>
