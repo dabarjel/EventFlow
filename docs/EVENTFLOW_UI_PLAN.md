@@ -106,15 +106,25 @@ Replace the fake dashboard and pipeline numbers (Active Events, revenue trend, "
 - **3b. Login: done** (`a009fcc`). Studio style, labeled 36px fields with focus rings, and a credit line. IDs and auth logic are unchanged.
 - **Dashboard and pipeline data: done** (`00c47c9`). All fake stats, seed rows, revenue bars, tasks and the 11 hardcoded pipeline cards are gone. Everything comes from the existing `getSavedProposals()` read, with no new queries. Empty accounts get empty states.
 - **Title, favicon and Open Graph tags: done** (`329e70f`). Page title, meta and OG description, theme-color, and an SVG favicon. This also fixed the `favicon.ico` 404.
-- **Housekeeping: done** (`7c31b20`). Removed the leftover `main` worktree. `.claude/settings.local.json` is no longer tracked and is now in `.gitignore`.
+- **Housekeeping: done** (`7b26f66`). Removed the leftover `main` worktree. `.claude/settings.local.json` is no longer tracked and is now in `.gitignore`.
 - **Fix: 0% rates and $0 deposit: done and live on `main`** (`8ed110b`). The proposal document printed a 0% shipping or tax rate as 20% or 6%. Loading a saved proposal reset 0 to the default, and saving turned a $0 deposit into $1,000. A new `numOr()` helper in `utils.js` falls back only when the field is blank. Print output is unchanged for default and custom rates.
+- **Fix: deposit sentence in the terms: done and live on `main`** (`4f5d416`). A $0 deposit printed "please make a non-refundable deposit of $1,000". A positive deposit already showed its real amount. At $0 (or blank) the sentence is now left out. "Deposits are not refundable" stays. Print output for $1,000 and $2,500 deposits is pixel-identical.
 - **Proposal builder**, done in steps on `phase-3-screens`. It's merged to `main` only after all six steps are tested.
-  - **1. Icons: done.**
+  - **1. Icons: done** (`e8c554b`).
     - Every Unicode and emoji icon in the builder is now a Lucide icon: toolbar, search, size toggle, paging, chips, custom upload, item rows, payments, schedule and the Load modal.
     - Photo placeholders show the category's icon.
     - Icon-only buttons have aria-labels.
     - The sprite is rebuilt by `scripts/build-icons.cjs`. Shared pieces: `iconSvg()` and `flashButton()` in `utils.js`, the `.icon` classes in `components.css`, and `--icon-*` tokens.
     - Not changed here: chip counts never display, because the chip names don't match the catalog's category names. This happens on `main` too; it gets fixed in step 3.
+  - **2. Toolbar: done.**
+    - Visible: a More actions (⋯) button, New, Preview and Save. Save is the screen's only primary button. "Preview and print proposal" under the totals is now secondary.
+    - The menu holds My proposals, Load a saved proposal, Venue visualizer mockup and Clear all items. Every `onclick` is unchanged.
+    - The menu closes on Escape (focus returns to the button), on a click outside, after an item runs, and when focus tabs out. Arrow keys move between items.
+    - The menu flips to open rightward when it would leave the screen.
+    - The repeated "Proposal Builder" heading is gone (the top bar already shows it). The left side now shows "Editing {client}", the last save time and the Visualizer session link.
+    - One row at 375, 768 and 1440px.
+    - The menu is reusable: `menuToggle()` and `menuCloseAll()` in `utils.js`, `.menu` styles in `components.css`, and the listeners in `main.js`.
+    - Not changed here: at 375px, once a proposal has items, the page scrolls sideways (408px) because the item rows don't shrink. Catalog card names can also be clipped when the panel is short. Both also happen on `main`; steps 3, 4 and 6 fix them.
 - **Still to do:**
   - Screens: proposal builder, inventory catalog, CRM, then payments and Venue Visualizer.
   - Loading, empty and error states.

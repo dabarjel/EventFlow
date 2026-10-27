@@ -723,7 +723,7 @@ function propRender() {
     if (window._propEditingKey) {
       const nameEl = document.getElementById('prop-client');
       const name = nameEl ? nameEl.value.trim() : '';
-      editLabel.textContent = name ? '— editing: ' + name : '';
+      editLabel.textContent = name ? 'Editing ' + name : 'Editing a saved proposal';
     } else {
       editLabel.textContent = '';
     }
@@ -952,7 +952,7 @@ async function propSave() {
   if (btn) { btn.disabled = true; flashButton(btn, iconSvg('check') + 'Saved', 2000); setTimeout(() => { btn.disabled = false; }, 2000); }
   showToast('Proposal saved — ' + clientName, 'toast-success');
   localStorage.removeItem(DRAFT_KEY);
-  _propSetSaveStatus('· Saved ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+  _propSetSaveStatus('Saved ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
 }
 
 function propDrop(e) { e.preventDefault(); }   // handled via addEventListener above
@@ -989,7 +989,7 @@ function _propSaveDraft() {
       taxRate:  _gv('prop-tax-rate')  || '6',
       ts: Date.now()
     }));
-    _propSetSaveStatus('• Draft saved ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+    _propSetSaveStatus('Draft saved ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
   } catch(e) {}
 }
 
@@ -1020,7 +1020,7 @@ function _propRestoreDraft() {
     const sr = document.getElementById('prop-ship-rate'); if (sr) sr.value = d.shipRate || '20';
     const tr = document.getElementById('prop-tax-rate');  if (tr) tr.value = d.taxRate  || '6';
     propRender();
-    _propSetSaveStatus('• Draft restored · ' + new Date(d.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+    _propSetSaveStatus('Draft restored from ' + new Date(d.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
     showToast('Draft restored from ' + new Date(d.ts).toLocaleString(), 'toast-info');
   } catch(e) {}
 }

@@ -91,3 +91,17 @@
 .prop-field input:focus, .prop-field select:focus { border-color:var(--accent-text); }
 @media (max-width:900px) { .prop-layout { grid-template-columns:1fr; height:auto; } }
 @media (max-width:600px) { .prop-inv-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); } }
+
+/* Toolbar: status on the left (what's open, last save), actions on the right */
+.prop-toolbar-status { flex:1; min-width:0; display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--space-1) var(--space-3); font-size:var(--fs-xs); color:var(--text-3); }
+#prop-editing-label { font-size:var(--fs-sm); font-weight:var(--weight-medium); color:var(--text); }
+#prop-editing-label:empty, #prop-autosave-status:empty { display:none; }
+#prop-session-link { color:var(--text); text-decoration:underline; text-underline-offset:2px; }
+#section-proposals > .filter-bar > .btn-primary { min-width:88px; }   /* "Save" and "Saved" keep one width */
+@media (max-width:639px) {
+  /* Phones: More, New, Preview and Save fit on one row */
+  #section-proposals > .filter-bar { gap:var(--space-2); }
+  #section-proposals > .filter-bar > .btn { padding-left:var(--space-3); padding-right:var(--space-3); }
+  #section-proposals > .filter-bar > .btn-primary { min-width:0; }
+  .prop-toolbar-status { flex-basis:100%; }
+}

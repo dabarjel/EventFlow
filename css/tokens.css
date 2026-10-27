@@ -117,6 +117,7 @@
   --control-h:      30px;   /* buttons and inputs */
   --control-h-sm:   28px;
   --control-h-touch:36px;   /* mobile FAB and touch-first controls */
+  --menu-min-w:     220px;  /* dropdown menus */
 
   /* ── Icons (Lucide, 1.5px stroke) ── */
   --icon-sm: 14px;          /* inside small round controls */

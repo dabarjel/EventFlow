@@ -242,14 +242,20 @@
     <div id="section-proposals" class="section">
 
       <div class="filter-bar" style="margin-bottom:16px;">
-        <div style="font-size:var(--fs-md);font-weight:var(--weight-medium);color:var(--text);flex:1;">Proposal Builder <span id="prop-editing-label" style="font-size:var(--fs-xs);font-weight:var(--weight-regular);color:var(--text-3);margin-left:8px;"></span><span id="prop-autosave-status" style="font-size:var(--fs-2xs);font-weight:var(--weight-regular);color:var(--text-3);margin-left:8px;"></span><a id="prop-session-link" href="#" onclick="event.preventDefault();vzaSessionFromProposal()" style="display:none;font-size:var(--fs-2xs);color:var(--text);text-decoration:underline;text-underline-offset:2px;margin-left:10px;font-weight:var(--weight-regular);">View Visualizer session</a></div>
-        <button class="btn" onclick="navigate('my-proposals')" title="Browse all saved proposals"><svg class="icon" aria-hidden="true"><use href="#i-files"/></svg>My proposals</button>
-        <button class="btn" onclick="propShowSaved()" title="Load a saved proposal into the builder"><svg class="icon" aria-hidden="true"><use href="#i-folder-open"/></svg>Load</button>
+        <div class="prop-toolbar-status"><span id="prop-editing-label"></span><span id="prop-autosave-status"></span><a id="prop-session-link" href="#" onclick="event.preventDefault();vzaSessionFromProposal()" style="display:none;">View Visualizer session</a></div>
+        <div class="menu-wrap">
+          <button type="button" class="btn btn-icon" id="prop-more-btn" onclick="menuToggle(this)" aria-controls="prop-more-menu" aria-expanded="false" aria-label="More actions" title="More actions"><svg class="icon" aria-hidden="true"><use href="#i-ellipsis"/></svg></button>
+          <div class="menu" id="prop-more-menu" hidden>
+            <button type="button" class="menu-item" onclick="navigate('my-proposals')"><svg class="icon" aria-hidden="true"><use href="#i-files"/></svg>My proposals</button>
+            <button type="button" class="menu-item" onclick="propShowSaved()"><svg class="icon" aria-hidden="true"><use href="#i-folder-open"/></svg>Load a saved proposal</button>
+            <button type="button" class="menu-item" onclick="vizOpenFromProposal()"><svg class="icon" aria-hidden="true"><use href="#i-scan-eye"/></svg>Venue visualizer mockup</button>
+            <div class="menu-sep" role="separator"></div>
+            <button type="button" class="menu-item menu-item-danger" onclick="propClearAll()"><svg class="icon" aria-hidden="true"><use href="#i-trash-2"/></svg>Clear all items</button>
+          </div>
+        </div>
         <button class="btn" onclick="propNewBlank()" title="Start a new blank proposal (clears current items)"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New</button>
-        <button class="btn" onclick="vizOpenFromProposal()" title="Generate an AI venue mockup for this proposal"><svg class="icon" aria-hidden="true"><use href="#i-scan-eye"/></svg>Visualizer</button>
-        <button class="btn" onclick="propClearAll()" title="Remove all items from current proposal" style="color:var(--danger-text);border-color:var(--danger-border-subtle);"><svg class="icon" aria-hidden="true"><use href="#i-trash-2"/></svg>Clear</button>
         <button class="btn" onclick="propSyncToDoc();navigate('proposal-doc');setTimeout(renderProposalDoc,50);" id="prop-preview-btn" title="Preview and print the proposal document"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg>Preview <span id="prop-preview-count" style="background:var(--accent);color:var(--accent-on);border-radius:var(--radius-md);padding:1px 7px;font-size:var(--fs-2xs);display:none;"></span></button>
-        <button class="btn btn-primary" onclick="propSave()" title="Save proposal (Ctrl+S)" style="min-width:88px;"><svg class="icon" aria-hidden="true"><use href="#i-save"/></svg>Save</button>
+        <button class="btn btn-primary" onclick="propSave()" title="Save proposal (Ctrl+S)"><svg class="icon" aria-hidden="true"><use href="#i-save"/></svg>Save</button>
       </div>
 
       <div class="prop-layout">
@@ -448,7 +454,7 @@
               </div>
 
               <div style="margin-top:10px;">
-                <button class="btn btn-primary" style="width:100%;font-size:var(--fs-xs);" onclick="propSyncToDoc();navigate('proposal-doc');setTimeout(renderProposalDoc,50);"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg>Preview and print proposal</button>
+                <button class="btn" style="width:100%;font-size:var(--fs-xs);" onclick="propSyncToDoc();navigate('proposal-doc');setTimeout(renderProposalDoc,50);"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg>Preview and print proposal</button>
               </div>
             </div>
           </div>

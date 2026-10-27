@@ -35,6 +35,33 @@ function flashButton(btn, html, ms) {
   btn._flashTimer = setTimeout(() => { btn.innerHTML = btn._flashOrig; btn._flashTimer = null; }, ms || 1500);
 }
 
+// ── DROPDOWN MENUS ────────────────────────────────────────────────────────────
+// A button with aria-controls="<menu id>" and onclick="menuToggle(this)" opens
+// a .menu of .menu-item buttons. main.js closes it on outside click, Escape and
+// after an item runs, and moves focus with the arrow keys.
+function menuToggle(btn) {
+  const menu = document.getElementById(btn.getAttribute('aria-controls'));
+  if (!menu) return;
+  const open = menu.hidden;
+  menuCloseAll();
+  menu.hidden = !open;
+  btn.setAttribute('aria-expanded', String(open));
+  if (!open) return;
+  // Menus open leftward from the button's right edge; flip when that would leave the screen
+  menu.style.left = ''; menu.style.right = '';
+  if (menu.getBoundingClientRect().left < 0) { menu.style.left = '0'; menu.style.right = 'auto'; }
+  const first = menu.querySelector('.menu-item');
+  if (first) first.focus();
+}
+
+function menuCloseAll() {
+  document.querySelectorAll('.menu:not([hidden])').forEach(m => {
+    m.hidden = true;
+    const btn = document.querySelector('[aria-controls="' + m.id + '"]');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+}
+
 // ── NUMBER WITH FALLBACK ──────────────────────────────────────────────────────
 // For rate/deposit fields where 0 is a real value: `parseFloat(v) || 20` turns
 // a 0% shipping rate into 20%. This only falls back when the field is blank or
