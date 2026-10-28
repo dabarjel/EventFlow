@@ -3,22 +3,32 @@
 .prop-layout { display:grid; grid-template-columns:1fr 420px; gap:var(--space-5); height:calc(100vh - 120px); min-height:600px; }
 .prop-inv-panel { display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; }
 .prop-inv-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:10px; flex-shrink:0; }
-.prop-inv-grid { flex:1; overflow-y:auto; padding:var(--space-3); display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:10px; align-content:start; }
+/* grid-auto-rows:max-content keeps rows at full card height. With plain auto rows, cards (overflow:hidden)
+   shrank to fit a short panel and their names were clipped. */
+.prop-inv-grid { flex:1; overflow-y:auto; padding:var(--space-3); display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); grid-auto-rows:max-content; gap:10px; align-content:start; }
 .prop-inv-grid.large-cards { grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
-.prop-inv-card { border:2px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; cursor:grab; transition:all var(--duration-fast); background:var(--surface); position:relative; user-select:none; }
-.prop-inv-card:hover { border-color:var(--accent-text); box-shadow:none; transform:translateY(-1px); }
+.prop-inv-card { border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; cursor:grab; transition:border-color var(--duration-fast); background:var(--surface); position:relative; user-select:none; }
+.prop-inv-card:hover { border-color:var(--accent-text); }
 .prop-inv-card:active { cursor:grabbing; opacity:0.7; }
 .prop-inv-card.added { border-color:var(--accent-border); background:var(--surface-active); }
-.prop-inv-card img { width:100%; height:120px; object-fit:cover; display:block; pointer-events:none; transition:height var(--duration-fast); }
-.prop-inv-grid.large-cards .prop-inv-card img { height:170px; }
+/* Catalog photos are shot on white: light well, whole item visible (contain, not cover) */
+.prop-inv-photo { aspect-ratio:4 / 3; background:var(--photo-well); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.prop-inv-photo img { width:100%; height:100%; object-fit:contain; padding:var(--space-2); box-sizing:border-box; display:block; pointer-events:none; }
+.prop-no-photo { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--space-1); background:var(--surface-raised); color:var(--text-2); font-size:var(--fs-2xs); }
 .prop-inv-card-body { padding:6px 8px; }
 .prop-inv-card-name { font-size:var(--fs-2xs); font-weight:var(--weight-medium); color:var(--text); line-height:1.3; margin-bottom:2px; }
 .prop-inv-grid.large-cards .prop-inv-card-name { font-size:var(--fs-xs); }
 .prop-inv-card-price { font-size:var(--fs-2xs); color:var(--text); font-weight:var(--weight-medium); }
-.prop-inv-card-add { position:absolute; top:4px; right:4px; width:22px; height:22px; background:var(--accent); color:var(--accent-on); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:var(--fs-md); font-weight:var(--weight-medium); opacity:0; transition:opacity var(--duration-fast); cursor:pointer; border:none; line-height:1; }
-.prop-inv-card:hover .prop-inv-card-add { opacity:1; }
-.prop-cat-chip { padding:4px 10px; border-radius:var(--radius-full); font-size:var(--fs-2xs); font-weight:500; border:1px solid var(--border-strong); cursor:pointer; transition:all var(--duration-fast); background:var(--surface); color:var(--text-3); white-space:nowrap; }
+.prop-inv-card-add { position:absolute; top:4px; right:4px; width:22px; height:22px; background:var(--accent); color:var(--accent-on); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity var(--duration-fast); cursor:pointer; border:none; padding:0; }
+/* Shown on hover, when focused, and always on touch screens (no hover there) */
+.prop-inv-card:hover .prop-inv-card-add, .prop-inv-card-add:focus { opacity:1; }
+.prop-inv-card-add:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
+@media (hover:none) { .prop-inv-card-add { opacity:1; } }
+.prop-cat-chip { padding:4px 10px; border-radius:var(--radius-full); font-family:var(--font-sans); font-size:var(--fs-2xs); font-weight:500; line-height:1.4; border:1px solid var(--border-strong); cursor:pointer; transition:background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast); background:var(--surface); color:var(--text-3); white-space:nowrap; }
+.prop-cat-chip:hover { color:var(--text); }
+.prop-cat-chip:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
 .prop-cat-chip.active { background:var(--accent); color:var(--accent-on); border-color:var(--accent-border); }
+.chip-count { font-variant-numeric:tabular-nums; }
 .prop-chips-row { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; flex-wrap:nowrap; }
 .prop-chips-row::-webkit-scrollbar { height:3px; } .prop-chips-row::-webkit-scrollbar-thumb { background:var(--border-strong); border-radius:var(--radius-xs); }
 .prop-canvas-panel { display:flex; flex-direction:column; gap:14px; }

@@ -116,7 +116,7 @@ Replace the fake dashboard and pipeline numbers (Active Events, revenue trend, "
     - Icon-only buttons have aria-labels.
     - The sprite is rebuilt by `scripts/build-icons.cjs`. Shared pieces: `iconSvg()` and `flashButton()` in `utils.js`, the `.icon` classes in `components.css`, and `--icon-*` tokens.
     - Not changed here: chip counts never display, because the chip names don't match the catalog's category names. This happens on `main` too; it gets fixed in step 3.
-  - **2. Toolbar: done.**
+  - **2. Toolbar: done** (`1452b4f`).
     - Visible: a More actions (⋯) button, New, Preview and Save. Save is the screen's only primary button. "Preview and print proposal" under the totals is now secondary.
     - The menu holds My proposals, Load a saved proposal, Venue visualizer mockup and Clear all items. Every `onclick` is unchanged.
     - The menu closes on Escape (focus returns to the button), on a click outside, after an item runs, and when focus tabs out. Arrow keys move between items.
@@ -125,6 +125,18 @@ Replace the fake dashboard and pipeline numbers (Active Events, revenue trend, "
     - One row at 375, 768 and 1440px.
     - The menu is reusable: `menuToggle()` and `menuCloseAll()` in `utils.js`, `.menu` styles in `components.css`, and the listeners in `main.js`.
     - Not changed here: at 375px, once a proposal has items, the page scrolls sideways (408px) because the item rows don't shrink. Catalog card names can also be clipped when the panel is short. Both also happen on `main`; steps 3, 4 and 6 fix them.
+  - **3. Inventory panel: done.**
+    - **Photos:** a light `--photo-well`, 4:3, `object-fit: contain`, so studio shots aren't cropped. The gradient placeholder is gone.
+    - **Missing or broken photos:** the card shows its category icon and "No photo yet". A broken photo first retries the Inventory card's current path (that card falls back between the two media folders on its own). If that loads, adding the item stores the working path. A path is only replaced by one that actually loaded.
+    - **Chips:** real `<button>`s with `aria-pressed`, a visible focus ring, and the count in its own `.chip-count` span.
+    - **Counts:** now counted with `catMatches()`, the same way the filter matches, so they display and agree with what each chip shows. Vases, Floral, Dance Floor and Photo Booth show no count because the catalog has no items in those categories; the floral pieces are filed under "Décor & Props".
+    - **Card names:** no longer cut off in a short panel (`grid-auto-rows: max-content`).
+    - **+ button:** shows on hover, when focused, and always on touch screens. Before, keyboard and touch users couldn't see it.
+    - **Bug fixed (also on `main`):** each Inventory edit rebuilt the builder's catalog and attached another set of drop listeners, so one drag-and-drop added the item once per rebuild. Now they're attached once.
+    - **Checked:**
+      - The builder still copies all 775 cards from `#inv-grid .inv-card` with matching name, category, price, sku and photo path.
+      - An Inventory edit still updates `.prop-inv-card` in place, and adding the item afterwards uses the new name and price.
+      - The name and price an item gets are now read from the card when it's added, so in-place edits carry through.
 - **Still to do:**
   - Screens: proposal builder, inventory catalog, CRM, then payments and Venue Visualizer.
   - Loading, empty and error states.

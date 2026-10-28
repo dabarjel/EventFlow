@@ -69,22 +69,12 @@ function propBuildInventory() {
 
   grid.innerHTML = '';
 
-  // IntersectionObserver: swap in real image only when card enters viewport
+  // IntersectionObserver: load the real photo only when the card nears the viewport
   const imgObserver = new IntersectionObserver((entries, obs) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
-      const div = entry.target;
-      const src = div.dataset.imgSrc;
-      if (src && !div.querySelector('img')) {
-        const placeholder = div.querySelector('.prop-img-placeholder');
-        if (placeholder) {
-          const img = document.createElement('img');
-          img.src = src;
-          img.style.cssText = 'width:100%;height:100px;object-fit:cover;display:block;';
-          placeholder.replaceWith(img);
-        }
-      }
-      obs.unobserve(div);
+      propLoadCardPhoto(entry.target);
+      obs.unobserve(entry.target);
     });
   }, { root: null, rootMargin: '400px 0px', threshold: 0 });
 
@@ -98,15 +88,12 @@ function propBuildInventory() {
     div.dataset.cat    = cat;
     div.dataset.price  = price;
     div.dataset.sku    = sku;
-    div.dataset.imgSrc = imgSrc;   // store for observer
+    div.dataset.imgSrc = imgSrc;   // photo path; propLoadCardPhoto() may swap in a working one
     div.title = name + (price && price !== 'MP' ? ' — ' + price : '');
 
-    // Render placeholder immediately — no grey flash, no lazy loading race
+    // Light photo well; stays empty until the photo loads, or shows "No photo yet"
     const safeName = escapeHtml(name);
-    div.innerHTML = '<div class="prop-img-placeholder" style="width:100%;height:100px;background:linear-gradient(135deg,var(--surface-raised) 0%,var(--surface-active) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">'
-      + '<span style="color:var(--text-3);display:flex;">' + iconSvg(propCatIcon(cat), 'icon-lg') + '</span>'
-      + '<span style="font-size:var(--fs-2xs);color:var(--text-3);text-align:center;padding:0 6px;line-height:1.3;max-height:28px;overflow:hidden;">' + safeName + '</span>'
-      + '</div>'
+    div.innerHTML = '<div class="prop-inv-photo">' + (imgSrc ? '' : propNoPhotoHtml(cat)) + '</div>'
       + '<div class="prop-inv-card-body">'
       + '<div class="prop-inv-card-name">' + safeName + '</div>'
       + '<div class="prop-inv-card-price">' + escapeHtml(price && price !== 'MP' ? price : 'Call') + '</div>'
@@ -115,13 +102,17 @@ function propBuildInventory() {
 
     if (imgSrc) imgObserver.observe(div);   // swap in real image when scrolled to
 
+    // Name, price and category are read from the card at add time, so the
+    // Inventory screen's in-place edits (inventory-catalog.js) carry through
+    const current = () => ({ name: div.dataset.name, cat: div.dataset.cat, price: div.dataset.price, imgSrc: div.dataset.imgSrc, sku });
+
     div.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('propItem', JSON.stringify({name, cat, price, imgSrc, sku}));
+      e.dataTransfer.setData('propItem', JSON.stringify(current()));
       e.dataTransfer.effectAllowed = 'copy';
     });
 
     function doAddItem() {
-      propAddItem({name, cat, price, imgSrc, sku});
+      propAddItem(current());
       div.style.transition = 'transform 0.12s, box-shadow 0.12s';
       div.style.transform = 'scale(0.94)';
       div.style.boxShadow = '0 0 0 2px var(--accent-text)';
@@ -139,9 +130,12 @@ function propBuildInventory() {
     grid.appendChild(div);
   });
 
-  // Wire up drop zone on canvas box AFTER building inventory
+  // Wire up the drop zone once. This function reruns after every Inventory
+  // edit (propInvBuilt = false), and re-adding these listeners made one drop
+  // add the item once per rebuild.
   const canvasBox = document.getElementById('prop-canvas-box');
-  if (canvasBox) {
+  if (canvasBox && !canvasBox._propDropWired) {
+    canvasBox._propDropWired = true;
     canvasBox.addEventListener('dragover', e => {
       e.preventDefault();
       canvasBox.classList.add('drop-highlight');
@@ -166,14 +160,43 @@ function propBuildInventory() {
   _invRestoreFilter();
 }
 
+// ── CARD PHOTOS ──────────────────────────────────────────────────────────────
+function propNoPhotoHtml(cat) {
+  return '<div class="prop-no-photo">' + iconSvg(propCatIcon(cat), 'icon-lg') + '<span>No photo yet</span></div>';
+}
+
+// Loads a catalog card's photo into its well. If it fails, retries with the
+// Inventory card's current src (its own rentals/floral fallback may have found
+// the photo since the builder copied the path), then shows "No photo yet".
+// The stored path is only replaced by one that actually loaded.
+function propLoadCardPhoto(div) {
+  const well = div.querySelector('.prop-inv-photo');
+  const src  = div.dataset.imgSrc;
+  if (!well || !src || well.querySelector('img')) return;
+  const img = document.createElement('img');
+  img.alt = '';
+  img.onerror = () => {
+    const invImg = div.dataset.sku && document.querySelector('#inv-grid .inv-card[data-sku="' + CSS.escape(div.dataset.sku) + '"] .inv-img img');
+    const alt = invImg ? invImg.getAttribute('src') : '';
+    if (alt && alt !== img.getAttribute('src')) {
+      img.onload = () => { div.dataset.imgSrc = alt; };
+      img.onerror = () => { well.innerHTML = propNoPhotoHtml(div.dataset.cat); };
+      img.src = alt;
+    } else {
+      well.innerHTML = propNoPhotoHtml(div.dataset.cat);
+    }
+  };
+  img.src = src;
+  well.appendChild(img);
+}
+
 // ── CHIP COUNTS ──────────────────────────────────────────────────────────────
 function propUpdateChipCounts() {
-  // Count items per category from _propInvData
-  const counts = {};
-  _propInvData.forEach(item => { counts[item.cat] = (counts[item.cat] || 0) + 1; });
+  // Counted the same way propFilter() matches, so old category names in the
+  // catalog ('Seating', 'Décor & Props', ...) count toward their chip
   document.querySelectorAll('#prop-chips .prop-cat-chip').forEach(chip => {
     const cat = chip.dataset.cat || chip.getAttribute('onclick').match(/'([^']+)'/)?.[1] || '';
-    const n = counts[cat] || 0;
+    const n = cat === '__custom__' ? 0 : _propInvData.filter(item => catMatches(cat, item.cat)).length;
     // Count lives in its own span so rewriting it never touches the chip's icon
     let countEl = chip.querySelector('.chip-count');
     if (!countEl) { countEl = document.createElement('span'); countEl.className = 'chip-count'; chip.appendChild(countEl); }
@@ -281,8 +304,8 @@ function propFilter() {
 function propSetCat(cat, btn) {
   propActiveCat = cat;
   propCurrentPage = 1; // reset to first page on category change
-  document.querySelectorAll('.prop-cat-chip').forEach(c => c.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.prop-cat-chip').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+  if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); }
 
   // Show/hide custom upload bar
   const bar = document.getElementById('prop-custom-bar');
