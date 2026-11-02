@@ -201,7 +201,16 @@ function propUpdateChipCounts() {
     let countEl = chip.querySelector('.chip-count');
     if (!countEl) { countEl = document.createElement('span'); countEl.className = 'chip-count'; chip.appendChild(countEl); }
     countEl.textContent = n ? ' (' + n + ')' : '';
+    // Hide categories with no items. Rebuilt after every Inventory edit, so a
+    // chip comes back once something is filed under it. Custom always stays.
+    chip.hidden = !n && cat !== '__custom__';
   });
+  // Never leave the selected chip hidden, which would show an empty grid
+  const active = document.querySelector('#prop-chips .prop-cat-chip.active');
+  if (active && active.hidden) {
+    const first = document.querySelector('#prop-chips .prop-cat-chip:not([hidden])');
+    if (first) propSetCat(first.dataset.cat, first);
+  }
 }
 
 // ── PROPOSAL INV SIZE + PAGINATION ───────────────────────────────────────────
