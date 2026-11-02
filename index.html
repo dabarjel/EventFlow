@@ -54,6 +54,7 @@
       <input type="email" id="auth-email" placeholder="Email" aria-label="Email" autocomplete="username">
       <input type="password" id="auth-password" placeholder="Password" aria-label="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')_authSignIn()">
       <button class="btn btn-primary auth-submit" onclick="_authSignIn()">Sign in</button>
+      <button type="button" class="auth-forgot" onclick="_authForgotPassword()">Forgot password?</button>
       <div class="auth-error" id="auth-error"></div>
     </div>
     <div id="auth-setpass-form" style="display:none;">

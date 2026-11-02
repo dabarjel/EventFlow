@@ -24,17 +24,23 @@ async function _authInit() {
   // as signed in. Capture the link's type from the hash before it's gone
   // (Supabase doesn't reliably strip it itself) so we can route to a
   // "set your password" prompt instead of dropping them straight into the app.
+  // The hash is gone after a reload, so an unfinished prompt is remembered in
+  // localStorage (see _authShowSetPassword).
   const hashParams = new URLSearchParams(_authInitialHash.replace(/^#/, ''));
-  const linkType = hashParams.get('type'); // 'invite' | 'recovery' | null
+  const hashType = hashParams.get('type');
+  const linkType = (hashType === 'invite' || hashType === 'recovery')
+    ? hashType
+    : localStorage.getItem(_AUTH_SETPASS_KEY); // 'invite' | 'recovery' | null
 
   const { data: { session } } = await sb.auth.getSession();
 
-  if (session && (linkType === 'invite' || linkType === 'recovery')) {
+  if (session && linkType) {
     history.replaceState(null, '', window.location.pathname + window.location.search); // drop the token out of the URL bar/history
     _authShowSetPassword(linkType);
   } else if (session) {
     _authOnSignedIn(session);
   } else {
+    localStorage.removeItem(_AUTH_SETPASS_KEY);
     if (statusEl) statusEl.textContent = 'Sign in to continue';
     if (formEl) formEl.style.display = '';
     const emailEl = document.getElementById('auth-email');
@@ -43,7 +49,9 @@ async function _authInit() {
 
   sb.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') { _authShowSetPassword(linkType || 'recovery'); return; }
-    if (event === 'SIGNED_IN' && session) _authOnSignedIn(session);
+    // supabase-js also fires SIGNED_IN just after an invite link is processed
+    // and whenever the tab regains focus; neither may dismiss the password prompt.
+    if (event === 'SIGNED_IN' && session && !_authSetPassPending) _authOnSignedIn(session);
     if (event === 'SIGNED_OUT') location.reload();
   });
 }
@@ -59,9 +67,27 @@ async function _authSignIn() {
   // onAuthStateChange fires SIGNED_IN and takes it from here.
 }
 
+async function _authForgotPassword() {
+  const email = (document.getElementById('auth-email') || {value:''}).value.trim();
+  const statusEl = document.getElementById('auth-status');
+  const errEl = document.getElementById('auth-error');
+  if (errEl) errEl.textContent = '';
+  if (!email) { if (errEl) errEl.textContent = 'Enter your email first.'; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+  if (error) { if (errEl) errEl.textContent = error.message; return; }
+  if (statusEl) statusEl.textContent = 'If that email has an account, a reset link is on its way.';
+}
+
+// True while the set-password prompt is up: the user has a session but must
+// not reach the app until auth.updateUser succeeds.
+const _AUTH_SETPASS_KEY = 'authSetPassPending_v1';
+let _authSetPassPending = false;
+
 // Shown for both a fresh invite (no password set yet) and a password-reset
 // link — same UI, same call (auth.updateUser), only the status copy differs.
 function _authShowSetPassword(kind) {
+  _authSetPassPending = true;
+  localStorage.setItem(_AUTH_SETPASS_KEY, kind);
   const statusEl  = document.getElementById('auth-status');
   const formEl    = document.getElementById('auth-form');
   const setPassEl = document.getElementById('auth-setpass-form');
@@ -79,10 +105,12 @@ async function _authSetPassword() {
   const pw2 = (document.getElementById('auth-newpass2') || {value:''}).value;
   const errEl = document.getElementById('auth-setpass-error');
   if (errEl) errEl.textContent = '';
-  if (!pw1 || pw1.length < 6) { if (errEl) errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (!pw1 || pw1.length < 8) { if (errEl) errEl.textContent = 'Password must be at least 8 characters.'; return; }
   if (pw1 !== pw2) { if (errEl) errEl.textContent = 'Passwords don\'t match.'; return; }
   const { error } = await sb.auth.updateUser({ password: pw1 });
   if (error) { if (errEl) errEl.textContent = error.message; return; }
+  _authSetPassPending = false;
+  localStorage.removeItem(_AUTH_SETPASS_KEY);
   const { data: { session } } = await sb.auth.getSession();
   _authOnSignedIn(session);
 }

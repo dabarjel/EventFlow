@@ -150,6 +150,11 @@ html[data-page="proposals"] .topbar-new, html[data-page="proposal-doc"] .topbar-
 }
 #auth-form input:focus, #auth-setpass-form input:focus { border-color: var(--accent-text); box-shadow: var(--ring); }
 .auth-submit { width: 100%; height: var(--control-h-touch); margin-top: var(--space-1); }
+.auth-forgot {
+  display: inline-block; margin-top: var(--space-3); padding: var(--space-1) var(--space-2); border: 0; background: none;
+  color: var(--text-2); font: inherit; font-size: var(--fs-sm); cursor: pointer;
+}
+.auth-forgot:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .auth-error { font-size: var(--fs-sm); color: var(--danger-text); margin-top: var(--space-3); min-height: 18px; }
 .auth-credit { font-size: var(--fs-xs); color: var(--text-3); text-decoration: none; }
 .auth-credit:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
